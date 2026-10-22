@@ -10,9 +10,9 @@ struct CourseServiceTests {
 
         try service.addCourse(title: "  Physics  ", instructor: "  Dr. Amal  ")
 
-        #expect(repository.courses == [
-            Course(title: "Physics", instructor: "Dr. Amal")
-        ])
+        #expect(repository.courses.count == 1)
+        #expect(repository.courses.first?.title == "Physics")
+        #expect(repository.courses.first?.instructor == "Dr. Amal")
     }
 
     @Test

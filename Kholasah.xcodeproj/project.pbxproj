@@ -6,8 +6,20 @@
 	objectVersion = 90;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		4F17C31B308A0E27008A368D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 000000000000000000000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 000000000000000100000000;
+			remoteInfo = Kholasah;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* Kholasah.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Kholasah.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F17C306308A0D9F008A368D /* KholasahTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KholasahTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F17C317308A0E27008A368D /* KholasahArchitectureTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KholasahArchitectureTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -16,10 +28,30 @@
 			path = Kholasah;
 			sourceTree = "<group>";
 		};
+		4F17C307308A0D9F008A368D /* KholasahTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = KholasahTests;
+			sourceTree = "<group>";
+		};
+		4F17C318308A0E27008A368D /* KholasahArchitectureTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = KholasahArchitectureTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		000000000000000130000000 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		4F17C303308A0D9F008A368D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		4F17C314308A0E27008A368D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
 			);
@@ -31,6 +63,8 @@
 			isa = PBXGroup;
 			children = (
 				000000000000000000000010 /* Kholasah */,
+				4F17C307308A0D9F008A368D /* KholasahTests */,
+				4F17C318308A0E27008A368D /* KholasahArchitectureTests */,
 				000000000000000000000020 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -39,6 +73,8 @@
 			isa = PBXGroup;
 			children = (
 				000000000000000000000120 /* Kholasah.app */,
+				4F17C306308A0D9F008A368D /* KholasahTests.xctest */,
+				4F17C317308A0E27008A368D /* KholasahArchitectureTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -64,6 +100,45 @@
 			productReference = 000000000000000000000120 /* Kholasah.app */;
 			productType = "com.apple.product-type.application";
 		};
+		4F17C305308A0D9F008A368D /* KholasahTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4F17C30A308A0D9F008A368D /* Build configuration list for PBXNativeTarget "KholasahTests" */;
+			buildPhases = (
+				4F17C302308A0D9F008A368D /* Sources */,
+				4F17C303308A0D9F008A368D /* Frameworks */,
+				4F17C304308A0D9F008A368D /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				4F17C307308A0D9F008A368D /* KholasahTests */,
+			);
+			name = KholasahTests;
+			productName = KholasahTests;
+			productReference = 4F17C306308A0D9F008A368D /* KholasahTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		4F17C316308A0E27008A368D /* KholasahArchitectureTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4F17C31D308A0E27008A368D /* Build configuration list for PBXNativeTarget "KholasahArchitectureTests" */;
+			buildPhases = (
+				4F17C313308A0E27008A368D /* Sources */,
+				4F17C314308A0E27008A368D /* Frameworks */,
+				4F17C315308A0E27008A368D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4F17C31C308A0E27008A368D /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				4F17C318308A0E27008A368D /* KholasahArchitectureTests */,
+			);
+			name = KholasahArchitectureTests;
+			productName = KholasahArchitectureTests;
+			productReference = 4F17C317308A0E27008A368D /* KholasahArchitectureTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -71,11 +146,18 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2630;
+				LastSwiftUpdateCheck = 2700;
 				LastUpgradeCheck = 2700;
 				TargetAttributes = {
 					000000000000000100000000 = {
 						CreatedOnToolsVersion = 26.3;
+					};
+					4F17C305308A0D9F008A368D = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					4F17C316308A0E27008A368D = {
+						CreatedOnToolsVersion = 27.0;
+						TestTargetID = 000000000000000100000000;
 					};
 				};
 			};
@@ -94,12 +176,24 @@
 			projectRoot = "";
 			targets = (
 				000000000000000100000000 /* Kholasah */,
+				4F17C305308A0D9F008A368D /* KholasahTests */,
+				4F17C316308A0E27008A368D /* KholasahArchitectureTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		000000000000000140000000 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		4F17C304308A0D9F008A368D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		4F17C315308A0E27008A368D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
 			);
@@ -112,7 +206,25 @@
 			files = (
 			);
 		};
+		4F17C302308A0D9F008A368D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		4F17C313308A0E27008A368D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		4F17C31C308A0E27008A368D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 000000000000000100000000 /* Kholasah */;
+			targetProxy = 4F17C31B308A0E27008A368D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		000000000000000011000000 /* Debug configuration for PBXProject "Kholasah" */ = {
@@ -321,6 +433,106 @@
 			};
 			name = Release;
 		};
+		4F17C30B308A0D9F008A368D /* Debug configuration for PBXNativeTarget "KholasahTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Kholasah.app/Kholasah.debug.dylib";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.KholasahTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Kholasah.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Kholasah";
+				XROS_DEPLOYMENT_TARGET = 27.0;
+			};
+			name = Debug;
+		};
+		4F17C30C308A0D9F008A368D /* Release configuration for PBXNativeTarget "KholasahTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Kholasah.app/Kholasah.debug.dylib";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.KholasahTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Kholasah.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Kholasah";
+				XROS_DEPLOYMENT_TARGET = 27.0;
+			};
+			name = Release;
+		};
+		4F17C31E308A0E27008A368D /* Debug configuration for PBXNativeTarget "KholasahArchitectureTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = devplaceholder.C5FCXCGR.Kholasah.KholasahArchitectureTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Kholasah.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Kholasah";
+				XROS_DEPLOYMENT_TARGET = 27.0;
+			};
+			name = Debug;
+		};
+		4F17C31F308A0E27008A368D /* Release configuration for PBXNativeTarget "KholasahArchitectureTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = devplaceholder.C5FCXCGR.Kholasah.KholasahArchitectureTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Kholasah.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Kholasah";
+				XROS_DEPLOYMENT_TARGET = 27.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -337,6 +549,22 @@
 			buildConfigurations = (
 				000000000000000111000000 /* Debug configuration for PBXNativeTarget "Kholasah" */,
 				000000000000000112000000 /* Release configuration for PBXNativeTarget "Kholasah" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		4F17C30A308A0D9F008A368D /* Build configuration list for PBXNativeTarget "KholasahTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4F17C30B308A0D9F008A368D /* Debug configuration for PBXNativeTarget "KholasahTests" */,
+				4F17C30C308A0D9F008A368D /* Release configuration for PBXNativeTarget "KholasahTests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		4F17C31D308A0E27008A368D /* Build configuration list for PBXNativeTarget "KholasahArchitectureTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4F17C31E308A0E27008A368D /* Debug configuration for PBXNativeTarget "KholasahArchitectureTests" */,
+				4F17C31F308A0E27008A368D /* Release configuration for PBXNativeTarget "KholasahArchitectureTests" */,
 			);
 			defaultConfigurationName = Release;
 		};
