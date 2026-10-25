@@ -13,7 +13,7 @@ enum AppColors {
     static let neutralGray = Color(red: 151 / 255, green: 151 / 255, blue: 151 / 255)
 
     // Semantic colors used throughout the app
-    static let background = light2Page
+    static let background = lightPage
     static let primary = burgundy
     static let card = lightPage
     static let secondaryText = neutralGray

@@ -17,7 +17,7 @@ struct MainTabView: View {
                 }
             }
 
-            Tab("Plan", systemImage: "book") {
+            Tab("Courses", systemImage: "book") {
                 NavigationStack {
                     PlanView(viewModel: dependencies.planViewModel)
                 }
