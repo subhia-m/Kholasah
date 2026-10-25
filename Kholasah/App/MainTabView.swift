@@ -5,19 +5,19 @@ struct MainTabView: View {
 
     var body: some View {
         TabView {
-            Tab("Courses", systemImage: "books.vertical") {
+            Tab("Board", systemImage: "rectangle.grid.2x2") {
                 NavigationStack {
                     CoursesView(viewModel: dependencies.coursesViewModel)
                 }
             }
 
-            Tab("Focus", systemImage: "timer") {
+            Tab("Focus", systemImage: "hourglass.badge.eye") {
                 NavigationStack {
                     FocusView(viewModel: dependencies.focusViewModel)
                 }
             }
 
-            Tab("Plan", systemImage: "calendar") {
+            Tab("Plan", systemImage: "book") {
                 NavigationStack {
                     PlanView(viewModel: dependencies.planViewModel)
                 }
@@ -25,4 +25,8 @@ struct MainTabView: View {
         }
         .tint(AppColors.primary)
     }
+}
+
+#Preview {
+    MainTabView(dependencies: AppDependencies())
 }
