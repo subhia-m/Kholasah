@@ -50,8 +50,19 @@ struct BoardAddTaskView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var title = ""
     @State private var minutes = "25"
-    @State var date: Date
+    @State private var date: Date
+    @FocusState private var focusedField: Field?
     let onSave: (String, Date, Int) -> Void
+
+    private enum Field: Hashable {
+        case name
+        case duration
+    }
+
+    init(date: Date, onSave: @escaping (String, Date, Int) -> Void) {
+        _date = State(initialValue: date)
+        self.onSave = onSave
+    }
 
     private var valid: Bool {
         !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
@@ -61,21 +72,56 @@ struct BoardAddTaskView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Task name", text: $title)
-                DatePicker("Date", selection: $date, displayedComponents: .date)
-                TextField("Duration in minutes", text: $minutes)
-                    .keyboardType(.numberPad)
-                PrimaryButton(title: "Save") {
-                    guard valid, let duration = Int(minutes) else { return }
-                    onSave(title, date, duration)
-                    dismiss()
+                Section {
+                    LabeledContent("Task name") {
+                        TextField("Enter task name", text: $title)
+                            .multilineTextAlignment(.trailing)
+                            .focused($focusedField, equals: .name)
+                            .submitLabel(.next)
+                            .onSubmit { focusedField = .duration }
+                            .accessibilityLabel("Task name")
+                    }
+
+                    DatePicker("Date", selection: $date, displayedComponents: .date)
+                        .datePickerStyle(.compact)
+
+                    LabeledContent("Duration") {
+                        HStack(spacing: 6) {
+                            TextField("Minutes", text: $minutes)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.trailing)
+                                .focused($focusedField, equals: .duration)
+                                .accessibilityLabel("Duration in minutes")
+                            Text("min")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
-                .disabled(!valid)
             }
+            .formStyle(.grouped)
+            .font(AppTypography.body)
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("New Task")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel") {
+                        focusedField = nil
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        guard valid, let duration = Int(minutes) else { return }
+                        focusedField = nil
+                        onSave(title.trimmingCharacters(in: .whitespacesAndNewlines), date, duration)
+                        dismiss()
+                    }
+                    .disabled(!valid)
+                }
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") { focusedField = nil }
                 }
             }
             .scrollContentBackground(.hidden)
@@ -83,6 +129,10 @@ struct BoardAddTaskView: View {
         }
         .tint(AppColors.primary)
     }
+}
+
+#Preview("New Task Sheet") {
+    BoardAddTaskView(date: .now) { _, _, _ in }
 }
 
 struct BoardTaskDetailView: View {
