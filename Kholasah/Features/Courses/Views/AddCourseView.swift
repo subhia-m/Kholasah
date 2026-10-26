@@ -64,7 +64,6 @@ private struct WelcomeHeroView: View {
         GeometryReader { proxy in
             // Root ZStack to handle visual layers correctly inside GeometryReader
             ZStack {
-                // LAYER 1: Background Elements
                 Image("palm-tree")
                     .resizable()
                     .scaledToFit()
@@ -84,10 +83,9 @@ private struct WelcomeHeroView: View {
                         .background(Color.neutralGray.opacity(0.8), in: Circle())
                 }
                 
-                // LAYER 2: Main Content Layout (Chevron Removed)
                 VStack(spacing: 0) {
                     WelcomeTitleView()
-                        .padding(.top, 58) // Adjusted spacing slightly to account for the removed top element
+                        .padding(.top, 58)
 
                     FirstCoursePromptView()
                         .padding(.top, 54)
@@ -107,17 +105,22 @@ private struct WelcomeHeroView: View {
 private struct WelcomeTitleView: View {
     var body: some View {
         VStack(spacing: 8) {
-            Text("Welcome to\nKholasah \(Image("logo"))")
-                .font(.system(size: 45, weight: .bold))
-                .multilineTextAlignment(.center)
+            Text("ADD YOUR")
+                .font(.system(size: 40, weight: .bold))
                 .foregroundStyle(Color.titleBrown)
 
-            Image("logo")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 35, height: 35)
-                .padding(.bottom, 1)
+            HStack(spacing: 10) {
+                Text("FIRST COURSE")
+                    .font(.system(size: 40, weight: .bold))
+                    .foregroundStyle(Color.titleBrown)
+
+                Image("logo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 35, height: 35)
+            }
         }
+        .multilineTextAlignment(.center)
     }
 }
 
