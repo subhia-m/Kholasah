@@ -19,16 +19,18 @@ struct BoardStreakCard: View {
                 ForEach(streak.week(calendar: calendar), id: \.self) { date in
                     VStack(spacing: 3) {
                         ZStack(alignment: .top) {
-                            Image("date").resizable().scaledToFit()
-                                .frame(height: 34)
-                                .padding(.top, 24)
                             if streak.count > 0,
                                let last = streak.lastRecordedDay,
                                calendar.isDate(last, inSameDayAs: date) {
                                 BoardFlame()
                                     .matchedGeometryEffect(id: "flame", in: flamePosition)
                             }
+                            // Draw the fruit last: it masks the lower flame while remaining still.
+                            Image("date").resizable().scaledToFit()
+                                .frame(height: 34)
+                                .padding(.top, 14)
                         }
+                        .frame(height: 48)
                         Text(date.formatted(.dateTime.weekday(.abbreviated).locale(Locale(identifier: "en_US"))))
                             .font(.system(.caption2, design: .rounded))
                     }
@@ -37,6 +39,18 @@ struct BoardStreakCard: View {
                     .accessibilityLabel(date.formatted(date: .complete, time: .omitted))
                     .accessibilityValue(isLastDay(date) ? "Latest streak day" : "")
                 }
+            }
+            .background {
+                GeometryReader { geometry in
+                    Path { path in
+                        let inset = geometry.size.width / 14
+                        path.move(to: CGPoint(x: inset, y: 31))
+                        path.addLine(to: CGPoint(x: geometry.size.width - inset, y: 31))
+                    }
+                    .stroke(AppColors.date.opacity(0.7),
+                            style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [1, 5]))
+                }
+                .accessibilityHidden(true)
             }
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.4), value: streak.lastRecordedDay)
             Text("\(streak.count) DAY STREAK")
@@ -135,7 +149,7 @@ struct BoardQuotesView: View {
             }
             .padding(18)
             .foregroundStyle(.white)
-            .boardCard(fill: AppColors.brown)
+            .boardCard(fill: Color(red: 153 / 255, green: 93 / 255, blue: 72 / 255))
         }
         .buttonStyle(.plain)
         .accessibilityHint("Shows another quote")

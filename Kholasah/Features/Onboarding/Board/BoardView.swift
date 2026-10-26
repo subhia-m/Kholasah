@@ -40,7 +40,14 @@ struct BoardView: View {
                          : viewModel.selectedDate.formatted(.dateTime.month(.abbreviated).day().year().locale(Locale(identifier: "en_US"))))
                         .font(AppTypography.largeTitle)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    PlanAddButton(label: "Add task") { showingAdd = true }
+                    Button { showingAdd = true } label: {
+                        Image(systemName: "plus")
+                            .font(.system(size: 24, weight: .medium))
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Add task")
                 }
                 VStack(spacing: 14) {
                     BoardTaskList(tasks: viewModel.tasks, toggle: viewModel.toggle) { selectedTask = $0 }
@@ -68,10 +75,12 @@ struct BoardView: View {
             }
             .padding(.horizontal, 20)
             .padding(.top, 12)
-            .padding(.bottom, 28)
+            .padding(.bottom, 48)
             .frame(maxWidth: 560)
             .frame(maxWidth: .infinity)
         }
+        // Keep the scrolling viewport above the shared floating tab bar.
+        .padding(.bottom, 64)
         .font(AppTypography.body)
         .foregroundStyle(PlanTheme.text)
         .background(AppColors.background.ignoresSafeArea())
@@ -83,6 +92,7 @@ struct BoardView: View {
             BoardTaskDetailView(viewModel: viewModel, taskID: task.id)
         }
         .onAppear {
+            viewModel.prepareForDisplay()
             isVisible = true
             if previewCards { showingStreak = true; showingMessage = true }
         }
@@ -96,12 +106,15 @@ struct BoardView: View {
         .task(id: running) {
             guard running else { return }
             do {
-                try await Task.sleep(for: timing.initial)
+                let clock = ContinuousClock()
+                var nextAppearance = clock.now.advanced(by: timing.interval)
+                try await clock.sleep(until: nextAppearance)
                 while !Task.isCancelled {
                     withAnimation(animation) { showingMessage = true }
                     try await Task.sleep(for: timing.visible)
                     withAnimation(animation) { showingMessage = false }
-                    try await Task.sleep(for: max(.zero, timing.interval - timing.visible))
+                    nextAppearance = nextAppearance.advanced(by: timing.interval)
+                    try await clock.sleep(until: nextAppearance)
                 }
             } catch {
                 // SwiftUI cancels this single task when Board leaves or becomes inactive.
