@@ -1,21 +1,25 @@
 import SwiftUI
 
-// MARK: - Model (kept in this file so it can't clash with shared models)
-
-struct PlanReminderItem: Identifiable, Equatable {
-    var id = UUID()
-    var title: String
-    var date: Date
-    var isOn: Bool = true
-}
-
-// MARK: - Reminders tab
+// MARK: - Reminders page
 
 struct RemindersView: View {
-    @Binding var reminders: [PlanReminderItem]
+    var courseTitle: String = "Plan"
+    @Binding var selection: PlanScreenTab
+    var onBack: (() -> Void)? = nil
+    var reminders: [PlanReminderItem]
+    var onAdd: (String, Date) -> Void
+    var onSetEnabled: (PlanReminderItem, Bool) -> Void
+    var onDelete: (PlanReminderItem) -> Void
+
     @State private var showingAddSheet = false
 
     var body: some View {
+        PlanPageScaffold(title: courseTitle, selection: $selection, onBack: onBack) {
+            content
+        }
+    }
+
+    private var content: some View {
         VStack(spacing: 0) {
             HStack {
                 Spacer()
@@ -45,10 +49,7 @@ struct RemindersView: View {
         }
         .sheet(isPresented: $showingAddSheet) {
             PlanAddReminderSheet { title, date in
-                withAnimation {
-                    reminders.append(PlanReminderItem(title: title, date: date))
-                    reminders.sort { $0.date < $1.date }
-                }
+                withAnimation { onAdd(title, date) }
             }
             .presentationDetents([.height(320)])
             .presentationDragIndicator(.visible)
@@ -71,7 +72,7 @@ struct RemindersView: View {
 
     private var reminderList: some View {
         List {
-            ForEach($reminders) { $reminder in
+            ForEach(reminders) { reminder in
                 HStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(reminder.title)
@@ -85,16 +86,19 @@ struct RemindersView: View {
 
                     Spacer()
 
-                    Toggle("Reminder on", isOn: $reminder.isOn)
-                        .labelsHidden()
-                        .tint(PlanTheme.deepClay)
+                    Toggle("Reminder on", isOn: Binding(
+                        get: { reminder.isOn },
+                        set: { onSetEnabled(reminder, $0) }
+                    ))
+                    .labelsHidden()
+                    .tint(PlanTheme.deepClay)
                 }
                 .padding(.vertical, 6)
                 .listRowBackground(Color.clear)
                 .listRowSeparatorTint(PlanTheme.text.opacity(0.12))
                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                     Button(role: .destructive) {
-                        withAnimation { reminders.removeAll { $0.id == reminder.id } }
+                        withAnimation { onDelete(reminder) }
                     } label: {
                         Label("Delete", systemImage: "trash")
                     }
@@ -170,10 +174,9 @@ private struct PlanAddReminderSheet: View {
 }
 
 #Preview {
-    ZStack {
-        PlanTheme.background.ignoresSafeArea()
-        RemindersView(reminders: .constant([
-            PlanReminderItem(title: "practice", date: Date().addingTimeInterval(3600))
-        ]))
+    // Opens the whole flow on this page, so the switcher can reach every other page.
+    // Use Live mode in the canvas (the play button) to tap around.
+    NavigationStack {
+        CourseFlowView(course: Course(title: "Swift Basics"), showsBackButton: true, startingAt: .reminders)
     }
 }

@@ -36,6 +36,10 @@ struct PlanTopBar: View {
             Text(title)
                 .font(.system(size: 26, weight: .regular))
                 .foregroundStyle(PlanTheme.text)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .padding(.horizontal, 48)   // keeps long names clear of the back button
+                .accessibilityAddTraits(.isHeader)
 
             if let onBack {
                 HStack {
@@ -146,66 +150,28 @@ struct PlanSectionPicker: View {
     }
 }
 
-// MARK: - Plan tab placeholder
+// MARK: - Page scaffold (every page uses this: background, top bar, switcher, divider)
 
-private struct PlanSchedulePlaceholder: View {
-    var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            Image("palm")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 320)
-                .opacity(0.15)
-            Text("Your study plan will appear here")
-                .font(.system(size: 15))
-                .foregroundStyle(PlanTheme.text.opacity(0.5))
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-    }
-}
-
-// MARK: - PlanView (course screen)
-
-struct PlanView: View {
-    var courseTitle: String = "Swift Basics"
-    /// Passed in by MainTabView. Not used yet: tasks and reminders are local
-    /// until we connect them to PlanViewModel.
-    var viewModel: PlanViewModel? = nil
-    /// True when opened from a course card, false when it is the Plan tab's root screen.
-    var showsBackButton: Bool = false
-
-    @Environment(\.dismiss) private var dismiss
-    @State private var selection: PlanScreenTab = .overview
-    @State private var tasks: [PlanTaskItem] = []
-    @State private var reminders: [PlanReminderItem] = []
+struct PlanPageScaffold<Content: View>: View {
+    let title: String
+    @Binding var selection: PlanScreenTab
+    var onBack: (() -> Void)? = nil
+    @ViewBuilder var content: Content
 
     var body: some View {
         ZStack {
             PlanTheme.background.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                PlanTopBar(title: courseTitle,
-                           onBack: showsBackButton ? { dismiss() } : nil)
+                PlanTopBar(title: title, onBack: onBack)
 
                 PlanSectionPicker(selection: $selection)
                     .padding(.bottom, 10)
 
                 Divider()
 
-                Group {
-                    switch selection {
-                    case .overview:
-                        PlanOverviewView(tasks: tasks, reminders: reminders)
-                    case .plan:
-                        PlanSchedulePlaceholder()
-                    case .tasks:
-                        TasksView(tasks: $tasks)
-                    case .reminders:
-                        RemindersView(reminders: $reminders)
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                content
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .navigationBarBackButtonHidden(true)
@@ -213,8 +179,45 @@ struct PlanView: View {
     }
 }
 
+// MARK: - Plan page (intentionally empty for now)
+
+/// The "Plan" page. Empty until the team decides what goes here; it only shows
+/// the palm backdrop from the design (invisible if the image isn't in Assets).
+struct PlanView: View {
+    var courseTitle: String = "Plan"
+    /// Passed in by MainTabView.
+    var viewModel: PlanViewModel? = nil
+    var showsBackButton: Bool = false
+
+    /// Set by CourseFlowView so the switcher can move between pages.
+    /// When nil (for example MainTabView creates PlanView directly), the page
+    /// wraps itself in a CourseFlowView so the switcher still works.
+    var selection: Binding<PlanScreenTab>? = nil
+    var onBack: (() -> Void)? = nil
+
+    var body: some View {
+        if let selection {
+            PlanPageScaffold(title: courseTitle, selection: selection, onBack: onBack) {
+                Image("palm")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 320)
+                    .opacity(0.15)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+            }
+        } else {
+            CourseFlowView(course: nil,
+                           viewModel: viewModel,
+                           showsBackButton: showsBackButton,
+                           startingAt: .plan)
+        }
+    }
+}
+
 #Preview {
+    // Opens the whole flow on this page, so the switcher can reach every other page.
+    // Use Live mode in the canvas (the play button) to tap around.
     NavigationStack {
-        PlanView()
+        CourseFlowView(course: Course(title: "Swift Basics"), showsBackButton: true, startingAt: .plan)
     }
 }

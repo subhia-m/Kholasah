@@ -1,14 +1,33 @@
 import SwiftUI
 
+// MARK: - Overview page
+
 struct PlanOverviewView: View {
-    var tasks: [PlanTaskItem] = []
+    var courseTitle: String = "Swift Basics"
+    @Binding var selection: PlanScreenTab
+    var onBack: (() -> Void)? = nil
+    var tasks: [StudyTask] = []
     var reminders: [PlanReminderItem] = []
-    var daysDone: Int = 15
-    var daysTotal: Int = 20
+
+    var body: some View {
+        PlanPageScaffold(title: courseTitle, selection: $selection, onBack: onBack) {
+            PlanOverviewContent(tasks: tasks, reminders: reminders)
+        }
+    }
+}
+
+// MARK: - Overview tab content
+
+private struct PlanOverviewContent: View {
+    var tasks: [StudyTask] = []
+    var reminders: [PlanReminderItem] = []
+    // Course duration isn't stored yet, so these stay at 0 until Course has dates.
+    var daysDone: Int = 0
+    var daysTotal: Int = 0
 
     // MARK: Derived data
 
-    private var tasksDone: Int { tasks.filter(\.isDone).count }
+    private var tasksDone: Int { tasks.filter(\.isCompleted).count }
 
     private var taskProgress: Double {
         tasks.isEmpty ? 0 : Double(tasksDone) / Double(tasks.count)
@@ -24,8 +43,8 @@ struct PlanOverviewView: View {
             .min { $0.date < $1.date }
     }
 
-    private var newestOpenTask: PlanTaskItem? {
-        tasks.last { !$0.isDone }
+    private var newestOpenTask: StudyTask? {
+        tasks.last { !$0.isCompleted }
     }
 
     // MARK: Body
@@ -163,16 +182,9 @@ struct PlanOverviewView: View {
 }
 
 #Preview {
-    ZStack {
-        PlanTheme.background.ignoresSafeArea()
-        PlanOverviewView(
-            tasks: [
-                PlanTaskItem(title: "Read chapter 1", isDone: true),
-                PlanTaskItem(title: "Build a SwiftUI button")
-            ],
-            reminders: [
-                PlanReminderItem(title: "practice", date: Date().addingTimeInterval(3600))
-            ]
-        )
+    // Opens the whole flow on this page, so the switcher can reach every other page.
+    // Use Live mode in the canvas (the play button) to tap around.
+    NavigationStack {
+        CourseFlowView(course: Course(title: "Swift Basics"), showsBackButton: true, startingAt: .overview)
     }
 }

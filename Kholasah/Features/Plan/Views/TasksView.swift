@@ -1,22 +1,37 @@
 import SwiftUI
 
-// MARK: - Model (kept in this file so it can't clash with shared models)
+// MARK: - Legacy type
 
+/// Kept only because StudyPlanService.replaceTaskItems and PlanViewModel still refer to it.
+/// The screens in this folder no longer use it: they work with StudyTask and call
+/// addTask / toggleTask directly. If the team deletes replaceTaskItems, this can go too.
 struct PlanTaskItem: Identifiable, Equatable {
     var id = UUID()
     var title: String
     var isDone: Bool = false
 }
 
-// MARK: - Tasks tab
+// MARK: - Tasks page
 
 struct TasksView: View {
-    @Binding var tasks: [PlanTaskItem]
+    var courseTitle: String = "Plan"
+    @Binding var selection: PlanScreenTab
+    var onBack: (() -> Void)? = nil
+    var tasks: [StudyTask]
+    var onAdd: (String) -> Void
+    var onToggle: (StudyTask) -> Void
+
     @State private var showingAddSheet = false
 
-    private var doneCount: Int { tasks.filter(\.isDone).count }
+    private var doneCount: Int { tasks.filter(\.isCompleted).count }
 
     var body: some View {
+        PlanPageScaffold(title: courseTitle, selection: $selection, onBack: onBack) {
+            content
+        }
+    }
+
+    private var content: some View {
         VStack(spacing: 0) {
             HStack {
                 Spacer()
@@ -53,7 +68,7 @@ struct TasksView: View {
         }
         .sheet(isPresented: $showingAddSheet) {
             PlanAddTaskSheet { title in
-                withAnimation { tasks.append(PlanTaskItem(title: title)) }
+                withAnimation { onAdd(title) }
             }
             .presentationDetents([.height(230)])
             .presentationDragIndicator(.visible)
@@ -76,17 +91,12 @@ struct TasksView: View {
 
     private var taskList: some View {
         List {
-            ForEach($tasks) { $task in
-                PlanTaskRow(task: $task)
-                    .listRowBackground(Color.clear)
-                    .listRowSeparatorTint(PlanTheme.text.opacity(0.12))
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) {
-                            withAnimation { tasks.removeAll { $0.id == task.id } }
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
-                    }
+            ForEach(tasks) { task in
+                PlanTaskRow(task: task) {
+                    withAnimation(.easeInOut(duration: 0.2)) { onToggle(task) }
+                }
+                .listRowBackground(Color.clear)
+                .listRowSeparatorTint(PlanTheme.text.opacity(0.12))
             }
         }
         .listStyle(.plain)
@@ -97,28 +107,37 @@ struct TasksView: View {
 // MARK: - Row
 
 private struct PlanTaskRow: View {
-    @Binding var task: PlanTaskItem
+    let task: StudyTask
+    let onToggle: () -> Void
 
     var body: some View {
-        HStack(spacing: 12) {
-            Button {
-                withAnimation(.easeInOut(duration: 0.2)) { task.isDone.toggle() }
-            } label: {
-                Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
+        Button(action: onToggle) {
+            HStack(spacing: 12) {
+                Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 22))
                     .foregroundStyle(PlanTheme.deepClay)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(task.title)
+                        .font(.system(size: 16))
+                        .strikethrough(task.isCompleted)
+                    if let due = task.dueDate {
+                        Text(due.formatted(date: .abbreviated, time: .omitted))
+                            .font(.system(size: 12))
+                            .opacity(0.6)
+                    }
+                }
+                .foregroundStyle(PlanTheme.text.opacity(task.isCompleted ? 0.45 : 1))
+
+                Spacer()
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(task.isDone ? "Mark as not done" : "Mark as done")
-
-            Text(task.title)
-                .font(.system(size: 16))
-                .strikethrough(task.isDone)
-                .foregroundStyle(PlanTheme.text.opacity(task.isDone ? 0.45 : 1))
-
-            Spacer()
+            .padding(.vertical, 6)
+            .contentShape(Rectangle())
         }
-        .padding(.vertical, 6)
+        .buttonStyle(.plain)
+        .accessibilityLabel(task.title)
+        .accessibilityValue(task.isCompleted ? "Completed" : "Not completed")
+        .accessibilityHint("Double tap to toggle")
     }
 }
 
@@ -183,11 +202,9 @@ private struct PlanAddTaskSheet: View {
 }
 
 #Preview {
-    ZStack {
-        PlanTheme.background.ignoresSafeArea()
-        TasksView(tasks: .constant([
-            PlanTaskItem(title: "Read chapter 1"),
-            PlanTaskItem(title: "Build a SwiftUI button", isDone: true)
-        ]))
+    // Opens the whole flow on this page, so the switcher can reach every other page.
+    // Use Live mode in the canvas (the play button) to tap around.
+    NavigationStack {
+        CourseFlowView(course: Course(title: "Swift Basics"), showsBackButton: true, startingAt: .tasks)
     }
 }

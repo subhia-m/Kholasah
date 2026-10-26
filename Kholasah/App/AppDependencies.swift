@@ -1,3 +1,4 @@
+import Foundation
 import Observation
 
 @MainActor
@@ -8,12 +9,13 @@ final class AppDependencies {
     let coursesViewModel: CoursesViewModel
     let focusViewModel: FocusViewModel
     let planViewModel: PlanViewModel
+    let boardViewModel: BoardViewModel
 
     convenience init() {
         self.init(
             storageService: UserDefaultsStorageService(),
             courseRepository: InMemoryCourseRepository(),
-            taskRepository: InMemoryTaskRepository(),
+            taskRepository: InMemoryTaskRepository(defaults: .standard),
             studyPlanRepository: InMemoryStudyPlanRepository(),
             timerService: SystemTimerService()
         )
@@ -34,6 +36,7 @@ final class AppDependencies {
             planRepository: studyPlanRepository
         )
 
+        boardViewModel = BoardViewModel(repository: taskRepository)
         self.appState = appState
         onboardingViewModel = OnboardingViewModel(appState: appState)
         coursesViewModel = CoursesViewModel(service: courseService)

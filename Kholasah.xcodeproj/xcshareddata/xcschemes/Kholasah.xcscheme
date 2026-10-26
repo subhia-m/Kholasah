@@ -17,6 +17,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "000000000000000100000000"
                BuildableName = "Kholasah.app"
+               BlueprintName = "Kholasah"
                ReferencedContainer = "container:Kholasah.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -29,6 +30,15 @@
       shouldUseLaunchSchemeArgsEnv = "YES"
       shouldAutocreateTestPlan = "YES">
       <Testables>
+         <TestableReference skipped = "NO" parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "4F17C305308A0D9F008A368D"
+               BuildableName = "KholasahTests.xctest"
+               BlueprintName = "KholasahTests"
+               ReferencedContainer = "container:Kholasah.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
          <TestableReference
             skipped = "NO"
             parallelizable = "YES">
@@ -58,6 +68,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "000000000000000100000000"
             BuildableName = "Kholasah.app"
+            BlueprintName = "Kholasah"
             ReferencedContainer = "container:Kholasah.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -74,6 +85,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "000000000000000100000000"
             BuildableName = "Kholasah.app"
+            BlueprintName = "Kholasah"
             ReferencedContainer = "container:Kholasah.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

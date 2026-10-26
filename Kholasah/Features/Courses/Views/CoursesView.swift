@@ -1,14 +1,6 @@
 import SwiftUI
 
-// MARK: - Local model and styles (private to this file)
-
-private struct CoursesListItem: Identifiable, Hashable {
-    let id = UUID()
-    var title: String
-    var subtitle: String = ""
-    var progress: Double = 0
-    var styleIndex: Int
-}
+// MARK: - Card colors (cycled by position in the list)
 
 private let courseCardStyles: [(background: Color, foreground: Color)] = [
     (PlanTheme.deepClay, Color(planHex: "#FFF7F0")),
@@ -19,19 +11,13 @@ private let courseCardStyles: [(background: Color, foreground: Color)] = [
 // MARK: - My Courses screen
 
 struct CoursesView: View {
-    /// Passed in by MainTabView. Not used yet: the list below is local sample data
-    /// until we connect it to CoursesViewModel.
-    var viewModel: CoursesViewModel? = nil
+    let viewModel: CoursesViewModel
+    /// Pass `dependencies.planViewModel` from MainTabView so each course's tasks
+    /// are shared with the rest of the app. Without it, tasks stay local to the screen.
+    var planViewModel: PlanViewModel? = nil
 
-    @State private var courses: [CoursesListItem] = [
-        CoursesListItem(title: "English", progress: 0.45, styleIndex: 0),
-        CoursesListItem(title: "UI Design", progress: 0.60, styleIndex: 1),
-        CoursesListItem(title: "Swift Skills",
-                        subtitle: "Learn iOS development with Swift",
-                        progress: 0.20, styleIndex: 2)
-    ]
-    @State private var expandedID: UUID?
-    @State private var selectedCourse: CoursesListItem?
+    @State private var expandedID: Course.ID?
+    @State private var selectedCourse: Course?
     @State private var showingAddSheet = false
 
     var body: some View {
@@ -43,29 +29,34 @@ struct CoursesView: View {
                 PlanTopBar(title: "My Courses")
                     .padding(.top, 12)
 
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: -28) {
-                        ForEach(Array(courses.enumerated()), id: \.element.id) { index, course in
-                            StackedCourseCard(
-                                course: course,
-                                isExpanded: expandedID == course.id
-                            )
-                            .zIndex(Double(index))
-                            .onTapGesture {
-                                if expandedID == course.id {
-                                    selectedCourse = course          // second tap opens the course
-                                } else {
-                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
-                                        expandedID = course.id       // first tap expands it
+                if viewModel.courses.isEmpty {
+                    emptyState
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: -28) {
+                            ForEach(Array(viewModel.courses.enumerated()), id: \.element.id) { index, course in
+                                StackedCourseCard(
+                                    course: course,
+                                    styleIndex: index,
+                                    isExpanded: expandedID == course.id
+                                )
+                                .zIndex(Double(index))
+                                .onTapGesture {
+                                    if expandedID == course.id {
+                                        selectedCourse = course          // second tap opens the course
+                                    } else {
+                                        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                                            expandedID = course.id       // first tap expands it
+                                        }
                                     }
                                 }
+                                .accessibilityAddTraits(.isButton)
                             }
-                            .accessibilityAddTraits(.isButton)
                         }
+                        .padding(.horizontal, 24)
+                        .padding(.top, 8)
+                        .padding(.bottom, 80)
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.top, 8)
-                    .padding(.bottom, 80)
                 }
             }
 
@@ -74,38 +65,52 @@ struct CoursesView: View {
                 .padding(.bottom, 16)
         }
         .navigationDestination(item: $selectedCourse) { course in
-            PlanView(courseTitle: course.title, showsBackButton: true)
+            CourseFlowView(course: course,
+                           viewModel: planViewModel,
+                           showsBackButton: true,
+                           startingAt: .overview)
         }
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showingAddSheet) {
-            NewCourseSheet { title, subtitle in
-                let item = CoursesListItem(
-                    title: title,
-                    subtitle: subtitle,
-                    styleIndex: courses.count % courseCardStyles.count
-                )
-                withAnimation {
-                    courses.append(item)
-                    expandedID = item.id
-                }
+            NewCourseSheet(viewModel: viewModel) {
+                withAnimation { expandedID = viewModel.courses.last?.id }
             }
-            .presentationDetents([.height(300)])
+            .presentationDetents([.height(340)])
             .presentationDragIndicator(.visible)
         }
         .onAppear {
-            if expandedID == nil { expandedID = courses.last?.id }
+            if expandedID == nil { expandedID = viewModel.courses.last?.id }
         }
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: 8) {
+            Spacer()
+            Image(systemName: "book")
+                .font(.system(size: 34))
+            Text("No courses yet")
+                .font(.system(size: 18, weight: .medium))
+            Text("Tap + to add your first course.")
+                .font(.system(size: 14))
+                .opacity(0.6)
+            Spacer()
+            Spacer()
+        }
+        .foregroundStyle(PlanTheme.text)
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
     }
 }
 
 // MARK: - Card
 
 private struct StackedCourseCard: View {
-    let course: CoursesListItem
+    let course: Course
+    let styleIndex: Int
     let isExpanded: Bool
 
     private var style: (background: Color, foreground: Color) {
-        courseCardStyles[course.styleIndex % courseCardStyles.count]
+        courseCardStyles[styleIndex % courseCardStyles.count]
     }
 
     var body: some View {
@@ -114,19 +119,11 @@ private struct StackedCourseCard: View {
                 .font(.system(size: 22, weight: .regular, design: .serif))
 
             if isExpanded {
-                if !course.subtitle.isEmpty {
-                    Text(course.subtitle)
+                if !course.instructor.isEmpty {
+                    Label(course.instructor, systemImage: "person")
                         .font(.system(size: 13))
                         .padding(.top, 8)
                 }
-
-                ProgressView(value: course.progress)
-                    .tint(style.foreground)
-                    .padding(.top, 4)
-
-                Text("\(Int(course.progress * 100))%")
-                    .font(.system(size: 13, weight: .medium))
-
                 Spacer(minLength: 0)
             }
         }
@@ -134,7 +131,7 @@ private struct StackedCourseCard: View {
         .padding(.horizontal, 16)
         .padding(.top, 14)
         .padding(.bottom, isExpanded ? 16 : 40)   // the extra space is hidden by the next card's overlap
-        .frame(maxWidth: .infinity, minHeight: isExpanded ? 230 : 0, alignment: .topLeading)
+        .frame(maxWidth: .infinity, minHeight: isExpanded ? 190 : 0, alignment: .topLeading)
         .background(style.background)
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .shadow(color: .black.opacity(0.12), radius: 6, y: 3)
@@ -144,11 +141,12 @@ private struct StackedCourseCard: View {
 // MARK: - Add course sheet
 
 private struct NewCourseSheet: View {
-    let onAdd: (String, String) -> Void
+    let viewModel: CoursesViewModel
+    let onAdded: () -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var title = ""
-    @State private var subtitle = ""
+    @State private var instructor = ""
     @FocusState private var isFocused: Bool
 
     private var trimmedTitle: String {
@@ -169,12 +167,18 @@ private struct NewCourseSheet: View {
                         .fill(PlanTheme.controlBackground)
                 )
 
-            TextField("Short description (optional)", text: $subtitle)
+            TextField("Instructor (optional)", text: $instructor)
                 .padding(14)
                 .background(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(PlanTheme.controlBackground)
                 )
+
+            if let message = viewModel.errorMessage {
+                Text(message)
+                    .font(.system(size: 13))
+                    .foregroundStyle(.red)
+            }
 
             HStack(spacing: 12) {
                 Button("Cancel") { dismiss() }
@@ -185,10 +189,10 @@ private struct NewCourseSheet: View {
                     .background(Capsule().fill(PlanTheme.chip))
 
                 Button("Add") {
-                    guard !trimmedTitle.isEmpty else { return }
-                    onAdd(trimmedTitle,
-                          subtitle.trimmingCharacters(in: .whitespacesAndNewlines))
-                    dismiss()
+                    if viewModel.addCourse(title: trimmedTitle, instructor: instructor) {
+                        onAdded()
+                        dismiss()
+                    }
                 }
                 .font(.system(size: 16, weight: .medium))
                 .foregroundStyle(.white)
@@ -202,12 +206,16 @@ private struct NewCourseSheet: View {
         .padding(.horizontal, 24)
         .padding(.top, 28)
         .background(PlanTheme.background.ignoresSafeArea())
-        .onAppear { isFocused = true }
+        .onAppear {
+            isFocused = true
+            viewModel.clearError()
+        }
+        .onDisappear { viewModel.clearError() }
     }
 }
 
 #Preview {
-    NavigationStack {
-        CoursesView()
-    }
+    // Shows My Courses inside the real tab bar (Courses tab selected).
+    // In Live mode: add a course, tap its card twice, and use the back button.
+    MainTabView(dependencies: AppDependencies())
 }
