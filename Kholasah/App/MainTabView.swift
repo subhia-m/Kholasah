@@ -14,7 +14,7 @@ struct MainTabView: View {
 
             Tab("Focus", systemImage: "hourglass.badge.eye") {
                 NavigationStack {
-                    FocusView(viewModel: dependencies.focusViewModel)
+//                    FocusView(viewModel: dependencies.focusViewModel)
                 }
             }
 
