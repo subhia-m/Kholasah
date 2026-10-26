@@ -185,6 +185,7 @@ struct PlanPageScaffold<Content: View>: View {
 /// the palm backdrop from the design (invisible if the image isn't in Assets).
 struct PlanView: View {
     var courseTitle: String = "Plan"
+    var courseID: Course.ID? = nil
     /// Passed in by MainTabView.
     var viewModel: PlanViewModel? = nil
     var showsBackButton: Bool = false
@@ -199,7 +200,7 @@ struct PlanView: View {
         if let selection {
             PlanPageScaffold(title: courseTitle, selection: selection, onBack: onBack) {
                 if let viewModel {
-                    StudyMaterialImportView(viewModel: viewModel)
+                    StudyMaterialImportView(viewModel: viewModel, courseID: courseID)
                 } else {
                     ContentUnavailableView(
                         "File Import Unavailable",

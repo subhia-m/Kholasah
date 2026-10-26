@@ -84,6 +84,7 @@ struct CourseFlowView: View {
                                  reminders: reminders)
             case .plan:
                 PlanView(courseTitle: title,
+                         courseID: course?.id,
                          viewModel: viewModel,
                          showsBackButton: showsBackButton,
                          selection: $selection,

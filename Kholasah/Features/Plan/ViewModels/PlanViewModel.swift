@@ -95,6 +95,7 @@ final class PlanViewModel {
     }
 
     func generateStudyPlan(
+        courseID: Course.ID?,
         durationDays: Int,
         dailyMinutes: Int,
         remindersEnabled: Bool,
@@ -117,7 +118,7 @@ final class PlanViewModel {
             generatedPlanDraft = draft
             let plan = service.saveGeneratedPlan(
                 draft,
-                courseID: nil,
+                courseID: courseID,
                 durationDays: durationDays,
                 dailyMinutes: dailyMinutes,
                 preferredStudyTime: preferredStudyTime
@@ -125,8 +126,13 @@ final class PlanViewModel {
             didSaveGeneratedPlan = true
 
             if remindersEnabled {
+                syncVisibleReminders(for: plan, courseID: courseID)
                 await scheduleReminders(for: plan)
             } else {
+                PlanRemindersStore.shared.replaceGeneratedReminders(
+                    with: [],
+                    courseID: courseID
+                )
                 await notificationService.cancelStudyReminders()
             }
         } catch {
@@ -135,6 +141,14 @@ final class PlanViewModel {
         }
 
         isGeneratingPlan = false
+    }
+
+    private func syncVisibleReminders(for plan: StudyPlan, courseID: Course.ID?) {
+        let planTasks = tasks.filter { plan.taskIDs.contains($0.id) }
+        PlanRemindersStore.shared.replaceGeneratedReminders(
+            with: planTasks,
+            courseID: courseID
+        )
     }
 
     private func scheduleReminders(for plan: StudyPlan) async {

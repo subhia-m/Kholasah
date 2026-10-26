@@ -3,6 +3,7 @@ import UniformTypeIdentifiers
 
 struct StudyMaterialImportView: View {
     let viewModel: PlanViewModel
+    var courseID: Course.ID? = nil
 
     @State private var isFileImporterPresented = false
     @State private var durationDays = 7
@@ -37,6 +38,7 @@ struct StudyMaterialImportView: View {
                     ) {
                         Task {
                             await viewModel.generateStudyPlan(
+                                courseID: courseID,
                                 durationDays: durationDays,
                                 dailyMinutes: dailyMinutes,
                                 remindersEnabled: remindersEnabled,
