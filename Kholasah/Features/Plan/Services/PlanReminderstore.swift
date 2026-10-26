@@ -21,7 +21,7 @@ struct PlanReminderItem: Identifiable, Equatable, Hashable {
 
 // MARK: - Store
 
-.
+
 @MainActor
 @Observable
 final class PlanRemindersStore {
