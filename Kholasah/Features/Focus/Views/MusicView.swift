@@ -1,13 +1,11 @@
 import SwiftUI
 
 struct MusicView: View {
-    @State private var selectedSoundID: String?
-
     private let sounds = [
-        FocusSound(id: "night", title: "Night", color: AppColors.burgundy),
-        FocusSound(id: "palms", title: "Palms", color: AppColors.darkPage),
-        FocusSound(id: "rain", title: "Rain", color: AppColors.brown),
-        FocusSound(id: "desert", title: "Desert", color: AppColors.sand)
+        FocusSound(id: "night", title: "Night", assetName: "najd"),
+        FocusSound(id: "palms", title: "Palms", assetName: "khobar"),
+        FocusSound(id: "rain", title: "Rain", assetName: "car"),
+        FocusSound(id: "desert", title: "Desert", assetName: "mountain")
     ]
 
     var body: some View {
@@ -20,13 +18,18 @@ struct MusicView: View {
                 spacing: 18
             ) {
                 ForEach(sounds) { sound in
-                    FocusSoundCard(
-                        title: sound.title,
-                        backgroundColor: sound.color,
-                        isSelected: selectedSoundID == sound.id
-                    ) {
-                        selectedSoundID = sound.id
+                    NavigationLink {
+                        MusicPlayerView(
+                            title: sound.title,
+                            artworkName: sound.assetName
+                        )
+                    } label: {
+                        FocusSoundCard(
+                            title: sound.title,
+                            imageName: sound.assetName
+                        )
                     }
+                    .buttonStyle(.plain)
                 }
             }
             .padding(.horizontal, 32)
@@ -39,5 +42,5 @@ struct MusicView: View {
 private struct FocusSound: Identifiable {
     let id: String
     let title: LocalizedStringKey
-    let color: Color
+    let assetName: String
 }
