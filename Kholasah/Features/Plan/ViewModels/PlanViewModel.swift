@@ -28,6 +28,10 @@ final class PlanViewModel {
         service.addTask(title: title, courseID: courseID)
     }
 
+    func replaceTaskItems(_ items: [PlanTaskItem]) {
+        service.replaceTaskItems(items)
+    }
+
     func toggleTask(_ task: StudyTask) {
         service.toggleTask(task)
     }

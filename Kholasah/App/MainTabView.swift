@@ -2,12 +2,13 @@ import SwiftUI
 
 struct MainTabView: View {
     let dependencies: AppDependencies
+    var boardPreviewCards = false
 
     var body: some View {
         TabView {
             Tab("Board", systemImage: "rectangle.grid.2x2") {
                 NavigationStack {
-                    CoursesView(viewModel: dependencies.coursesViewModel)
+                    BoardView(viewModel: dependencies.boardViewModel, previewCards: boardPreviewCards)
                 }
             }
 
@@ -19,7 +20,7 @@ struct MainTabView: View {
 
             Tab("Courses", systemImage: "book") {
                 NavigationStack {
-                    PlanView(viewModel: dependencies.planViewModel)
+                    CoursesView(viewModel: dependencies.coursesViewModel, planViewModel: dependencies.planViewModel)
                 }
             }
         }

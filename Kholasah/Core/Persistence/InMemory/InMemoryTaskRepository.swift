@@ -4,10 +4,26 @@ import Observation
 @MainActor
 @Observable
 final class InMemoryTaskRepository: TaskRepository {
-    private(set) var tasks: [StudyTask]
+    private(set) var tasks: [StudyTask] {
+        didSet { persist() }
+    }
+    private let defaults: UserDefaults?
+    private let storageKey = "sharedStudyTasks.v1"
 
-    init(tasks: [StudyTask] = []) {
-        self.tasks = tasks
+    // Passing defaults enables local persistence; tests and previews remain isolated.
+    init(tasks: [StudyTask] = [], defaults: UserDefaults? = nil) {
+        self.defaults = defaults
+        if let data = defaults?.data(forKey: storageKey),
+           let saved = try? JSONDecoder().decode([StudyTask].self, from: data) {
+            self.tasks = saved
+        } else {
+            self.tasks = tasks
+        }
+    }
+
+    private func persist() {
+        guard let defaults, let data = try? JSONEncoder().encode(tasks) else { return }
+        defaults.set(data, forKey: storageKey)
     }
 
     func add(_ task: StudyTask) {

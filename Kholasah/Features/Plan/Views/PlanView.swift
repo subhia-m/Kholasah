@@ -169,8 +169,7 @@ private struct PlanSchedulePlaceholder: View {
 
 struct PlanView: View {
     var courseTitle: String = "Swift Basics"
-    /// Passed in by MainTabView. Not used yet: tasks and reminders are local
-    /// until we connect them to PlanViewModel.
+    /// Uses the shared task repository when opened from the main navigation.
     var viewModel: PlanViewModel? = nil
     /// True when opened from a course card, false when it is the Plan tab's root screen.
     var showsBackButton: Bool = false
@@ -179,6 +178,14 @@ struct PlanView: View {
     @State private var selection: PlanScreenTab = .overview
     @State private var tasks: [PlanTaskItem] = []
     @State private var reminders: [PlanReminderItem] = []
+
+    private var sharedTasks: Binding<[PlanTaskItem]> {
+        guard let viewModel else { return $tasks }
+        return Binding(
+            get: { viewModel.tasks.map { PlanTaskItem(id: $0.id, title: $0.title, isDone: $0.isCompleted) } },
+            set: { viewModel.replaceTaskItems($0) }
+        )
+    }
 
     var body: some View {
         ZStack {
@@ -196,11 +203,11 @@ struct PlanView: View {
                 Group {
                     switch selection {
                     case .overview:
-                        PlanOverviewView(tasks: tasks, reminders: reminders)
+                        PlanOverviewView(tasks: sharedTasks.wrappedValue, reminders: reminders)
                     case .plan:
                         PlanSchedulePlaceholder()
                     case .tasks:
-                        TasksView(tasks: $tasks)
+                        TasksView(tasks: sharedTasks)
                     case .reminders:
                         RemindersView(reminders: $reminders)
                     }

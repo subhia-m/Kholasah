@@ -22,6 +22,7 @@ struct CoursesView: View {
     /// Passed in by MainTabView. Not used yet: the list below is local sample data
     /// until we connect it to CoursesViewModel.
     var viewModel: CoursesViewModel? = nil
+    var planViewModel: PlanViewModel? = nil
 
     @State private var courses: [CoursesListItem] = [
         CoursesListItem(title: "English", progress: 0.45, styleIndex: 0),
@@ -74,7 +75,7 @@ struct CoursesView: View {
                 .padding(.bottom, 16)
         }
         .navigationDestination(item: $selectedCourse) { course in
-            PlanView(courseTitle: course.title, showsBackButton: true)
+            PlanView(courseTitle: course.title, viewModel: planViewModel, showsBackButton: true)
         }
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showingAddSheet) {
