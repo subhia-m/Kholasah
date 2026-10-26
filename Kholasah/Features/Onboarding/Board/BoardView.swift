@@ -20,7 +20,7 @@ struct BoardView: View {
             VStack(spacing: 16) {
                 HStack {
                     Button {
-                        withAnimation(animation) { showingStreak.toggle() }
+                        withAnimation(animation) { showingStreak = true }
                     } label: {
                         Label("\(viewModel.streak.count) Day Streak", systemImage: "flame")
                             .font(.subheadline)
@@ -35,9 +35,7 @@ struct BoardView: View {
                         .accessibilityHidden(true)
                 }
                 HStack(alignment: .center) {
-                    Text(viewModel.calendar.isDateInToday(viewModel.selectedDate)
-                         ? "Today’s Tasks"
-                         : viewModel.selectedDate.formatted(.dateTime.month(.abbreviated).day().year().locale(Locale(identifier: "en_US"))))
+                    Text("Today’s Tasks")
                         .font(AppTypography.largeTitle)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     Button { showingAdd = true } label: {
@@ -103,19 +101,15 @@ struct BoardView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase != .active { showingMessage = false }
         }
-        .task(id: running) {
-            guard running else { return }
+        .task(id: running && !showingMessage) {
+            guard running, !showingMessage else { return }
             do {
-                let clock = ContinuousClock()
-                var nextAppearance = clock.now.advanced(by: timing.interval)
-                try await clock.sleep(until: nextAppearance)
-                while !Task.isCancelled {
-                    withAnimation(animation) { showingMessage = true }
-                    try await Task.sleep(for: timing.visible)
-                    withAnimation(animation) { showingMessage = false }
-                    nextAppearance = nextAppearance.advanced(by: timing.interval)
-                    try await clock.sleep(until: nextAppearance)
-                }
+                // One delay while hidden. Closing X starts a fresh delay; while visible
+                // there is no timer and no automatic dismissal or duplicate message.
+                try await Task.sleep(for: timing.interval)
+                try Task.checkCancellation()
+                guard running else { return }
+                withAnimation(animation) { showingMessage = true }
             } catch {
                 // SwiftUI cancels this single task when Board leaves or becomes inactive.
             }

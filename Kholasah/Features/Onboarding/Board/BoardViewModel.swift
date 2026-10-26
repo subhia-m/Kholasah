@@ -16,9 +16,8 @@ struct BoardStreak: Equatable {
 }
 
 struct BoardMessageTiming {
-    // Measured from the start of one message to the start of the next.
-    var interval: Duration = .seconds(35)
-    var visible: Duration = .seconds(5)
+    // Wait after opening Board or dismissing the previous encouragement.
+    var interval: Duration = .seconds(30)
 }
 
 @MainActor
