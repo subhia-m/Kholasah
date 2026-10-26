@@ -52,6 +52,7 @@ struct BoardAddTaskView: View {
     @State private var minutes = "25"
     @State private var date: Date
     @FocusState private var focusedField: Field?
+    @State private var selectedDetent: PresentationDetent = .medium
     let onSave: (String, Date, Int) -> Void
 
     private enum Field: Hashable {
@@ -73,9 +74,13 @@ struct BoardAddTaskView: View {
         NavigationStack {
             Form {
                 Section {
-                    LabeledContent("Task name") {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Task name")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                         TextField("Enter task name", text: $title)
-                            .multilineTextAlignment(.trailing)
+                            .multilineTextAlignment(.leading)
+                            .frame(minHeight: 44)
                             .focused($focusedField, equals: .name)
                             .submitLabel(.next)
                             .onSubmit { focusedField = .duration }
@@ -84,6 +89,7 @@ struct BoardAddTaskView: View {
 
                     DatePicker("Date", selection: $date, displayedComponents: .date)
                         .datePickerStyle(.compact)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
 
                     LabeledContent("Duration") {
                         HStack(spacing: 6) {
@@ -96,9 +102,12 @@ struct BoardAddTaskView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
+                    .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                 }
             }
             .formStyle(.grouped)
+            .contentMargins(.top, 20, for: .scrollContent)
+            .contentMargins(.horizontal, 20, for: .scrollContent)
             .font(AppTypography.body)
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle("New Task")
@@ -119,15 +128,24 @@ struct BoardAddTaskView: View {
                     }
                     .disabled(!valid)
                 }
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Done") { focusedField = nil }
+                if focusedField != nil {
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        Button("Done") { focusedField = nil }
+                    }
                 }
             }
             .scrollContentBackground(.hidden)
             .background(AppColors.background)
         }
         .tint(AppColors.primary)
+        .presentationDetents([.medium, .large], selection: $selectedDetent)
+        .presentationDragIndicator(.visible)
+        .onChange(of: focusedField) { _, field in
+            if field != nil {
+                selectedDetent = .large
+            }
+        }
     }
 }
 
