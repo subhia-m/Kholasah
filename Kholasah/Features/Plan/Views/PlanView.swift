@@ -198,12 +198,14 @@ struct PlanView: View {
     var body: some View {
         if let selection {
             PlanPageScaffold(title: courseTitle, selection: selection, onBack: onBack) {
-                Image("palm")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 320)
-                    .opacity(0.15)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+                if let viewModel {
+                    StudyMaterialImportView(viewModel: viewModel)
+                } else {
+                    ContentUnavailableView(
+                        "File Import Unavailable",
+                        systemImage: "doc.badge.ellipsis"
+                    )
+                }
             }
         } else {
             CourseFlowView(course: nil,
@@ -218,6 +220,11 @@ struct PlanView: View {
     // Opens the whole flow on this page, so the switcher can reach every other page.
     // Use Live mode in the canvas (the play button) to tap around.
     NavigationStack {
-        CourseFlowView(course: Course(title: "Swift Basics"), showsBackButton: true, startingAt: .plan)
+        CourseFlowView(
+            course: Course(title: "Swift Basics"),
+            viewModel: AppDependencies().planViewModel,
+            showsBackButton: true,
+            startingAt: .plan
+        )
     }
 }
