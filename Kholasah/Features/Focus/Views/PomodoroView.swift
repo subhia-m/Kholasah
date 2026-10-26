@@ -4,18 +4,15 @@ struct PomodoroView: View {
     let viewModel: FocusViewModel
     @State private var note = ""
 
-    private var formattedTime: String {
-        let minutes = viewModel.remainingSeconds / 60
-        let seconds = viewModel.remainingSeconds % 60
-        return String(format: "%02d:%02d", minutes, seconds)
-    }
-
     var body: some View {
         VStack(spacing: 34) {
-            PomodoroTimerDial(formattedTime: formattedTime)
+            PomodoroDial(
+                remainingSeconds: viewModel.remainingSeconds,
+                progress: viewModel.progress
+            )
 
             PomodoroTimerControls(
-                isRunning: viewModel.isRunning,
+                timerState: viewModel.timerState,
                 onToggle: viewModel.toggleTimer,
                 onReset: viewModel.reset
             )
@@ -27,58 +24,117 @@ struct PomodoroView: View {
     }
 }
 
-private struct PomodoroTimerDial: View {
-    let formattedTime: String
+private struct PomodoroDial: View {
+    let remainingSeconds: Int
+    let progress: Double
+
+    private var formattedTime: String {
+        let minutes = remainingSeconds / 60
+        let seconds = remainingSeconds % 60
+        return String(format: "%02d:%02d", minutes, seconds)
+    }
 
     var body: some View {
         ZStack {
             Circle()
-                .stroke(.primary.opacity(0.72), lineWidth: 1)
-                .frame(width: 292, height: 292)
+                .stroke(.black.opacity(0.12), lineWidth: 5)
+
+            ForEach(0..<60, id: \.self) { index in
+                Capsule()
+                    .fill(
+                        index.isMultiple(of: 5)
+                            ? AppColors.date
+                            : .black.opacity(0.18)
+                    )
+                    .frame(
+                        width: index.isMultiple(of: 5) ? 3 : 2,
+                        height: index.isMultiple(of: 5) ? 13 : 6
+                    )
+                    .offset(y: -137)
+                    .rotationEffect(.degrees(Double(index) * 6))
+            }
 
             Circle()
-                .stroke(.primary.opacity(0.72), lineWidth: 1)
-                .frame(width: 236, height: 236)
+                .trim(from: 0, to: progress)
+                .stroke(
+                    AppColors.date,
+                    style: StrokeStyle(lineWidth: 7, lineCap: .round)
+                )
+                .rotationEffect(.degrees(-90))
 
-            Text(formattedTime)
-                .font(.system(size: 62, weight: .regular, design: .rounded))
-                .monospacedDigit()
-                .foregroundStyle(AppColors.burgundy)
-                .minimumScaleFactor(0.7)
-                .accessibilityLabel("Time remaining")
-                .accessibilityValue(formattedTime)
+            Circle()
+                .fill(AppColors.date)
+                .frame(width: 22, height: 22)
+                .shadow(color: AppColors.date.opacity(0.4), radius: 7)
+                .offset(y: -150)
+                .rotationEffect(.degrees(progress * 360))
+
+            VStack(spacing: 20) {
+                Text("\(remainingSeconds) SEC")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+
+                Text(formattedTime)
+                    .font(.system(size: 58, weight: .light, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(AppColors.burgundy)
+            }
         }
-        .frame(height: 310)
+        .frame(width: 310, height: 310)
+            .animation(.linear(duration: 0.2), value: progress)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Time remaining")
+            .accessibilityValue(formattedTime)
     }
 }
 
 private struct PomodoroTimerControls: View {
-    let isRunning: Bool
+    let timerState: PomodoroTimerState
     let onToggle: () -> Void
     let onReset: () -> Void
 
     var body: some View {
-        Button(isRunning ? "Pause Timer" : "Start Timer", action: onToggle)
-            .font(.headline)
-            .foregroundStyle(.primary)
-            .frame(width: 210)
-            .padding(.vertical, 12)
-            .background(
-                LinearGradient(
-                    colors: [.white, AppColors.lightPage.opacity(0.75)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                ),
-                in: Capsule()
-            )
-            .overlay {
-                Capsule()
-                    .stroke(.white, lineWidth: 1)
-            }
-            .shadow(color: .black.opacity(0.12), radius: 8, y: 3)
-            .contextMenu {
-                Button("Reset Timer", systemImage: "arrow.counterclockwise", action: onReset)
-            }
+        HStack(spacing: 12) {
+            Button(primaryButtonTitle, action: onToggle)
+                .font(.headline)
+                .foregroundStyle(.primary)
+                .frame(width: 170)
+                .padding(.vertical, 12)
+                .background(
+                    LinearGradient(
+                        colors: [.white, AppColors.lightPage.opacity(0.75)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    in: Capsule()
+                )
+                .overlay {
+                    Capsule()
+                        .stroke(.white, lineWidth: 1)
+                }
+                .shadow(color: .black.opacity(0.12), radius: 8, y: 3)
+
+            Button("Reset Timer", systemImage: "arrow.counterclockwise", action: onReset)
+                .labelStyle(.iconOnly)
+                .font(.headline)
+                .foregroundStyle(AppColors.burgundy)
+                .frame(width: 44, height: 44)
+                .background(.white.opacity(0.7), in: Circle())
+                .accessibilityLabel("Reset Timer")
+        }
+    }
+
+    private var primaryButtonTitle: LocalizedStringKey {
+        switch timerState {
+        case .idle:
+            "Start Timer"
+        case .running:
+            "Pause Timer"
+        case .paused:
+            "Resume Timer"
+        case .completed:
+            "Start Again"
+        }
     }
 }
 

@@ -1,11 +1,25 @@
 import Foundation
 import Observation
 
+enum PomodoroTimerState: Equatable {
+    case idle
+    case running
+    case paused
+    case completed
+}
+
 @MainActor
 @Observable
 final class FocusViewModel {
-    private(set) var remainingSeconds = 25 * 60
-    private(set) var isRunning = false
+    let totalSeconds: Int
+
+    private(set) var remainingSeconds: Int
+    private(set) var timerState = PomodoroTimerState.idle
+
+    var progress: Double {
+        guard totalSeconds > 0 else { return 0 }
+        return 1 - (Double(remainingSeconds) / Double(totalSeconds))
+    }
 
     @ObservationIgnored
     private let timerService: any TimerService
@@ -13,8 +27,13 @@ final class FocusViewModel {
     @ObservationIgnored
     private var timerTask: Task<Void, Never>?
 
-    init(timerService: any TimerService) {
+    init(
+        timerService: any TimerService,
+        totalSeconds: Int = 25 * 60
+    ) {
         self.timerService = timerService
+        self.totalSeconds = totalSeconds
+        remainingSeconds = totalSeconds
     }
 
     deinit {
@@ -22,31 +41,63 @@ final class FocusViewModel {
     }
 
     func toggleTimer() {
-        isRunning ? pause() : start()
+        switch timerState {
+        case .idle, .completed:
+            start()
+        case .running:
+            pause()
+        case .paused:
+            resume()
+        }
     }
 
     func reset() {
-        pause()
-        remainingSeconds = 25 * 60
+        cancelTimer()
+        remainingSeconds = totalSeconds
+        timerState = .idle
     }
 
-    private func start() {
-        guard remainingSeconds > 0 else { return }
-        isRunning = true
+    func start() {
+        cancelTimer()
+        remainingSeconds = totalSeconds
+        runCountdown()
+    }
+
+    func pause() {
+        guard timerState == .running else { return }
+        cancelTimer()
+        timerState = .paused
+    }
+
+    func resume() {
+        guard timerState == .paused, remainingSeconds > 0 else { return }
+        runCountdown()
+    }
+
+    private func runCountdown() {
+        guard remainingSeconds > 0 else {
+            timerState = .completed
+            return
+        }
+
+        timerState = .running
         timerTask = Task { [weak self, timerService] in
-            for await _ in timerService.ticks(every: .seconds(1)) {
-                guard let self, self.isRunning else { break }
-                self.remainingSeconds -= 1
-                if self.remainingSeconds == 0 {
-                    self.pause()
+            guard let self else { return }
+
+            for await seconds in timerService.countdown(from: remainingSeconds) {
+                guard !Task.isCancelled else { break }
+                self.remainingSeconds = seconds
+
+                if seconds == 0 {
+                    self.timerState = .completed
+                    self.timerTask = nil
                     break
                 }
             }
         }
     }
 
-    private func pause() {
-        isRunning = false
+    private func cancelTimer() {
         timerTask?.cancel()
         timerTask = nil
     }

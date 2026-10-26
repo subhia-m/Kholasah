@@ -2,7 +2,7 @@ import SwiftUI
 
 struct MusicPlayerView: View {
     let title: LocalizedStringKey
-    let artworkColor: Color
+    let artworkName: String
 
     @Environment(\.dismiss) private var dismiss
     @State private var isPlaying = false
@@ -18,7 +18,7 @@ struct MusicPlayerView: View {
 
                 MusicArtworkPlaceholder(
                     title: title,
-                    backgroundColor: artworkColor
+                    imageName: artworkName
                 )
                 .padding(.horizontal, 30)
 
@@ -64,16 +64,13 @@ private struct MusicPlayerHeader: View {
 
 private struct MusicArtworkPlaceholder: View {
     let title: LocalizedStringKey
-    let backgroundColor: Color
+    let imageName: String
 
     var body: some View {
         ZStack {
-            backgroundColor
-
-            Image(systemName: "music.note")
-                .font(.system(size: 72, weight: .light))
-                .foregroundStyle(.white.opacity(0.85))
-                .accessibilityHidden(true)
+            Image(imageName)
+                .resizable()
+                .scaledToFill()
         }
         .aspectRatio(0.76, contentMode: .fit)
         .clipShape(RoundedRectangle(cornerRadius: 15))
@@ -126,7 +123,7 @@ private struct MusicPlaybackControls: View {
     NavigationStack {
         MusicPlayerView(
             title: "Sound",
-            artworkColor: AppColors.burgundy
+            artworkName: "khobar"
         )
     }
 }
