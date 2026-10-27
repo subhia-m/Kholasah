@@ -6,7 +6,7 @@ import Observation
 struct BoardStreak: Equatable {
     var count: Int
     var lastRecordedDay: Date?
-    static var demo: BoardStreak { BoardStreak(count: 7, lastRecordedDay: .now) }
+    nonisolated static var demo: BoardStreak { BoardStreak(count: 7, lastRecordedDay: .now) }
 
     func week(calendar: Calendar, fallback: Date = .now) -> [Date] {
         let anchor = lastRecordedDay ?? fallback
@@ -23,7 +23,7 @@ struct BoardMessageTiming {
 @MainActor
 @Observable
 final class BoardViewModel {
-    let repository: InMemoryTaskRepository
+    let repository: any TaskRepository
     var selectedDate: Date
     var displayedMonth: Date {
         didSet {
@@ -33,7 +33,7 @@ final class BoardViewModel {
     var streak: BoardStreak
     let calendar: Calendar
 
-    init(repository: InMemoryTaskRepository, today: Date = .now, streak: BoardStreak = .demo) {
+    init(repository: any TaskRepository, today: Date = .now, streak: BoardStreak = .demo) {
         self.repository = repository
         var calendar = Calendar(identifier: .gregorian)
         calendar.locale = Locale(identifier: "en_US")
