@@ -358,7 +358,7 @@ struct CourseView: View {
     private func fieldLabel(_ title: String) -> some View {
         Text(title)
             .font(.system(size: 20, weight: .regular))
-            .foregroundStyle(labelOrange)
+            .foregroundStyle(titleBrown)
             .padding(.leading, 10)
     }
 }
