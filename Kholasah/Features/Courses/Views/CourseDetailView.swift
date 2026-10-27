@@ -1,4 +1,3 @@
-
 import SwiftUI
 import UniformTypeIdentifiers
 import PhotosUI
@@ -26,8 +25,6 @@ struct CourseView: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
 
-    // Example link: replace with a real course URL later
-    private let courseLink = "https://yourapp.com/course/123"
 
     private let motivationTypes = [
         "bbbbb",
@@ -58,13 +55,10 @@ struct CourseView: View {
     // MARK: - Body
 
     var body: some View {
-
         ZStack {
-
             backgroundColor
                 .ignoresSafeArea()
 
-            // Background palm tree
             GeometryReader { geometry in
                 Image("palm-tree")
                     .resizable()
@@ -75,54 +69,30 @@ struct CourseView: View {
                         alignment: .bottomLeading
                     )
                     .offset(x: -150, y: 102)
-                    .opacity(0.35)
+                    .opacity(0.2)
             }
             .ignoresSafeArea()
             .allowsHitTesting(false)
 
             VStack(spacing: 0) {
-
+                
                 // MARK: Header
-
-                ZStack {
-
-                    Text("Add Course")
-                        .font(.system(size: 32, weight: .bold))
-                        .foregroundStyle(titleBrown)
-
-                    HStack {
-                        Spacer()
-
-                        Button {
-                            // Add navigation here
-                        } label: {
-                            Image(systemName: "chevron.right")
-                                .font(
-                                    .system(size: 22, weight: .medium)
-                                )
-                                .foregroundStyle(darkBrown)
-                                .frame(width: 52, height: 52)
-                                .background(.white.opacity(0.25))
-                                .clipShape(Circle())
-                        }
-                        .accessibilityLabel("Next")
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 8)
+                
+                Text("Add Course")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundStyle(titleBrown)
+                    .padding(.top, 16)
+                    .padding(.bottom, 8)
 
                 // MARK: Form
-
+                
                 ScrollView(showsIndicators: false) {
-
                     VStack(alignment: .leading, spacing: 22) {
-
+                        
                         // Course Name
-
                         VStack(alignment: .leading, spacing: 0) {
-
                             fieldLabel("Course Name:")
-
+                            
                             TextField(
                                 "Enter course name",
                                 text: $courseName
@@ -132,15 +102,12 @@ struct CourseView: View {
                             .background(fieldBackground)
                             .textInputAutocapitalization(.words)
                         }
-
+                        
                         // Start Date and End Date
-
                         HStack(alignment: .top, spacing: 12) {
-
                             VStack(alignment: .leading, spacing: 0) {
-
                                 fieldLabel("Start Date:")
-
+                                
                                 DatePicker(
                                     "Start Date",
                                     selection: $startDate,
@@ -156,11 +123,10 @@ struct CourseView: View {
                                 .padding(.leading, 12)
                                 .background(fieldBackground)
                             }
-
+                            
                             VStack(alignment: .leading, spacing: 0) {
-
                                 fieldLabel("End Date:")
-
+                                
                                 DatePicker(
                                     "End Date",
                                     selection: $endDate,
@@ -178,20 +144,18 @@ struct CourseView: View {
                                 .background(fieldBackground)
                             }
                         }
-
+                        
                         // Motivation Type
-
                         VStack(alignment: .leading, spacing: 0) {
-
                             fieldLabel("Motivation Type:")
-
+                            
                             Picker(
                                 "Motivation Type",
                                 selection: $motivationType
                             ) {
                                 Text("Choose a type")
                                     .tag("Choose a type")
-
+                                
                                 ForEach(
                                     motivationTypes,
                                     id: \.self
@@ -210,13 +174,11 @@ struct CourseView: View {
                             .padding(.horizontal, 18)
                             .background(fieldBackground)
                         }
-
+                        
                         // Goals
-
                         VStack(alignment: .leading, spacing: 0) {
-
                             fieldLabel("Goals:")
-
+                            
                             TextField(
                                 "What do you want to achieve?",
                                 text: $goals,
@@ -231,13 +193,11 @@ struct CourseView: View {
                             )
                             .background(fieldBackground)
                         }
-
+                        
                         // Tasks
-
                         VStack(alignment: .leading, spacing: 0) {
-
                             fieldLabel("Tasks:")
-
+                            
                             TextField(
                                 "Add your tasks",
                                 text: $additionalGoals,
@@ -252,23 +212,19 @@ struct CourseView: View {
                             )
                             .background(fieldBackground)
                         }
-
+                        
                         // MARK: Course Materials
-
                         VStack(alignment: .leading, spacing: 8) {
-
                             fieldLabel("Course Materials:")
-
+                            
                             Button {
                                 showUploadOptions = true
                             } label: {
-
                                 HStack(spacing: 12) {
-
                                     Image(systemName: "paperclip")
                                         .font(.system(size: 21))
                                         .foregroundStyle(darkBrown)
-
+                                    
                                     VStack(
                                         alignment: .leading,
                                         spacing: 4
@@ -276,18 +232,15 @@ struct CourseView: View {
                                         Text("Upload materials")
                                             .font(.system(size: 15))
                                             .foregroundStyle(darkBrown)
-
+                                        
                                         Text(
                                             "\(selectedFiles.count + selectedPhotos.count) item(s) selected"
                                         )
                                         .font(.system(size: 12))
                                         .foregroundStyle(.secondary)
                                     }
-
+                                    
                                     Spacer()
-
-                                    Image(systemName: "plus")
-                                        .foregroundStyle(darkBrown)
                                 }
                                 .padding(.horizontal, 16)
                                 .frame(
@@ -305,11 +258,11 @@ struct CourseView: View {
                                 Button("Choose from Photos") {
                                     showPhotoPicker = true
                                 }
-
+                                
                                 Button("Choose Files") {
                                     showFileImporter = true
                                 }
-
+                                
                                 Button("Cancel", role: .cancel) { }
                             }
                             .photosPicker(
@@ -319,72 +272,16 @@ struct CourseView: View {
                                 matching: .any(of: [.images, .videos])
                             )
                         }
-
-                        // MARK: Share Course
-
-                        VStack(alignment: .leading, spacing: 8) {
-
-                            fieldLabel("Share Course:")
-
-                            HStack(spacing: 8) {
-
-                                Image(systemName: "link")
-                                    .foregroundStyle(darkBrown)
-
-                                Text(courseLink)
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(1)
-                                    .truncationMode(.middle)
-
-                                Spacer(minLength: 0)
-
-                                // Copy link
-
-                                Button {
-                                    UIPasteboard.general.string = courseLink
-
-                                    alertMessage = "The course link has been copied."
-                                    showAlert = true
-                                } label: {
-                                    Image(systemName: "doc.on.doc")
-                                        .foregroundStyle(darkBrown)
-                                        .padding(6)
-                                }
-                                .accessibilityLabel("Copy course link")
-
-                                // Share link
-
-                                ShareLink(item: courseLink) {
-                                    Image(
-                                        systemName: "square.and.arrow.up"
-                                    )
-                                    .foregroundStyle(darkBrown)
-                                    .padding(6)
-                                }
-                                .accessibilityLabel("Share course link")
-                            }
-                            .padding(.horizontal, 12)
-                            .frame(
-                                maxWidth: .infinity,
-                                minHeight: 62
-                            )
-                            .background(fieldBackground)
-                        }
-
+                        
+                        
                         // MARK: Done Button
-
                         Button {
-
                             if courseName.trimmingCharacters(
                                 in: .whitespacesAndNewlines
                             ).isEmpty {
-
                                 alertMessage = "Please enter a course name before continuing."
                                 showAlert = true
-
                             } else {
-
                                 print("Course: \(courseName)")
                                 print("Start: \(startDate)")
                                 print("End: \(endDate)")
@@ -393,33 +290,26 @@ struct CourseView: View {
                                 print("Tasks: \(additionalGoals)")
                                 print("Files: \(selectedFiles)")
                                 print("Photos selected: \(selectedPhotos.count)")
-
-                                // Save the course here
                             }
-
                         } label: {
-
-                            Text("Done")
-                                .font(.system(size: 25))
+                            Text("Generate study plan")
+                                .font(.system(size: 20))
+                                .fontWeight(.bold)
                                 .foregroundStyle(.white)
-                                .frame(width: 150, height: 64)
+                                .frame(maxWidth: .infinity, minHeight: 64)
                                 .background(darkBrown)
                                 .clipShape(
-                                    RoundedRectangle(cornerRadius: 36)
+                                    RoundedRectangle(cornerRadius: 30)
                                 )
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 6)
+                        .padding(.top, 10)
                         .padding(.bottom, 24)
                     }
                     .padding(.horizontal, 24)
-                    .padding(.top, 36)
                 }
             }
         }
-
         // MARK: File Importer
-
         .fileImporter(
             isPresented: $showFileImporter,
             allowedContentTypes: [
@@ -434,19 +324,14 @@ struct CourseView: View {
             },
             allowsMultipleSelection: true
         ) { result in
-
             switch result {
-
             case .success(let urls):
                 selectedFiles = urls
-
             case .failure(let error):
                 print("File selection failed: \(error)")
             }
         }
-
         // MARK: Alert
-
         .alert(
             "Course",
             isPresented: $showAlert
@@ -460,7 +345,6 @@ struct CourseView: View {
     // MARK: - Reusable Components
 
     private var fieldBackground: some View {
-
         RoundedRectangle(cornerRadius: 30)
             .fill(.white.opacity(0.92))
             .shadow(
@@ -472,9 +356,8 @@ struct CourseView: View {
     }
 
     private func fieldLabel(_ title: String) -> some View {
-
         Text(title)
-            .font(.system(size: 25, weight: .regular))
+            .font(.system(size: 20, weight: .regular))
             .foregroundStyle(labelOrange)
             .padding(.leading, 10)
     }

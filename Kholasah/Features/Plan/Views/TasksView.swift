@@ -2,9 +2,6 @@ import SwiftUI
 
 // MARK: - Legacy type
 
-/// Kept only because StudyPlanService.replaceTaskItems and PlanViewModel still refer to it.
-/// The screens in this folder no longer use it: they work with StudyTask and call
-/// addTask / toggleTask directly. If the team deletes replaceTaskItems, this can go too.
 struct PlanTaskItem: Identifiable, Equatable {
     var id = UUID()
     var title: String
