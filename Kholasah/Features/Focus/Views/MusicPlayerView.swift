@@ -5,7 +5,8 @@ struct MusicPlayerView: View {
     let artworkName: String
 
     @Environment(\.dismiss) private var dismiss
-    @State private var isPlaying = false
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var audioPlayer = FocusAudioPlayer()
 
     var body: some View {
         ZStack {
@@ -18,13 +19,18 @@ struct MusicPlayerView: View {
 
                 MusicArtworkPlaceholder(
                     title: title,
-                    imageName: artworkName
+                    imageName: audioPlayer.artworkName
                 )
                 .padding(.horizontal, 30)
 
                 Spacer(minLength: 40)
 
-                MusicPlaybackControls(isPlaying: $isPlaying)
+                MusicPlaybackControls(
+                    isPlaying: audioPlayer.isPlaying,
+                    onPlayPause: audioPlayer.togglePlayback,
+                    onPrevious: audioPlayer.previous,
+                    onNext: audioPlayer.next
+                )
                     .padding(.horizontal, 52)
 
                 Spacer(minLength: 64)
@@ -32,6 +38,11 @@ struct MusicPlayerView: View {
             .padding(.top, 8)
         }
         .toolbar(.hidden, for: .navigationBar)
+        .onAppear { audioPlayer.select(artworkName: artworkName) }
+        .onDisappear { audioPlayer.pause() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase != .active { audioPlayer.pause() }
+        }
     }
 }
 
@@ -67,23 +78,29 @@ private struct MusicArtworkPlaceholder: View {
     let imageName: String
 
     var body: some View {
-        ZStack {
-            Image(imageName)
-                .resizable()
-                .scaledToFill()
-        }
-        .aspectRatio(0.76, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: 15))
-        .overlay {
-            RoundedRectangle(cornerRadius: 15)
-                .stroke(Color.black.opacity(0.12), lineWidth: 1)
-        }
-        .accessibilityLabel(title)
+        Color.clear
+            .aspectRatio(3 / 4, contentMode: .fit)
+            .overlay {
+                Image(imageName)
+                    .resizable()
+                    .interpolation(.high)
+                    .scaledToFill()
+            }
+            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 15, style: .continuous)
+                    .stroke(Color.black.opacity(0.12), lineWidth: 1)
+            }
+            .accessibilityLabel(title)
     }
 }
 
 private struct MusicPlaybackControls: View {
-    @Binding var isPlaying: Bool
+    let isPlaying: Bool
+    let onPlayPause: () -> Void
+    let onPrevious: () -> Void
+    let onNext: () -> Void
 
     var body: some View {
         VStack(spacing: 34) {
@@ -93,14 +110,14 @@ private struct MusicPlaybackControls: View {
 
             HStack {
                 Button("Previous", systemImage: "backward.end.fill") {
-                    // Audio navigation will be connected through AudioService.
+                    onPrevious()
                 }
                 .accessibilityLabel("Previous sound")
 
                 Spacer()
 
                 Button(isPlaying ? "Pause" : "Play", systemImage: isPlaying ? "pause.fill" : "play.fill") {
-                    isPlaying.toggle()
+                    onPlayPause()
                 }
                 .font(.system(size: 36))
                 .accessibilityLabel(isPlaying ? "Pause sound" : "Play sound")
@@ -108,7 +125,7 @@ private struct MusicPlaybackControls: View {
                 Spacer()
 
                 Button("Next", systemImage: "forward.end.fill") {
-                    // Audio navigation will be connected through AudioService.
+                    onNext()
                 }
                 .accessibilityLabel("Next sound")
             }

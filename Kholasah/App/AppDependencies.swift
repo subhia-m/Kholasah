@@ -17,7 +17,10 @@ final class AppDependencies {
             courseRepository: InMemoryCourseRepository(),
             taskRepository: InMemoryTaskRepository(defaults: .standard),
             studyPlanRepository: InMemoryStudyPlanRepository(),
-            timerService: SystemTimerService()
+            timerService: SystemTimerService(),
+            fileImportService: PDFFileImportService(),
+            aiService: LocalFoundationModelsAIService(),
+            notificationService: LocalNotificationService()
         )
     }
 
@@ -26,7 +29,10 @@ final class AppDependencies {
         courseRepository: InMemoryCourseRepository,
         taskRepository: InMemoryTaskRepository,
         studyPlanRepository: InMemoryStudyPlanRepository,
-        timerService: any TimerService
+        timerService: any TimerService,
+        fileImportService: any FileImportService = PDFFileImportService(),
+        aiService: any AIService = LocalFoundationModelsAIService(),
+        notificationService: any NotificationService = LocalNotificationService()
     ) {
         let appState = AppState(storage: storageService)
         let courseService = CourseService(repository: courseRepository)
@@ -41,6 +47,11 @@ final class AppDependencies {
         onboardingViewModel = OnboardingViewModel(appState: appState)
         coursesViewModel = CoursesViewModel(service: courseService)
         focusViewModel = FocusViewModel(timerService: timerService)
-        planViewModel = PlanViewModel(service: planService)
+        planViewModel = PlanViewModel(
+            service: planService,
+            fileImportService: fileImportService,
+            aiService: aiService,
+            notificationService: notificationService
+        )
     }
 }

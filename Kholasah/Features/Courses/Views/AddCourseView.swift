@@ -62,36 +62,30 @@ struct AddCourseWelcomeView: View {
 private struct WelcomeHeroView: View {
     var body: some View {
         GeometryReader { proxy in
+            // Root ZStack to handle visual layers correctly inside GeometryReader
             ZStack {
                 Image("palm-tree")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: proxy.size.width * 0.62) // Restored correct multiplier width
+                    .frame(width: proxy.size.width * 1)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
                     .ignoresSafeArea(edges: .bottom)
+                    .offset(x: -150, y: 102)
+                    .opacity(0.6)
 
+                Button(action: {
+                    print("Plus button tapped!")
+                }) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 48, weight: .regular))
+                        .foregroundStyle(Color.white)
+                        .frame(width: 72, height: 72)
+                        .background(Color.neutralGray.opacity(0.8), in: Circle())
+                }
+                
                 VStack(spacing: 0) {
-                    HStack {
-                        Spacer()
-
-                        Button(action: {}) {
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 22, weight: .medium))
-                                .foregroundStyle(Color.titleBrown)
-                                .frame(width: 48, height: 48)
-                                .background(.clear, in: Circle())
-                                .overlay {
-                                    Circle()
-                                        .stroke(Color.titleBrown.opacity(0.08), lineWidth: 1)
-                                }
-                        }
-                        .accessibilityLabel("Continue")
-                    }
-                    .padding(.top, 24)
-                    .padding(.trailing, 25)
-
                     WelcomeTitleView()
-                        .padding(.top, 34)
+                        .padding(.top, 58)
 
                     FirstCoursePromptView()
                         .padding(.top, 54)
@@ -111,23 +105,22 @@ private struct WelcomeHeroView: View {
 private struct WelcomeTitleView: View {
     var body: some View {
         VStack(spacing: 8) {
-            Text("Welcome to")
-                .font(.system(size: 45, weight: .bold))
+            Text("ADD YOUR")
+                .font(.system(size: 40, weight: .bold))
+                .foregroundStyle(Color.titleBrown)
 
-            HStack(alignment: .bottom, spacing: 2) {
-                Text("Kholasah")
-                    .font(.system(size: 45, weight: .bold))
+            HStack(spacing: 10) {
+                Text("FIRST COURSE")
+                    .font(.system(size: 40, weight: .bold))
+                    .foregroundStyle(Color.titleBrown)
 
                 Image("logo")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 35, height: 35)
-                    .padding(.bottom, 1)
             }
         }
-        .foregroundStyle(Color.titleBrown)
-        .minimumScaleFactor(0.6)
-        .lineLimit(1)
+        .multilineTextAlignment(.center)
     }
 }
 
@@ -137,16 +130,8 @@ private struct FirstCoursePromptView: View {
             Text("Add your first course!")
                 .font(.system(size: 21, weight: .regular, design: .rounded))
                 .foregroundStyle(Color.titleBrown)
-
-            Button(action: {}) {
-                Image(systemName: "plus")
-                    .font(.system(size: 48, weight: .regular))
-                    .foregroundStyle(Color.titleBrown)
-                    .frame(width: 72, height: 72)
-                    .background(Color.titleBrown.opacity(0.12), in: Circle())
-            }
-            .accessibilityLabel("Add your first course")
         }
+        .accessibilityLabel("Add your first course")
     }
 }
 
@@ -183,6 +168,7 @@ private extension Color {
     static let backgroundCream = Color(red: 242 / 255, green: 238 / 255, blue: 234 / 255)
     static let quoteBrown = Color(red: 72 / 255, green: 9 / 255, blue: 2 / 255)
     static let titleBrown = Color(red: 100 / 255, green: 25 / 255, blue: 14 / 255)
+    static let neutralGray = Color(red: 151 / 255, green: 151 / 255, blue: 151 / 255)
 }
 
 #Preview {

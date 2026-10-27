@@ -72,9 +72,9 @@ struct BoardAddTaskView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
-                    VStack(alignment: .leading, spacing: 2) {
+            ScrollView {
+                VStack(spacing: 0) {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Task name")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
@@ -82,19 +82,30 @@ struct BoardAddTaskView: View {
                             .multilineTextAlignment(.leading)
                             .frame(minHeight: 44)
                             .focused($focusedField, equals: .name)
-                            .submitLabel(.next)
-                            .onSubmit { focusedField = .duration }
+                            .textFieldStyle(.plain)
+                            .autocorrectionDisabled()
+                            .submitLabel(.done)
+                            .onSubmit { focusedField = nil }
                             .accessibilityLabel("Task name")
                     }
+                    .padding(.vertical, 12)
+
+                    Divider()
 
                     DatePicker("Date", selection: $date, displayedComponents: .date)
                         .datePickerStyle(.compact)
-                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                        .frame(minHeight: 52)
+                        .padding(.vertical, 4)
+                        .simultaneousGesture(TapGesture().onEnded { focusedField = nil })
+
+                    Divider()
 
                     LabeledContent("Duration") {
                         HStack(spacing: 6) {
                             TextField("Minutes", text: $minutes)
                                 .keyboardType(.numberPad)
+                                .textFieldStyle(.plain)
+                                .frame(minWidth: 44, maxWidth: 88, minHeight: 44)
                                 .multilineTextAlignment(.trailing)
                                 .focused($focusedField, equals: .duration)
                                 .accessibilityLabel("Duration in minutes")
@@ -102,12 +113,18 @@ struct BoardAddTaskView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
-                    .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                    .frame(minHeight: 52)
+                    .padding(.vertical, 4)
                 }
+                .padding(.horizontal, 16)
+                .background(.white, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                .padding(20)
             }
-            .formStyle(.grouped)
-            .contentMargins(.top, 20, for: .scrollContent)
-            .contentMargins(.horizontal, 20, for: .scrollContent)
+            .background {
+                AppColors.background
+                    .ignoresSafeArea()
+            }
+            .onTapGesture { focusedField = nil }
             .font(AppTypography.body)
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle("New Task")
@@ -128,17 +145,12 @@ struct BoardAddTaskView: View {
                     }
                     .disabled(!valid)
                 }
-                if focusedField != nil {
-                    ToolbarItemGroup(placement: .keyboard) {
-                        Spacer()
-                        Button("Done") { focusedField = nil }
-                    }
-                }
             }
-            .scrollContentBackground(.hidden)
-            .background(AppColors.background)
+            .toolbarBackground(AppColors.background, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
         }
         .tint(AppColors.primary)
+        .presentationBackground(AppColors.background)
         .presentationDetents([.medium, .large], selection: $selectedDetent)
         .presentationDragIndicator(.visible)
         .onChange(of: focusedField) { _, field in

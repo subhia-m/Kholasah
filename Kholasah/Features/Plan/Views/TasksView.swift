@@ -6,6 +6,13 @@ struct PlanTaskItem: Identifiable, Equatable {
     var id = UUID()
     var title: String
     var isDone: Bool = false
+    var dueDate: Date?
+    var durationMinutes: Int?
+    var concept: String?
+    var explanation: String?
+    var keyPoints: [String] = []
+    var reviewPrompt: String?
+    var reminderMessage: String?
 }
 
 // MARK: - Tasks page
@@ -108,33 +115,41 @@ private struct PlanTaskRow: View {
     let onToggle: () -> Void
 
     var body: some View {
-        Button(action: onToggle) {
-            HStack(spacing: 12) {
+        HStack(spacing: 12) {
+            Button(action: onToggle) {
                 Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 22))
                     .foregroundStyle(PlanTheme.deepClay)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(task.isCompleted ? "Mark as not completed" : "Mark as completed")
 
-                VStack(alignment: .leading, spacing: 2) {
+            NavigationLink {
+                TaskDetailView(task: task)
+            } label: {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(task.title)
                         .font(.system(size: 16))
                         .strikethrough(task.isCompleted)
-                    if let due = task.dueDate {
-                        Text(due.formatted(date: .abbreviated, time: .omitted))
-                            .font(.system(size: 12))
-                            .opacity(0.6)
+
+                    HStack(spacing: 8) {
+                        if let dueDate = task.dueDate {
+                            Text(dueDate.formatted(date: .abbreviated, time: .shortened))
+                        }
+                        if let durationMinutes = task.durationMinutes {
+                            Text("\(durationMinutes) min")
+                        }
                     }
+                    .font(.caption)
+                    .opacity(0.65)
                 }
                 .foregroundStyle(PlanTheme.text.opacity(task.isCompleted ? 0.45 : 1))
-
-                Spacer()
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(.vertical, 6)
-            .contentShape(Rectangle())
+            .buttonStyle(.plain)
+            .accessibilityHint("Opens task details")
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(task.title)
-        .accessibilityValue(task.isCompleted ? "Completed" : "Not completed")
-        .accessibilityHint("Double tap to toggle")
+        .padding(.vertical, 6)
     }
 }
 
