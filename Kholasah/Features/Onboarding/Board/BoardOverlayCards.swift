@@ -147,10 +147,14 @@ struct BoardCloseButton: View {
 
 // extension يضيف وظائف أو خصائص محسوبة إلى نوع موجود دون تعديل تعريفه الأصلي.
 private extension View {
-    // يطبق خلفية وشكل البطاقة العائمة المشتركة.
+    // يوحّد شكل إشعاري الستريك والتحفيز في صفحة البورد داخل المين والمعاينة.
+    // خلفية كريمية فاتحة جدًا بلمسة مشمشية خفيفة، تميّز الإشعار وتنسجم مع العنابي ولون التمر.
     func boardFloatingCard() -> some View {
         foregroundStyle(AppColors.primary)
-            .background(AppColors.card, in: RoundedRectangle(cornerRadius: 26))
+            .background(
+                Color(red: 255 / 255, green: 247 / 255, blue: 239 / 255),
+                in: RoundedRectangle(cornerRadius: 26)
+            )
             .overlay {
                 RoundedRectangle(cornerRadius: 26).stroke(PlanTheme.text.opacity(0.7), lineWidth: 1)
             }
