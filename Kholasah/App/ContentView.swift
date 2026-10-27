@@ -5,7 +5,9 @@ struct ContentView: View {
 
     var body: some View {
         if dependencies.appState.hasCompletedOnboarding {
-            if dependencies.appState.hasCompletedFirstCourseSetup {
+            if dependencies.appState.hasSkippedFirstCourseSetup
+                || (dependencies.appState.hasCompletedFirstCourseSetup
+                    && !dependencies.coursesViewModel.courses.isEmpty) {
                 MainTabView(dependencies: dependencies)
             } else {
                 FirstCourseSetupView(dependencies: dependencies)

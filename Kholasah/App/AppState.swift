@@ -15,6 +15,9 @@ final class AppState {
         }
     }
 
+    // Skipping only applies to the current app session.
+    var hasSkippedFirstCourseSetup = false
+
     @ObservationIgnored
     private let storage: any StorageService
 

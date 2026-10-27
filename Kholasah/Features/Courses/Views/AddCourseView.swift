@@ -115,7 +115,7 @@ struct FirstCourseSetupView: View {
             }
             .overlay(alignment: .topTrailing) {
                 Button {
-                    dependencies.appState.completeFirstCourseSetup()
+                    dependencies.appState.hasSkippedFirstCourseSetup = true
                 } label: {
                     Text("Skip")
                         .font(.footnote)
