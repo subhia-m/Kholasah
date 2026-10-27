@@ -49,17 +49,21 @@ struct AddCourseView: View {
 }
 
 struct AddCourseWelcomeView: View {
+    let onAddCourse: () -> Void
+
     var body: some View {
         ZStack {
             Color.backgroundCream
                 .ignoresSafeArea()
 
-            WelcomeHeroView()
+            WelcomeHeroView(onAddCourse: onAddCourse)
         }
     }
 }
 
 private struct WelcomeHeroView: View {
+    let onAddCourse: () -> Void
+
     var body: some View {
         GeometryReader { proxy in
             // Root ZStack to handle visual layers correctly inside GeometryReader
@@ -73,9 +77,7 @@ private struct WelcomeHeroView: View {
                     .offset(x: -150, y: 102)
                     .opacity(0.6)
 
-                Button(action: {
-                    print("Plus button tapped!")
-                }) {
+                Button(action: onAddCourse) {
                     Image(systemName: "plus")
                         .font(.system(size: 48, weight: .regular))
                         .foregroundStyle(Color.white)
@@ -96,6 +98,27 @@ private struct WelcomeHeroView: View {
                         .padding(.leading, 138)
                         .padding(.trailing, 12)
                         .padding(.bottom, 80)
+                }
+            }
+        }
+    }
+}
+
+struct FirstCourseSetupView: View {
+    let dependencies: AppDependencies
+    @State private var showingCourseDetails = false
+
+    var body: some View {
+        NavigationStack {
+            AddCourseWelcomeView {
+                showingCourseDetails = true
+            }
+            .navigationDestination(isPresented: $showingCourseDetails) {
+                CourseView(
+                    coursesViewModel: dependencies.coursesViewModel,
+                    planViewModel: dependencies.planViewModel
+                ) { _ in
+                    dependencies.appState.completeFirstCourseSetup()
                 }
             }
         }
@@ -172,5 +195,5 @@ private extension Color {
 }
 
 #Preview {
-    AddCourseWelcomeView()
+    AddCourseWelcomeView(onAddCourse: {})
 }
