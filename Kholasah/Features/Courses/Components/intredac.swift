@@ -6,7 +6,7 @@
 
 import SwiftUI
 
-struct OnboardingView: View {
+struct intredac: View {
     @State private var currentPage = 0
     
     var body: some View {
@@ -35,6 +35,7 @@ struct OnboardingView: View {
                 }
                 
                 // Paging TabView for the 5 screens
+                
                 TabView(selection: $currentPage) {
                     PageView1().tag(0)
                     PageView2().tag(1)
@@ -46,8 +47,10 @@ struct OnboardingView: View {
                 
                 // Bottom Controls: Page Indicator Dots & Next Arrow Button
                 HStack {
+                    Spacer()
                     // Custom Page Dots
                     HStack(spacing: 8) {
+                        
                         ForEach(0..<5, id: \.self) { index in
                             Circle()
                                 .fill(currentPage == index ? Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)) : Color.gray.opacity(0.3))
@@ -65,12 +68,7 @@ struct OnboardingView: View {
                                 currentPage += 1
                             }
                         }) {
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 18, weight: .bold))
-                                .foregroundColor(.white)
-                                .frame(width: 50, height: 50)
-                                .background(Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)))
-                                .clipShape(Circle())
+                          
                         }
                     }
                 }
@@ -81,28 +79,25 @@ struct OnboardingView: View {
     }
 }
 
-// Page 1: Splash / Cover
+// Page 1
 struct PageView1: View {
     var body: some View {
         VStack(spacing: 20) {
             Spacer()
             
             ZStack {
-                RoundedRectangle(cornerRadius: 24)
-                    .fill(Color.white)
-                    .frame(width: 140, height: 140)
-                    .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
                 
                 VStack(spacing: 4) {
-                    Image(systemName: "circle.grid.cross.fill")
-                        .font(.system(size: 50))
-                        .foregroundColor(Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)))
-                    Text("خلاصة")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)))
+
+                    Image ("pic2")
+                        .resizable()
+                        .frame(width: 140,height: 140)
+                   
                 }
             }
-            
+            Text("خُلاصة")
+                .font(.system(size: 32, weight: .bold))
+                .foregroundColor(Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)))
             Text("Kholasah")
                 .font(.system(size: 32, weight: .bold))
                 .foregroundColor(Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)))
@@ -118,7 +113,7 @@ struct PageView1: View {
     }
 }
 
-// MARK: - Page 2: Welcome to Kholasah
+// Page 2
 struct PageView2: View {
     var body: some View {
         VStack(spacing: 24) {
@@ -130,9 +125,11 @@ struct PageView2: View {
                     .frame(height: 280)
                 
                 VStack {
-                    Image(systemName: "tree.fill")
-                        .font(.system(size: 80))
-                        .foregroundColor(Color(#colorLiteral(red: 0.2, green: 0.4, blue: 0.2, alpha: 1.0)))
+                    Image( "date")
+                        .resizable()
+                        .frame(width: 100,height: 100)
+                        .font(.system(size: 20))
+                        .foregroundColor(Color(#colorLiteral(red: 0.3098039329, green: 0.2039215714, blue: 0.03921568766, alpha: 1)))
                     Text("Upload. Plan. Learn. Progress.")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)))
@@ -159,7 +156,7 @@ struct PageView2: View {
     }
 }
 
-// MARK: - Page 3: Upload your study materials
+//  Page 3
 struct PageView3: View {
     var body: some View {
         VStack(spacing: 24) {
@@ -229,7 +226,7 @@ struct FileBadge: View {
     }
 }
 
-// MARK: - Page 4: Get a clear study plan
+// Page 4
 struct PageView4: View {
     var body: some View {
         VStack(spacing: 24) {
@@ -301,7 +298,7 @@ struct PlanRow: View {
     }
 }
 
-// MARK: - Page 5: Stay motivated every day
+// Page 5
 struct PageView5: View {
     var body: some View {
         VStack(spacing: 24) {
@@ -376,5 +373,5 @@ struct FeatureRow: View {
 }
 
 #Preview {
-    OnboardingView()
+    intredac()
 }
