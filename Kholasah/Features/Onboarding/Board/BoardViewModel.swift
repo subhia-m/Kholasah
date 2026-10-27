@@ -1,5 +1,5 @@
 // MARK: - شرح الملف
-// يربط اللوحة بمستودع المهام ويحسب أيام التقويم. يضيف حاليًا مهامًا تجريبية للشهور؛ قيمة الاستمرارية الافتراضية تجريبية وليست محسوبة من الإنجاز.
+// يربط اللوحة بمستودع المهام ويحسب أيام التقويم. تظهر البيانات التجريبية في معاينات Xcode فقط.
 // للقراءة: let يثبت القيمة، وvar يسمح بتغييرها، وprivate يحصر الوصول في نطاق التعريف.
 
 import Foundation
@@ -105,15 +105,20 @@ final class BoardViewModel {
     // يستبعد هذا المرجع الداخلي من تتبع Observation؛ لا يلغي دوره في تنفيذ العمليات.
     @ObservationIgnored private var hasOpened = false
 
-    // يهيئ اللوحة عند أول ظهور ويجهز البيانات التجريبية للشهر.
+    // يهيئ اللوحة عند أول ظهور ويحذف أي بيانات تجريبية محفوظة من الإصدارات السابقة.
     func prepareForDisplay(today: Date = .now) {
         guard !hasOpened else { return }
         hasOpened = true
         selectedDate = calendar.startOfDay(for: today)
         displayedMonth = calendar.dateInterval(of: .month, for: today)?.start ?? today
-        // Previews use the same data generation without touching the app's saved markers.
-        let isPreview = ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
-        seedDemoTasksIfNeeded(today: today, defaults: isPreview ? nil : .standard)
+        removePersistedDemoTasks()
+    }
+
+    /// Removes only fixtures created by the old Board seeder. AI-generated and user-created tasks use unrelated IDs.
+    private func removePersistedDemoTasks() {
+        repository.tasks
+            .filter { $0.id.uuidString.hasPrefix("B04D0002-") }
+            .forEach { repository.remove(id: $0.id) }
     }
 
     // هل أُتيح توليد بيانات اللوحة التجريبية؟
