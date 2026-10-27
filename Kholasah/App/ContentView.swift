@@ -7,6 +7,7 @@ struct ContentView: View {
         if dependencies.appState.hasCompletedOnboarding {
             MainTabView(dependencies: dependencies)
         } else {
+            OnboardingView(viewModel: dependencies.onboardingViewModel)
         }
     }
 }
