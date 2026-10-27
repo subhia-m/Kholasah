@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct MusicView: View {
+    let audioPlayer: FocusAudioPlayer
+
     private let sounds = [
         FocusSound(id: "night", title: "Night", assetName: "sandHouse"),
         FocusSound(id: "palms", title: "Palms", assetName: "khobar"),
@@ -21,7 +23,8 @@ struct MusicView: View {
                     NavigationLink {
                         MusicPlayerView(
                             title: sound.title,
-                            artworkName: sound.assetName
+                            artworkName: sound.assetName,
+                            audioPlayer: audioPlayer
                         )
                     } label: {
                         FocusSoundCard(

@@ -33,6 +33,8 @@ final class FocusAudioPlayer {
     }
 
     func select(artworkName: String) {
+        // Reopening the current sound preserves its playback position and session.
+        if self.artworkName == artworkName, player != nil { return }
         pause()
         player = nil
         elapsedTime = 0

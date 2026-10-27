@@ -5,8 +5,8 @@ struct MusicPlayerView: View {
     let artworkName: String
 
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.scenePhase) private var scenePhase
-    @State private var audioPlayer = FocusAudioPlayer()
+    let audioPlayer: FocusAudioPlayer
+    @State private var hasSelectedTrack = false
 
     var body: some View {
         ZStack {
@@ -15,7 +15,6 @@ struct MusicPlayerView: View {
 
             VStack(spacing: 0) {
                 MusicPlayerHeader {
-                    audioPlayer.pause()
                     dismiss()
                 }
                     .padding(.bottom, 40)
@@ -43,10 +42,10 @@ struct MusicPlayerView: View {
             .padding(.top, 8)
         }
         .toolbar(.hidden, for: .navigationBar)
-        .onAppear { audioPlayer.select(artworkName: artworkName) }
-        .onDisappear { audioPlayer.pause() }
-        .onChange(of: scenePhase) { _, phase in
-            if phase != .active { audioPlayer.pause() }
+        .onAppear {
+            guard !hasSelectedTrack else { return }
+            hasSelectedTrack = true
+            audioPlayer.select(artworkName: artworkName)
         }
     }
 }
@@ -179,7 +178,8 @@ private struct MusicPlaybackControls: View {
     NavigationStack {
         MusicPlayerView(
             title: "Sound",
-            artworkName: "khobar"
+            artworkName: "khobar",
+            audioPlayer: FocusAudioPlayer()
         )
     }
 }

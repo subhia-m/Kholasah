@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct MainTabView: View {
+    @Environment(\.scenePhase) private var scenePhase
     let dependencies: AppDependencies
     var boardPreviewCards = false
 
@@ -25,6 +26,9 @@ struct MainTabView: View {
             }
         }
         .tint(AppColors.primary)
+        .onChange(of: scenePhase) { _, phase in
+            if phase != .active { dependencies.focusViewModel.audioPlayer.pause() }
+        }
     }
 }
 

@@ -14,7 +14,7 @@ struct FocusView: View {
             Group {
                 switch selectedMode {
                 case .sound:
-                    MusicView()
+                    MusicView(audioPlayer: viewModel.audioPlayer)
                 case .pomodoro:
                     ScrollView {
                         PomodoroView(viewModel: viewModel)

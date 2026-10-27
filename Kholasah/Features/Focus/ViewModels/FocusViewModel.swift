@@ -11,6 +11,7 @@ enum PomodoroTimerState: Equatable {
 @MainActor
 @Observable
 final class FocusViewModel {
+    let audioPlayer = FocusAudioPlayer()
     let totalSeconds: Int
 
     private(set) var remainingSeconds: Int
