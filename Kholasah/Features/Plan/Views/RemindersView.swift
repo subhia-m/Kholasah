@@ -21,15 +21,16 @@ struct RemindersView: View {
 
     private var content: some View {
         VStack(spacing: 0) {
-            HStack {
-                Spacer()
-                PlanAddButton(label: "Add reminder") { showingAddSheet = true }
-            }
-            .padding(.horizontal, 24)
-            .padding(.top, 14)
-            .padding(.bottom, 12)
-
+            
             PlanCard {
+                HStack {
+                    Spacer()
+                    PlanAddButton(label: "Add reminder") { showingAddSheet = true }
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 20)
+                .padding(.bottom, 17)
+                
                 VStack(alignment: .leading, spacing: 8) {
                     Image(systemName: "bell")
                         .font(.system(size: 22))
@@ -46,6 +47,8 @@ struct RemindersView: View {
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 16)
+            .padding(.top, 16)
+
         }
         .sheet(isPresented: $showingAddSheet) {
             PlanAddReminderSheet { title, date in

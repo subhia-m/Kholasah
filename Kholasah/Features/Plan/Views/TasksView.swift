@@ -24,11 +24,11 @@ struct TasksView: View {
     var tasks: [StudyTask]
     var onAdd: (String) -> Void
     var onToggle: (StudyTask) -> Void
-    var onRename: (StudyTask, String) -> Void          // NEW
-    var onDelete: (StudyTask) -> Void                   // NEW
+    var onRename: (StudyTask, String) -> Void
+    var onDelete: (StudyTask) -> Void
 
     @State private var showingAddSheet = false
-    @State private var editingTask: StudyTask?          // NEW
+    @State private var editingTask: StudyTask?
 
     private var doneCount: Int { tasks.filter(\.isCompleted).count }
 
@@ -39,17 +39,20 @@ struct TasksView: View {
     }
 
     private var content: some View {
+        
         VStack(spacing: 0) {
-            HStack {
-                Spacer()
-                PlanAddButton(label: "Add task") { showingAddSheet = true }
-            }
-            .padding(.horizontal, 24)
-            .padding(.top, 14)
-            .padding(.bottom, 12)
-
+           
             PlanCard {
+                HStack {
+                    Spacer()
+                    PlanAddButton(label: "Add task") { showingAddSheet = true }
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 20)
+                .padding(.bottom, 17)
+
                 VStack(alignment: .leading, spacing: 8) {
+                    
                     HStack(spacing: 8) {
                         Image(systemName: "list.clipboard")
                             .font(.system(size: 22))
@@ -72,6 +75,7 @@ struct TasksView: View {
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 16)
+            .padding(.top, 16)
         }
         // NEW: the add sheet now uses the shared editor sheet (same look as before)
         .sheet(isPresented: $showingAddSheet) {
