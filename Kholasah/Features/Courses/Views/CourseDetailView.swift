@@ -255,22 +255,14 @@ struct CourseView: View {
                                 isPresented: $showUploadOptions,
                                 titleVisibility: .visible
                             ) {
-                                Button("Choose from Photos") {
-                                    showPhotoPicker = true
-                                }
-                                
+                               
                                 Button("Choose Files") {
                                     showFileImporter = true
                                 }
                                 
                                 Button("Cancel", role: .cancel) { }
                             }
-                            .photosPicker(
-                                isPresented: $showPhotoPicker,
-                                selection: $selectedPhotos,
-                                maxSelectionCount: 10,
-                                matching: .any(of: [.images, .videos])
-                            )
+                            
                         }
                         
                         
