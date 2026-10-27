@@ -1,52 +1,86 @@
+// MARK: - شرح الملف
+// يعرض المهام ويتيح إضافتها وإعادة تسميتها وتبديل الإنجاز وحذفها؛ يرسل التغييرات إلى الواجهة الأب عبر closures.
+// للقراءة: let يثبت القيمة، وvar يسمح بتغييرها، وprivate يحصر الوصول في نطاق التعريف.
+
 import SwiftUI
 
 // MARK: - Legacy type
 
+// Identifiable يوفر هوية للعنصر؛ Equatable للمقارنة، وHashable لاستخدامه في المجموعات إن كانا مذكورين.
 struct PlanTaskItem: Identifiable, Equatable {
+    // معرّف يميز هذا العنصر عن بقية العناصر.
     var id = UUID()
+    // العنوان المستخدم لهذا العنصر.
     var title: String
+    // حالة إنجاز المهمة المعروضة.
     var isDone: Bool = false
+    // موعد المهمة الاختياري.
+    // علامة ? تعني قيمة اختيارية قد تكون nil؛ يجب التحقق منها قبل استخدامها.
     var dueDate: Date?
+    // مدة الدراسة المقدرة بالدقائق.
     var durationMinutes: Int?
+    // المفهوم الذي تتناوله المهمة.
     var concept: String?
+    // شرح المفهوم المستخرج من المادة.
     var explanation: String?
+    // النقاط الأساسية التي تساعد على مراجعة المفهوم.
     var keyPoints: [String] = []
+    // سؤال مراجعة لاختبار فهم المفهوم.
     var reviewPrompt: String?
+    // النص التحفيزي المرتبط بتذكير المهمة.
     var reminderMessage: String?
 }
 
 // MARK: - Tasks page
 
 struct TasksView: View {
+    // عنوان المقرر المعروض في الصفحة.
     var courseTitle: String = "Plan"
+    // التبويب المحدد الذي يقرر المحتوى المعروض.
+    // @Binding رابط قراءة وكتابة إلى قيمة يملكها العرض الأب، حتى ينعكس التعديل في الطرفين.
     @Binding var selection: PlanScreenTab
+    // إجراء الرجوع الذي يمرره العرض الأب.
     var onBack: (() -> Void)? = nil
+    // المهام التي يستخدمها هذا الجزء من التطبيق.
     var tasks: [StudyTask]
+    // إجراء إرسال بيانات العنصر الجديد إلى الأب.
     var onAdd: (String) -> Void
+    // إجراء طلب تبديل حالة الإنجاز أو المؤقت وفق المكوّن.
     var onToggle: (StudyTask) -> Void
+    // إجراء إرسال عنوان المهمة الجديد.
     var onRename: (StudyTask, String) -> Void
+    // إجراء طلب حذف العنصر المحدد.
     var onDelete: (StudyTask) -> Void
 
+    // يتحكم في ظهور نافذة إضافة عنصر.
+    // @State حالة تملكها الواجهة وتحافظ SwiftUI عليها بين تحديثاتها؛ الرمز $ يتيح ربطها بعنصر إدخال.
     @State private var showingAddSheet = false
+    // المهمة الجاري تعديل عنوانها.
     @State private var editingTask: StudyTask?
 
+    // عدد المهام المكتملة.
     private var doneCount: Int { tasks.filter(\.isCompleted).count }
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         PlanPageScaffold(title: courseTitle, selection: $selection, onBack: onBack) {
             content
         }
     }
 
+    // المحتوى الداخلي الذي تتكون منه هذه الواجهة.
     private var content: some View {
         
+        // يرتب العناصر عموديًا؛ spacing يحدد المسافة بينها.
         VStack(spacing: 0) {
            
             PlanCard {
+                // يرتب العناصر أفقيًا.
                 HStack {
                     Spacer()
                     PlanAddButton(label: "Add task") { showingAddSheet = true }
                 }
+                // يضيف مسافة حول العنصر؛ ترتيب معدلات العرض يؤثر في النتيجة.
                 .padding(.horizontal, 24)
                 .padding(.top, 20)
                 .padding(.bottom, 17)
@@ -78,6 +112,7 @@ struct TasksView: View {
             .padding(.top, 16)
         }
         // NEW: the add sheet now uses the shared editor sheet (same look as before)
+        // يعرض نافذة فوق الشاشة اعتمادًا على حالة العرض أو العنصر المحدد.
         .sheet(isPresented: $showingAddSheet) {
             PlanTaskEditorSheet(heading: "New Task", buttonTitle: "Add") { title in
                 withAnimation { onAdd(title) }
@@ -97,6 +132,7 @@ struct TasksView: View {
         }
     }
 
+    // واجهة بديلة تظهر عندما تكون القائمة فارغة.
     private var emptyState: some View {
         VStack(spacing: 6) {
             Spacer()
@@ -108,11 +144,14 @@ struct TasksView: View {
             Spacer()
         }
         .foregroundStyle(PlanTheme.text)
+        // يضبط مساحة تخطيط العنصر ومحاذاته.
         .frame(maxWidth: .infinity)
     }
 
+    // قائمة صفوف المهام وإجراءات التعامل معها.
     private var taskList: some View {
         List {
+            // ينشئ عنصر واجهة لكل قيمة؛ المعرّف يربط العنصر ببياناته أثناء التحديث.
             ForEach(tasks) { task in
                 PlanTaskRow(task: task) {
                     withAnimation(.easeInOut(duration: 0.2)) { onToggle(task) }
@@ -121,6 +160,7 @@ struct TasksView: View {
                 .listRowSeparatorTint(PlanTheme.text.opacity(0.12))
                 // NEW: swipe left on a task to delete or edit it
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    // الجزء التنفيذي يحدد ما يحدث عند الضغط، وlabel يحدد شكل الزر إن وُجد.
                     Button(role: .destructive) {
                         withAnimation { onDelete(task) }
                     } label: {
@@ -156,9 +196,12 @@ struct TasksView: View {
 // MARK: - Row
 
 private struct PlanTaskRow: View {
+    // بيانات المهمة المعروضة.
     let task: StudyTask
+    // إجراء طلب تبديل حالة الإنجاز أو المؤقت وفق المكوّن.
     let onToggle: () -> Void
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         HStack(spacing: 12) {
             Button(action: onToggle) {
@@ -167,6 +210,7 @@ private struct PlanTaskRow: View {
                     .foregroundStyle(PlanTheme.deepClay)
             }
             .buttonStyle(.plain)
+            // يوفر اسمًا تقرؤه التقنيات المساعدة مثل VoiceOver.
             .accessibilityLabel(task.isCompleted ? "Mark as not completed" : "Mark as completed")
 
             NavigationLink {
@@ -178,6 +222,7 @@ private struct PlanTaskRow: View {
                         .strikethrough(task.isCompleted)
 
                     HStack(spacing: 8) {
+                        // يفك قيمة اختيارية بأمان؛ ينفذ الفرع فقط إذا لم تكن nil.
                         if let dueDate = task.dueDate {
                             Text(dueDate.formatted(date: .abbreviated, time: .shortened))
                         }
@@ -201,14 +246,23 @@ private struct PlanTaskRow: View {
 // MARK: - Add / edit sheet (NEW: one sheet used for both adding and editing)
 
 private struct PlanTaskEditorSheet: View {
+    // عنوان نافذة التحرير.
     let heading: String
+    // عنوان زر التأكيد.
     let buttonTitle: String
+    // إجراء تمرير بيانات الحفظ إلى الجهة المالكة.
     let onSave: (String) -> Void
 
+    // إجراء من بيئة SwiftUI لإغلاق العرض الحالي بحسب طريقة تقديمه.
+    // @Environment يقرأ قيمة أو كائنًا توفره بيئة SwiftUI لهذا العرض.
     @Environment(\.dismiss) private var dismiss
+    // العنوان المستخدم لهذا العنصر.
     @State private var title: String
+    // هل حقل الإدخال يمتلك تركيز لوحة المفاتيح؟
+    // @FocusState يربط حالة التركيز بحقول الإدخال للتحكم بلوحة المفاتيح.
     @FocusState private var isFocused: Bool
 
+    // المهيئ init يجهز النسخة ويستقبل القيم أو الخدمات اللازمة؛ self تشير إلى النسخة الحالية.
     init(heading: String,
          buttonTitle: String,
          initialText: String = "",
@@ -219,16 +273,19 @@ private struct PlanTaskEditorSheet: View {
         _title = State(initialValue: initialText)
     }
 
+    // النص بعد إزالة الفراغات والأسطر من طرفيه.
     private var trimmed: String {
         title.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text(heading)
                 .font(.system(size: 20, weight: .medium))
                 .foregroundStyle(PlanTheme.text)
 
+            // حقل إدخال نص؛ الربط $ يكتب إدخال المستخدم في الخاصية المرتبطة.
             TextField("What do you need to do?", text: $title)
                 .focused($isFocused)
                 .submitLabel(.done)
@@ -260,19 +317,24 @@ private struct PlanTaskEditorSheet: View {
         .padding(.horizontal, 24)
         .padding(.top, 28)
         .background(PlanTheme.background.ignoresSafeArea())
+        // ينفذ الإجراء عند ظهور الواجهة.
         .onAppear { isFocused = true }
     }
 
+    // يتحقق من العنوان ثم يرسل الحفظ إلى الأب ويغلق نافذة التحرير.
     private func save() {
+        // يتحقق من شرط لازم للاستمرار؛ ينفذ مسار الخروج عند عدم تحققه.
         guard !trimmed.isEmpty else { return }
         onSave(trimmed)
         dismiss()
     }
 }
 
+// معاينة داخل Xcode لتجربة الواجهة دون المرور بمسار التطبيق كاملًا.
 #Preview {
     // Opens the whole flow on this page, so the switcher can reach every other page.
     // Use Live mode in the canvas (the play button) to tap around.
+    // حاوية تدير الانتقال إلى شاشات التفاصيل والرجوع منها.
     NavigationStack {
         CourseFlowView(course: Course(title: "Swift Basics"), showsBackButton: true, startingAt: .tasks)
     }
