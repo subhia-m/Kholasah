@@ -152,10 +152,40 @@ private struct MusicPlaybackControls: View {
     var body: some View {
         VStack(spacing: 34) {
             VStack(spacing: 4) {
-                Slider(value: $audioPlayer.playbackPosition, in: 0...max(audioPlayer.duration, 1)) {
-                    Text("Playback position")
+                // خط رفيع بدون دائرة؛ الجزء الممتلئ يوضح موضع الاستماع الحالي.
+                GeometryReader { geometry in
+                    let progress = min(max(audioPlayer.playbackPosition / max(audioPlayer.duration, 1), 0), 1)
+
+                    Rectangle()
+                        .fill(.primary.opacity(0.15))
+                        .overlay(alignment: .leading) {
+                            Rectangle()
+                                .fill(.primary.opacity(0.55))
+                                .frame(width: geometry.size.width * progress)
+                        }
+                        .frame(height: 4)
+                        .clipShape(Capsule())
+                        // نوسّع مساحة اللمس مع بقاء الخط رفيعًا لتسهيل السحب والضغط.
+                        .frame(height: 44)
+                        .contentShape(Rectangle())
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { value in
+                                    guard audioPlayer.duration > 0, geometry.size.width > 0 else { return }
+                                    // نحول مكان اللمس إلى وقت، ونمنعه من تجاوز بداية المقطع أو نهايته.
+                                    let fraction = min(max(value.location.x / geometry.size.width, 0), 1)
+                                    audioPlayer.playbackPosition = fraction * audioPlayer.duration
+                                }
+                        )
                 }
-                .tint(.primary)
+                .frame(height: 44)
+                // يحافظ على إمكانية تقديم الصوت وتأخيره باستخدام VoiceOver.
+                .accessibilityRepresentation {
+                    Slider(value: $audioPlayer.playbackPosition, in: 0...max(audioPlayer.duration, 1)) {
+                        Text("Playback position")
+                    }
+                    .disabled(audioPlayer.duration <= 0)
+                }
                 .disabled(audioPlayer.duration <= 0)
 
                 HStack {
