@@ -12,6 +12,14 @@ final class FocusAudioPlayer {
     private(set) var selectedIndex = 0
     private(set) var elapsedTime: TimeInterval = 0
     private(set) var playbackError: String?
+    private(set) var currentTime: TimeInterval = 0
+    private(set) var duration: TimeInterval = 0
+
+    var playbackPosition: TimeInterval {
+        get { currentTime }
+        set { seek(to: newValue) }
+    }
+
     let sessionDuration: TimeInterval
 
     @ObservationIgnored private var player: AVAudioPlayer?
@@ -29,6 +37,7 @@ final class FocusAudioPlayer {
         player = nil
         elapsedTime = 0
         selectedIndex = Self.artworkNames.firstIndex(of: artworkName) ?? 0
+        prepareTrack()
     }
 
     func play() {
@@ -38,15 +47,7 @@ final class FocusAudioPlayer {
             player?.currentTime = 0
         }
         do {
-            if player == nil {
-                let name = "music\(selectedIndex + 1)"
-                guard let url = Bundle.main.url(forResource: name, withExtension: "mp3") else {
-                    throw CocoaError(.fileNoSuchFile)
-                }
-                player = try AVAudioPlayer(contentsOf: url)
-                player?.numberOfLoops = -1
-                player?.prepareToPlay()
-            }
+            try loadTrackIfNeeded()
             #if os(iOS) || os(visionOS)
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
             try AVAudioSession.sharedInstance().setActive(true)
@@ -65,6 +66,7 @@ final class FocusAudioPlayer {
                         return
                     }
                     guard let self else { return }
+                    self.updatePlaybackTime()
                     if self.player?.isPlaying != true {
                         self.pause()
                         return
@@ -73,6 +75,7 @@ final class FocusAudioPlayer {
                         self.pause()
                         self.elapsedTime = self.sessionDuration
                         self.player?.currentTime = 0
+                        self.updatePlaybackTime()
                         return
                     }
                 }
@@ -88,6 +91,7 @@ final class FocusAudioPlayer {
         elapsedTime = min(listeningTime, sessionDuration)
         startedAt = nil
         player?.pause()
+        updatePlaybackTime()
         isPlaying = false
         sessionTask?.cancel()
         sessionTask = nil
@@ -98,6 +102,49 @@ final class FocusAudioPlayer {
 
     func togglePlayback() {
         if isPlaying { pause() } else { play() }
+    }
+
+    func seek(to time: TimeInterval) {
+        guard let player, duration > 0, time.isFinite else { return }
+        // At the end of a looping track, continue from its beginning.
+        player.currentTime = time >= duration ? 0 : max(0, time)
+        updatePlaybackTime()
+    }
+
+    func replay() {
+        seek(to: 0)
+        // Replay must never reset or extend a completed listening session.
+        guard listeningTime < sessionDuration else { return }
+        play()
+    }
+
+    private func updatePlaybackTime() {
+        currentTime = player?.currentTime ?? 0
+        duration = player?.duration ?? 0
+    }
+
+    private func loadTrackIfNeeded() throws {
+        if player == nil {
+            let name = "music\(selectedIndex + 1)"
+            guard let url = Bundle.main.url(forResource: name, withExtension: "mp3") else {
+                throw CocoaError(.fileNoSuchFile)
+            }
+            player = try AVAudioPlayer(contentsOf: url)
+            player?.numberOfLoops = -1
+            player?.prepareToPlay()
+        }
+        updatePlaybackTime()
+    }
+
+    private func prepareTrack() {
+        currentTime = 0
+        duration = 0
+        do {
+            try loadTrackIfNeeded()
+            playbackError = nil
+        } catch {
+            playbackError = error.localizedDescription
+        }
     }
 
     func next() { changeTrack(by: 1) }
@@ -112,6 +159,7 @@ final class FocusAudioPlayer {
         pause()
         selectedIndex = (selectedIndex + offset + Self.artworkNames.count) % Self.artworkNames.count
         player = nil
+        prepareTrack()
         if resume { play() }
     }
 }

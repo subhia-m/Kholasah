@@ -1,33 +1,34 @@
-
 import SwiftUI
 import UniformTypeIdentifiers
-import PhotosUI
 import UIKit
 
 struct CourseView: View {
+    let coursesViewModel: CoursesViewModel
+    let planViewModel: PlanViewModel?
 
     // MARK: - Form Data
 
     @State private var courseName = ""
     @State private var startDate = Date()
-    @State private var endDate = Date()
+    @State private var endDate =
+        Calendar.current.date(byAdding: .day, value: 6, to: .now) ?? .now
     @State private var motivationType = "Choose a type"
     @State private var goals = ""
     @State private var additionalGoals = ""
 
     // Upload states
-    @State private var showUploadOptions = false
     @State private var showFileImporter = false
-    @State private var showPhotoPicker = false
     @State private var selectedFiles: [URL] = []
-    @State private var selectedPhotos: [PhotosPickerItem] = []
+    @State private var dailyMinutes = 30
+    @State private var remindersEnabled = true
+    @State private var preferredStudyTime =
+        Calendar.current.date(bySettingHour: 18, minute: 0, second: 0, of: .now) ?? .now
+    @State private var generatedCourse: Course?
 
     // Alert
     @State private var showAlert = false
     @State private var alertMessage = ""
 
-    // Example link: replace with a real course URL later
-    private let courseLink = "https://yourapp.com/course/123"
 
     private let motivationTypes = [
         "bbbbb",
@@ -36,6 +37,13 @@ struct CourseView: View {
         "ddddd",
         "Other"
     ]
+
+    private var durationDays: Int {
+        let calendar = Calendar.current
+        let start = calendar.startOfDay(for: startDate)
+        let end = calendar.startOfDay(for: endDate)
+        return max((calendar.dateComponents([.day], from: start, to: end).day ?? 0) + 1, 1)
+    }
 
     // MARK: - Colors
 
@@ -58,13 +66,10 @@ struct CourseView: View {
     // MARK: - Body
 
     var body: some View {
-
         ZStack {
-
             backgroundColor
                 .ignoresSafeArea()
 
-            // Background palm tree
             GeometryReader { geometry in
                 Image("palm-tree")
                     .resizable()
@@ -75,54 +80,30 @@ struct CourseView: View {
                         alignment: .bottomLeading
                     )
                     .offset(x: -150, y: 102)
-                    .opacity(0.35)
+                    .opacity(0.2)
             }
             .ignoresSafeArea()
             .allowsHitTesting(false)
 
             VStack(spacing: 0) {
-
+                
                 // MARK: Header
-
-                ZStack {
-
-                    Text("Add Course")
-                        .font(.system(size: 32, weight: .bold))
-                        .foregroundStyle(titleBrown)
-
-                    HStack {
-                        Spacer()
-
-                        Button {
-                            // Add navigation here
-                        } label: {
-                            Image(systemName: "chevron.right")
-                                .font(
-                                    .system(size: 22, weight: .medium)
-                                )
-                                .foregroundStyle(darkBrown)
-                                .frame(width: 52, height: 52)
-                                .background(.white.opacity(0.25))
-                                .clipShape(Circle())
-                        }
-                        .accessibilityLabel("Next")
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 8)
+                
+                Text("Add Course")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundStyle(titleBrown)
+                    .padding(.top, 16)
+                    .padding(.bottom, 8)
 
                 // MARK: Form
-
+                
                 ScrollView(showsIndicators: false) {
-
                     VStack(alignment: .leading, spacing: 22) {
-
+                        
                         // Course Name
-
                         VStack(alignment: .leading, spacing: 0) {
-
                             fieldLabel("Course Name:")
-
+                            
                             TextField(
                                 "Enter course name",
                                 text: $courseName
@@ -132,15 +113,12 @@ struct CourseView: View {
                             .background(fieldBackground)
                             .textInputAutocapitalization(.words)
                         }
-
+                        
                         // Start Date and End Date
-
                         HStack(alignment: .top, spacing: 12) {
-
                             VStack(alignment: .leading, spacing: 0) {
-
                                 fieldLabel("Start Date:")
-
+                                
                                 DatePicker(
                                     "Start Date",
                                     selection: $startDate,
@@ -155,12 +133,16 @@ struct CourseView: View {
                                 )
                                 .padding(.leading, 12)
                                 .background(fieldBackground)
+                                .onChange(of: startDate) { _, newStartDate in
+                                    if endDate < newStartDate {
+                                        endDate = newStartDate
+                                    }
+                                }
                             }
-
+                            
                             VStack(alignment: .leading, spacing: 0) {
-
                                 fieldLabel("End Date:")
-
+                                
                                 DatePicker(
                                     "End Date",
                                     selection: $endDate,
@@ -178,20 +160,18 @@ struct CourseView: View {
                                 .background(fieldBackground)
                             }
                         }
-
+                        
                         // Motivation Type
-
                         VStack(alignment: .leading, spacing: 0) {
-
                             fieldLabel("Motivation Type:")
-
+                            
                             Picker(
                                 "Motivation Type",
                                 selection: $motivationType
                             ) {
                                 Text("Choose a type")
                                     .tag("Choose a type")
-
+                                
                                 ForEach(
                                     motivationTypes,
                                     id: \.self
@@ -210,13 +190,11 @@ struct CourseView: View {
                             .padding(.horizontal, 18)
                             .background(fieldBackground)
                         }
-
+                        
                         // Goals
-
                         VStack(alignment: .leading, spacing: 0) {
-
                             fieldLabel("Goals:")
-
+                            
                             TextField(
                                 "What do you want to achieve?",
                                 text: $goals,
@@ -231,13 +209,11 @@ struct CourseView: View {
                             )
                             .background(fieldBackground)
                         }
-
+                        
                         // Tasks
-
                         VStack(alignment: .leading, spacing: 0) {
-
                             fieldLabel("Tasks:")
-
+                            
                             TextField(
                                 "Add your tasks",
                                 text: $additionalGoals,
@@ -252,23 +228,19 @@ struct CourseView: View {
                             )
                             .background(fieldBackground)
                         }
-
+                        
                         // MARK: Course Materials
-
                         VStack(alignment: .leading, spacing: 8) {
-
                             fieldLabel("Course Materials:")
-
+                            
                             Button {
-                                showUploadOptions = true
+                                showFileImporter = true
                             } label: {
-
                                 HStack(spacing: 12) {
-
                                     Image(systemName: "paperclip")
                                         .font(.system(size: 21))
                                         .foregroundStyle(darkBrown)
-
+                                    
                                     VStack(
                                         alignment: .leading,
                                         spacing: 4
@@ -276,18 +248,13 @@ struct CourseView: View {
                                         Text("Upload materials")
                                             .font(.system(size: 15))
                                             .foregroundStyle(darkBrown)
-
-                                        Text(
-                                            "\(selectedFiles.count + selectedPhotos.count) item(s) selected"
-                                        )
+                                        
+                                        Text(planViewModel?.importedMaterial?.fileName ?? "No file selected")
                                         .font(.system(size: 12))
                                         .foregroundStyle(.secondary)
                                     }
-
+                                    
                                     Spacer()
-
-                                    Image(systemName: "plus")
-                                        .foregroundStyle(darkBrown)
                                 }
                                 .padding(.horizontal, 16)
                                 .frame(
@@ -297,156 +264,84 @@ struct CourseView: View {
                                 .background(fieldBackground)
                             }
                             .buttonStyle(.plain)
-                            .confirmationDialog(
-                                "Upload Course Materials",
-                                isPresented: $showUploadOptions,
-                                titleVisibility: .visible
-                            ) {
-                                Button("Choose from Photos") {
-                                    showPhotoPicker = true
-                                }
-
-                                Button("Choose Files") {
-                                    showFileImporter = true
-                                }
-
-                                Button("Cancel", role: .cancel) { }
-                            }
-                            .photosPicker(
-                                isPresented: $showPhotoPicker,
-                                selection: $selectedPhotos,
-                                maxSelectionCount: 10,
-                                matching: .any(of: [.images, .videos])
-                            )
                         }
 
-                        // MARK: Share Course
+                        VStack(alignment: .leading, spacing: 12) {
+                            fieldLabel("Study Plan:")
 
-                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Plan duration: \(durationDays) days")
 
-                            fieldLabel("Share Course:")
+                            Stepper(
+                                "Daily study: \(dailyMinutes) minutes",
+                                value: $dailyMinutes,
+                                in: 15...180,
+                                step: 15
+                            )
 
-                            HStack(spacing: 8) {
+                            Toggle("Daily study reminders", isOn: $remindersEnabled)
+                                .tint(titleBrown)
 
-                                Image(systemName: "link")
-                                    .foregroundStyle(darkBrown)
+                            if remindersEnabled {
+                                DatePicker(
+                                    "Preferred study time",
+                                    selection: $preferredStudyTime,
+                                    displayedComponents: .hourAndMinute
+                                )
+                            }
 
-                                Text(courseLink)
-                                    .font(.system(size: 12))
+                            if let planViewModel {
+                                Text(planViewModel.aiAvailability.message)
+                                    .font(.caption)
                                     .foregroundStyle(.secondary)
-                                    .lineLimit(1)
-                                    .truncationMode(.middle)
-
-                                Spacer(minLength: 0)
-
-                                // Copy link
-
-                                Button {
-                                    UIPasteboard.general.string = courseLink
-
-                                    alertMessage = "The course link has been copied."
-                                    showAlert = true
-                                } label: {
-                                    Image(systemName: "doc.on.doc")
-                                        .foregroundStyle(darkBrown)
-                                        .padding(6)
-                                }
-                                .accessibilityLabel("Copy course link")
-
-                                // Share link
-
-                                ShareLink(item: courseLink) {
-                                    Image(
-                                        systemName: "square.and.arrow.up"
-                                    )
-                                    .foregroundStyle(darkBrown)
-                                    .padding(6)
-                                }
-                                .accessibilityLabel("Share course link")
                             }
-                            .padding(.horizontal, 12)
-                            .frame(
-                                maxWidth: .infinity,
-                                minHeight: 62
-                            )
-                            .background(fieldBackground)
                         }
-
+                        .padding(18)
+                        .background(fieldBackground)
+                        
+                        
                         // MARK: Done Button
-
                         Button {
-
-                            if courseName.trimmingCharacters(
-                                in: .whitespacesAndNewlines
-                            ).isEmpty {
-
-                                alertMessage = "Please enter a course name before continuing."
-                                showAlert = true
-
-                            } else {
-
-                                print("Course: \(courseName)")
-                                print("Start: \(startDate)")
-                                print("End: \(endDate)")
-                                print("Motivation: \(motivationType)")
-                                print("Goals: \(goals)")
-                                print("Tasks: \(additionalGoals)")
-                                print("Files: \(selectedFiles)")
-                                print("Photos selected: \(selectedPhotos.count)")
-
-                                // Save the course here
-                            }
-
+                            generatePlan()
                         } label: {
-
-                            Text("Done")
-                                .font(.system(size: 25))
+                            Text(planViewModel?.isGeneratingPlan == true ? "Creating plan…" : "Generate study plan")
+                                .font(.system(size: 20))
+                                .fontWeight(.bold)
                                 .foregroundStyle(.white)
-                                .frame(width: 150, height: 64)
+                                .frame(maxWidth: .infinity, minHeight: 64)
                                 .background(darkBrown)
                                 .clipShape(
-                                    RoundedRectangle(cornerRadius: 36)
+                                    RoundedRectangle(cornerRadius: 30)
                                 )
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 6)
+                        .disabled(planViewModel?.isGeneratingPlan == true)
+                        .padding(.top, 10)
                         .padding(.bottom, 24)
                     }
                     .padding(.horizontal, 24)
-                    .padding(.top, 36)
                 }
             }
         }
-
         // MARK: File Importer
-
         .fileImporter(
             isPresented: $showFileImporter,
             allowedContentTypes: [
                 .pdf,
-                .presentation,
-                .image,
                 .plainText
-            ] + [
-                "doc", "docx", "ppt", "pptx"
-            ].compactMap {
-                UTType(filenameExtension: $0)
-            },
-            allowsMultipleSelection: true
+            ],
+            allowsMultipleSelection: false
         ) { result in
-
             switch result {
-
             case .success(let urls):
                 selectedFiles = urls
-
+                guard let url = urls.first, let planViewModel else { return }
+                Task {
+                    await planViewModel.importStudyMaterial(from: url)
+                }
             case .failure(let error):
                 print("File selection failed: \(error)")
             }
         }
-
         // MARK: Alert
-
         .alert(
             "Course",
             isPresented: $showAlert
@@ -455,12 +350,19 @@ struct CourseView: View {
         } message: {
             Text(alertMessage)
         }
+        .navigationDestination(item: $generatedCourse) { course in
+            CourseFlowView(
+                course: course,
+                viewModel: planViewModel,
+                showsBackButton: true,
+                startingAt: .plan
+            )
+        }
     }
 
     // MARK: - Reusable Components
 
     private var fieldBackground: some View {
-
         RoundedRectangle(cornerRadius: 30)
             .fill(.white.opacity(0.92))
             .shadow(
@@ -472,14 +374,61 @@ struct CourseView: View {
     }
 
     private func fieldLabel(_ title: String) -> some View {
-
         Text(title)
-            .font(.system(size: 25, weight: .regular))
-            .foregroundStyle(labelOrange)
+            .font(.system(size: 20, weight: .regular))
+            .foregroundStyle(titleBrown)
             .padding(.leading, 10)
+    }
+
+    private func generatePlan() {
+        let normalizedName = courseName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedName.isEmpty else {
+            alertMessage = "Please enter a course name before continuing."
+            showAlert = true
+            return
+        }
+        guard let planViewModel else {
+            alertMessage = "Plan generation is unavailable."
+            showAlert = true
+            return
+        }
+        guard planViewModel.importedMaterial != nil else {
+            alertMessage = "Please upload a PDF or text file before generating the plan."
+            showAlert = true
+            return
+        }
+        guard let course = coursesViewModel.createCourse(title: normalizedName, instructor: "") else {
+            alertMessage = coursesViewModel.errorMessage ?? "Unable to create the course."
+            showAlert = true
+            return
+        }
+
+        Task {
+            await planViewModel.generateStudyPlan(
+                courseID: course.id,
+                durationDays: durationDays,
+                dailyMinutes: dailyMinutes,
+                remindersEnabled: remindersEnabled,
+                preferredStudyTime: preferredStudyTime
+            )
+
+            if planViewModel.didSaveGeneratedPlan {
+                generatedCourse = course
+            } else {
+                coursesViewModel.removeCourse(id: course.id)
+                alertMessage = planViewModel.planGenerationError ?? "Unable to generate the study plan."
+                showAlert = true
+            }
+        }
     }
 }
 
 #Preview {
-    CourseView()
+    let dependencies = AppDependencies()
+    NavigationStack {
+        CourseView(
+            coursesViewModel: dependencies.coursesViewModel,
+            planViewModel: dependencies.planViewModel
+        )
+    }
 }
