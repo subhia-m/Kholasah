@@ -1,29 +1,17 @@
-// MARK: - شرح الملف
-// يجمع الخدمات ومستودعات البيانات ونماذج العرض في مكان واحد؛ تشترك شاشتا اللوحة والخطة في مستودع المهام نفسه.
-// للقراءة: let يثبت القيمة، وvar يسمح بتغييرها، وprivate يحصر الوصول في نطاق التعريف.
-
 import Foundation
 import Observation
+import SwiftData
 
-// يحصر الوصول إلى هذا النوع في الممثل الرئيسي لتنسيق التغييرات المرتبطة بالواجهة.
 @MainActor
-// يتيح لـ SwiftUI تتبع الخصائص المقروءة وتحديث الأجزاء التي تعتمد عليها عند تغيرها.
 @Observable
 final class AppDependencies {
-    // حالة التطبيق المشتركة التي تحدد مسار الدخول.
     let appState: AppState
-    // نموذج عرض إكمال المقدمة.
     let onboardingViewModel: OnboardingViewModel
-    // نموذج عرض إدارة المقررات.
     let coursesViewModel: CoursesViewModel
-    // نموذج عرض مؤقت التركيز.
     let focusViewModel: FocusViewModel
-    // نموذج عرض الخطة والمهام وتوليد المحتوى.
     let planViewModel: PlanViewModel
-    // نموذج عرض اللوحة والتقويم.
     let boardViewModel: BoardViewModel
 
-    // المهيئ init يجهز النسخة ويستقبل القيم أو الخدمات اللازمة؛ self تشير إلى النسخة الحالية.
     convenience init() {
         self.init(
             storageService: UserDefaultsStorageService(),
@@ -37,16 +25,31 @@ final class AppDependencies {
         )
     }
 
-    // المهيئ init يجهز النسخة ويستقبل القيم أو الخدمات اللازمة؛ self تشير إلى النسخة الحالية.
+    convenience init(modelContainer: ModelContainer) {
+        let context = modelContainer.mainContext
+        self.init(
+            storageService: UserDefaultsStorageService(),
+            courseRepository: SwiftDataCourseRepository(modelContext: context),
+            taskRepository: SwiftDataTaskRepository(modelContext: context),
+            studyPlanRepository: SwiftDataStudyPlanRepository(modelContext: context),
+            timerService: SystemTimerService(),
+            fileImportService: PDFFileImportService(),
+            aiService: LocalFoundationModelsAIService(),
+            notificationService: LocalNotificationService(),
+            reminderModelContext: context
+        )
+    }
+
     init(
         storageService: any StorageService,
-        courseRepository: InMemoryCourseRepository,
-        taskRepository: InMemoryTaskRepository,
-        studyPlanRepository: InMemoryStudyPlanRepository,
+        courseRepository: any CourseRepository,
+        taskRepository: any TaskRepository,
+        studyPlanRepository: any StudyPlanRepository,
         timerService: any TimerService,
         fileImportService: any FileImportService = PDFFileImportService(),
         aiService: any AIService = LocalFoundationModelsAIService(),
-        notificationService: any NotificationService = LocalNotificationService()
+        notificationService: any NotificationService = LocalNotificationService(),
+        reminderModelContext: ModelContext? = nil
     ) {
         let appState = AppState(storage: storageService)
         let courseService = CourseService(repository: courseRepository)
@@ -56,7 +59,6 @@ final class AppDependencies {
             planRepository: studyPlanRepository
         )
 
-        // تمرير taskRepository نفسه إلى اللوحة وخدمة الخطط يجعل تعديل المهمة ظاهرًا في الشاشتين.
         boardViewModel = BoardViewModel(repository: taskRepository)
         self.appState = appState
         onboardingViewModel = OnboardingViewModel(appState: appState)
@@ -68,5 +70,8 @@ final class AppDependencies {
             aiService: aiService,
             notificationService: notificationService
         )
+        if let reminderModelContext {
+            PlanRemindersStore.shared.configure(modelContext: reminderModelContext)
+        }
     }
 }

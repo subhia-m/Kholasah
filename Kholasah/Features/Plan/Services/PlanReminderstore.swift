@@ -11,6 +11,7 @@
 
 import Foundation
 import Observation
+import SwiftData
 
 // MARK: - Model
 
@@ -46,9 +47,18 @@ final class PlanRemindersStore {
     // تذكيرات الواجهة المعروضة.
     // private(set) يسمح بقراءة القيمة من الخارج، ويقصر تعديلها على هذا النوع.
     private(set) var reminders: [PlanReminderItem] = []
+    @ObservationIgnored private var modelContext: ModelContext?
 
     // المهيئ init يجهز النسخة ويستقبل القيم أو الخدمات اللازمة؛ self تشير إلى النسخة الحالية.
     init() {}
+
+    func configure(modelContext: ModelContext) {
+        self.modelContext = modelContext
+        let descriptor = FetchDescriptor<PlanReminderEntity>()
+        reminders = ((try? modelContext.fetch(descriptor)) ?? [])
+            .map(\.domainModel)
+            .sorted { $0.date < $1.date }
+    }
 
     /// Reminders for one course, or all reminders when `courseID` is nil.
     // يعيد تذكيرات المقرر المحدد، أو جميع التذكيرات إذا كان المعرّف nil.
@@ -64,6 +74,7 @@ final class PlanRemindersStore {
         guard !trimmed.isEmpty else { return }
         reminders.append(PlanReminderItem(courseID: courseID, title: trimmed, date: date))
         reminders.sort { $0.date < $1.date }
+        persistAll()
     }
 
     /// Replaces only AI-generated reminders while preserving reminders added by the user.
@@ -82,16 +93,27 @@ final class PlanRemindersStore {
             )
         })
         reminders.sort { $0.date < $1.date }
+        persistAll()
     }
 
     // يحدث حالة تفعيل التذكير في الذاكرة فقط؛ لا يعدل إشعار النظام.
     func setEnabled(_ id: PlanReminderItem.ID, _ isOn: Bool) {
         guard let index = reminders.firstIndex(where: { $0.id == id }) else { return }
         reminders[index].isOn = isOn
+        persistAll()
     }
 
     // يحذف التذكير من مخزن الواجهة فقط.
     func delete(_ id: PlanReminderItem.ID) {
         reminders.removeAll { $0.id == id }
+        persistAll()
+    }
+
+    private func persistAll() {
+        guard let modelContext else { return }
+        let existing = (try? modelContext.fetch(FetchDescriptor<PlanReminderEntity>())) ?? []
+        existing.forEach(modelContext.delete)
+        reminders.forEach { modelContext.insert(PlanReminderEntity(reminder: $0)) }
+        try? modelContext.save()
     }
 }

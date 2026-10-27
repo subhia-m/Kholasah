@@ -13,8 +13,7 @@ struct BoardStreak: Equatable {
     // آخر يوم مسجل للاستمرارية.
     // علامة ? تعني قيمة اختيارية قد تكون nil؛ يجب التحقق منها قبل استخدامها.
     var lastRecordedDay: Date?
-    // قيمة استمرارية تجريبية للعرض.
-    static var demo: BoardStreak { BoardStreak(count: 7, lastRecordedDay: .now) }
+    nonisolated static var demo: BoardStreak { BoardStreak(count: 7, lastRecordedDay: .now) }
 
     // يحسب أيام الأسبوع المرتبطة بتاريخ الاستمرارية باستخدام التقويم.
     func week(calendar: Calendar, fallback: Date = .now) -> [Date] {
@@ -33,12 +32,9 @@ struct BoardMessageTiming {
 
 // يحصر الوصول إلى هذا النوع في الممثل الرئيسي لتنسيق التغييرات المرتبطة بالواجهة.
 @MainActor
-// يتيح لـ SwiftUI تتبع الخصائص المقروءة وتحديث الأجزاء التي تعتمد عليها عند تغيرها.
 @Observable
 final class BoardViewModel {
-    // مستودع البيانات الذي تنفذ عليه عمليات القراءة والتعديل.
-    let repository: InMemoryTaskRepository
-    // اليوم المحدد لعرض مهامه.
+    let repository: any TaskRepository
     var selectedDate: Date
     // الشهر الذي يعرضه التقويم.
     var displayedMonth: Date {
@@ -51,8 +47,7 @@ final class BoardViewModel {
     // التقويم المستخدم لحساب الأيام والشهور.
     let calendar: Calendar
 
-    // المهيئ init يجهز النسخة ويستقبل القيم أو الخدمات اللازمة؛ self تشير إلى النسخة الحالية.
-    init(repository: InMemoryTaskRepository, today: Date = .now, streak: BoardStreak = .demo) {
+    init(repository: any TaskRepository, today: Date = .now, streak: BoardStreak = .demo) {
         self.repository = repository
         var calendar = Calendar(identifier: .gregorian)
         calendar.locale = Locale(identifier: "en_US")
