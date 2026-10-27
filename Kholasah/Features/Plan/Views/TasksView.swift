@@ -24,8 +24,11 @@ struct TasksView: View {
     var tasks: [StudyTask]
     var onAdd: (String) -> Void
     var onToggle: (StudyTask) -> Void
+    var onRename: (StudyTask, String) -> Void          // NEW
+    var onDelete: (StudyTask) -> Void                   // NEW
 
     @State private var showingAddSheet = false
+    @State private var editingTask: StudyTask?          // NEW
 
     private var doneCount: Int { tasks.filter(\.isCompleted).count }
 
@@ -70,9 +73,20 @@ struct TasksView: View {
             .padding(.horizontal, 24)
             .padding(.bottom, 16)
         }
+        // NEW: the add sheet now uses the shared editor sheet (same look as before)
         .sheet(isPresented: $showingAddSheet) {
-            PlanAddTaskSheet { title in
+            PlanTaskEditorSheet(heading: "New Task", buttonTitle: "Add") { title in
                 withAnimation { onAdd(title) }
+            }
+            .presentationDetents([.height(230)])
+            .presentationDragIndicator(.visible)
+        }
+        // NEW: the edit sheet, opened with the task's current title filled in
+        .sheet(item: $editingTask) { task in
+            PlanTaskEditorSheet(heading: "Edit Task",
+                                buttonTitle: "Save",
+                                initialText: task.title) { title in
+                withAnimation { onRename(task, title) }
             }
             .presentationDetents([.height(230)])
             .presentationDragIndicator(.visible)
@@ -101,6 +115,33 @@ struct TasksView: View {
                 }
                 .listRowBackground(Color.clear)
                 .listRowSeparatorTint(PlanTheme.text.opacity(0.12))
+                // NEW: swipe left on a task to delete or edit it
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button(role: .destructive) {
+                        withAnimation { onDelete(task) }
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                    Button {
+                        editingTask = task
+                    } label: {
+                        Label("Edit", systemImage: "pencil")
+                    }
+                    .tint(PlanTheme.mauve)
+                }
+                // NEW: or press and hold
+                .contextMenu {
+                    Button {
+                        editingTask = task
+                    } label: {
+                        Label("Edit", systemImage: "pencil")
+                    }
+                    Button(role: .destructive) {
+                        withAnimation { onDelete(task) }
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
             }
         }
         .listStyle(.plain)
@@ -153,14 +194,26 @@ private struct PlanTaskRow: View {
     }
 }
 
-// MARK: - Add sheet
+// MARK: - Add / edit sheet (NEW: one sheet used for both adding and editing)
 
-private struct PlanAddTaskSheet: View {
-    let onAdd: (String) -> Void
+private struct PlanTaskEditorSheet: View {
+    let heading: String
+    let buttonTitle: String
+    let onSave: (String) -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @State private var title = ""
+    @State private var title: String
     @FocusState private var isFocused: Bool
+
+    init(heading: String,
+         buttonTitle: String,
+         initialText: String = "",
+         onSave: @escaping (String) -> Void) {
+        self.heading = heading
+        self.buttonTitle = buttonTitle
+        self.onSave = onSave
+        _title = State(initialValue: initialText)
+    }
 
     private var trimmed: String {
         title.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -168,14 +221,14 @@ private struct PlanAddTaskSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("New Task")
+            Text(heading)
                 .font(.system(size: 20, weight: .medium))
                 .foregroundStyle(PlanTheme.text)
 
             TextField("What do you need to do?", text: $title)
                 .focused($isFocused)
                 .submitLabel(.done)
-                .onSubmit(add)
+                .onSubmit(save)
                 .padding(14)
                 .background(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -190,7 +243,7 @@ private struct PlanAddTaskSheet: View {
                     .padding(.vertical, 12)
                     .background(Capsule().fill(PlanTheme.chip))
 
-                Button("Add", action: add)
+                Button(buttonTitle, action: save)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
@@ -206,9 +259,9 @@ private struct PlanAddTaskSheet: View {
         .onAppear { isFocused = true }
     }
 
-    private func add() {
+    private func save() {
         guard !trimmed.isEmpty else { return }
-        onAdd(trimmed)
+        onSave(trimmed)
         dismiss()
     }
 }
