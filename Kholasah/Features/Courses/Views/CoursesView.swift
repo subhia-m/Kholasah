@@ -215,7 +215,6 @@ private struct NewCourseSheet: View {
 }
 
 #Preview {
-    // Shows My Courses inside the real tab bar (Courses tab selected).
-    // In Live mode: add a course, tap its card twice, and use the back button.
+    
     MainTabView(dependencies: AppDependencies())
 }
