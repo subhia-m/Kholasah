@@ -113,6 +113,21 @@ struct FirstCourseSetupView: View {
             AddCourseWelcomeView {
                 showingCourseDetails = true
             }
+            .overlay(alignment: .topTrailing) {
+                Button {
+                    dependencies.appState.completeFirstCourseSetup()
+                } label: {
+                    Text("Skip")
+                        .font(.footnote)
+                        .foregroundStyle(AppColors.brown.opacity(0.7))
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Continue to Board, Focus, and Courses without adding a course")
+                .padding(.trailing, 20)
+                .padding(.top, 4)
+            }
             .navigationDestination(isPresented: $showingCourseDetails) {
                 CourseView(
                     coursesViewModel: dependencies.coursesViewModel,
