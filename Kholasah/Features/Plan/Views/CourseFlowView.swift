@@ -61,6 +61,44 @@ struct CourseFlowView: View {
         }
     }
 
+    // NEW: changes a task's title and leaves everything else about it as it was.
+    // It uses PlanViewModel.replaceTaskItems, which your team already built for editing from
+    // the Plan screens. That method removes every task missing from the list it receives,
+    // so we pass ALL tasks and change only the title of the one being edited.
+    private func renameTask(_ task: StudyTask, to newTitle: String) {
+        let trimmed = newTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        if let viewModel {
+            let items = viewModel.tasks.map {
+                PlanTaskItem(id: $0.id,
+                             title: $0.id == task.id ? trimmed : $0.title,
+                             isDone: $0.isCompleted)
+            }
+            viewModel.replaceTaskItems(items)
+        } else if let index = localTasks.firstIndex(where: { $0.id == task.id }) {
+            localTasks[index].title = trimmed
+        }
+    }
+
+    // NEW: removes a task. Like renaming, it goes through replaceTaskItems, which removes any
+    // task missing from the list, so we pass every task EXCEPT the one being deleted.
+    // Reminders that were made from this task are removed too, so none are left pointing at it.
+    private func deleteTask(_ task: StudyTask) {
+        for reminder in store.reminders where reminder.generatedTaskID == task.id {
+            store.delete(reminder.id)
+        }
+
+        if let viewModel {
+            let items = viewModel.tasks
+                .filter { $0.id != task.id }
+                .map { PlanTaskItem(id: $0.id, title: $0.title, isDone: $0.isCompleted) }
+            viewModel.replaceTaskItems(items)
+        } else {
+            localTasks.removeAll { $0.id == task.id }
+        }
+    }
+
     private func toggleTask(_ task: StudyTask) {
         if let viewModel {
             viewModel.toggleTask(task)
@@ -95,7 +133,9 @@ struct CourseFlowView: View {
                           onBack: back,
                           tasks: tasks,
                           onAdd: addTask,
-                          onToggle: toggleTask)
+                          onToggle: toggleTask,
+                          onRename: renameTask,          // NEW
+                          onDelete: deleteTask)          // NEW
             case .reminders:
                 RemindersView(courseTitle: title,
                               selection: $selection,
