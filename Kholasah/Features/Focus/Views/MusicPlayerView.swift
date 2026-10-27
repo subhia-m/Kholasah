@@ -14,7 +14,10 @@ struct MusicPlayerView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                MusicPlayerHeader(onBack: dismiss.callAsFunction)
+                MusicPlayerHeader {
+                    audioPlayer.pause()
+                    dismiss()
+                }
                     .padding(.bottom, 40)
 
                 MusicArtworkPlaceholder(
@@ -29,7 +32,9 @@ struct MusicPlayerView: View {
                     isPlaying: audioPlayer.isPlaying,
                     onPlayPause: audioPlayer.togglePlayback,
                     onPrevious: audioPlayer.previous,
-                    onNext: audioPlayer.next
+                    onNext: audioPlayer.next,
+                    onReplay: audioPlayer.replay,
+                    audioPlayer: audioPlayer
                 )
                     .padding(.horizontal, 52)
 
@@ -56,8 +61,13 @@ private struct MusicPlayerHeader: View {
                 .foregroundStyle(AppColors.burgundy)
 
             HStack {
-                Button("Back", systemImage: "chevron.backward", action: onBack)
-                    .labelStyle(.iconOnly)
+                Button(action: onBack) {
+                    Image(systemName: "chevron.backward")
+                        .frame(width: 44, height: 44)
+                        .contentShape(Circle())
+                }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Back")
                     .font(.title2)
                     .foregroundStyle(.primary)
                     .frame(width: 44, height: 44)
@@ -92,6 +102,8 @@ private struct MusicArtworkPlaceholder: View {
                 RoundedRectangle(cornerRadius: 15, style: .continuous)
                     .stroke(Color.black.opacity(0.12), lineWidth: 1)
             }
+            // Scaled artwork can extend beyond its clipped layout for hit testing.
+            .allowsHitTesting(false)
             .accessibilityLabel(title)
     }
 }
@@ -101,38 +113,63 @@ private struct MusicPlaybackControls: View {
     let onPlayPause: () -> Void
     let onPrevious: () -> Void
     let onNext: () -> Void
+    let onReplay: () -> Void
+    @Bindable var audioPlayer: FocusAudioPlayer
 
     var body: some View {
         VStack(spacing: 34) {
-            Capsule()
-                .fill(.primary)
-                .frame(height: 4)
-
-            HStack {
-                Button("Previous", systemImage: "backward.end.fill") {
-                    onPrevious()
+            VStack(spacing: 4) {
+                Slider(value: $audioPlayer.playbackPosition, in: 0...max(audioPlayer.duration, 1)) {
+                    Text("Playback position")
                 }
-                .accessibilityLabel("Previous sound")
+                .tint(.primary)
+                .disabled(audioPlayer.duration <= 0)
 
-                Spacer()
-
-                Button(isPlaying ? "Pause" : "Play", systemImage: isPlaying ? "pause.fill" : "play.fill") {
-                    onPlayPause()
+                HStack {
+                    Text(Self.timeString(audioPlayer.currentTime))
+                    Spacer()
+                    Text(Self.timeString(audioPlayer.duration))
                 }
-                .font(.system(size: 36))
-                .accessibilityLabel(isPlaying ? "Pause sound" : "Play sound")
-
-                Spacer()
-
-                Button("Next", systemImage: "forward.end.fill") {
-                    onNext()
-                }
-                .accessibilityLabel("Next sound")
+                .font(.caption)
+                .monospacedDigit()
+                .foregroundStyle(.primary)
             }
+            .environment(\.layoutDirection, .leftToRight)
+
+            HStack(spacing: 0) {
+                HStack(spacing: 20) {
+                    Button("Previous", systemImage: "backward.end.fill") {
+                        onPrevious()
+                    }
+                    .accessibilityLabel("Previous sound")
+
+                    Button(isPlaying ? "Pause" : "Play", systemImage: isPlaying ? "pause.fill" : "play.fill") {
+                        onPlayPause()
+                    }
+                    .font(.system(size: 36))
+                    .accessibilityLabel(isPlaying ? "Pause sound" : "Play sound")
+
+                    Button("Next", systemImage: "forward.end.fill") {
+                        onNext()
+                    }
+                    .accessibilityLabel("Next sound")
+                }
+
+                Spacer(minLength: 40)
+
+                Button("Replay", systemImage: "arrow.counterclockwise", action: onReplay)
+                    .accessibilityLabel("Replay sound")
+            }
+            .environment(\.layoutDirection, .leftToRight)
             .labelStyle(.iconOnly)
             .font(.system(size: 25))
             .foregroundStyle(AppColors.burgundy)
         }
+    }
+
+    private static func timeString(_ time: TimeInterval) -> String {
+        let seconds = Int(max(0, time))
+        return String(format: "%02d:%02d", seconds / 60, seconds % 60)
     }
 }
 
