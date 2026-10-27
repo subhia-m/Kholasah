@@ -136,7 +136,7 @@ private struct MusicPlaybackControls: View {
             }
             .environment(\.layoutDirection, .leftToRight)
 
-            HStack(spacing: 0) {
+            ZStack {
                 HStack(spacing: 20) {
                     Button("Previous", systemImage: "backward.end.fill") {
                         onPrevious()
@@ -155,10 +155,12 @@ private struct MusicPlaybackControls: View {
                     .accessibilityLabel("Next sound")
                 }
 
-                Spacer(minLength: 40)
+                HStack {
+                    Spacer()
 
-                Button("Replay", systemImage: "arrow.counterclockwise", action: onReplay)
-                    .accessibilityLabel("Replay sound")
+                    Button("Replay", systemImage: "arrow.counterclockwise", action: onReplay)
+                        .accessibilityLabel("Replay sound")
+                }
             }
             .environment(\.layoutDirection, .leftToRight)
             .labelStyle(.iconOnly)
