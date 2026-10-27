@@ -1,19 +1,35 @@
+// MARK: - شرح الملف
+// واجهة اختيار PDF ومعاينة نصه وضبط مدة الدراسة وتوليد مسودة الخطة وعرضها.
+// للقراءة: let يثبت القيمة، وvar يسمح بتغييرها، وprivate يحصر الوصول في نطاق التعريف.
+
 import SwiftUI
 import UniformTypeIdentifiers
 
 struct StudyMaterialImportView: View {
+    // نموذج العرض الذي يزوّد هذه الواجهة بالبيانات والإجراءات.
     let viewModel: PlanViewModel
+    // معرّف المقرر المرتبط؛ nil يعني عدم الارتباط بمقرر.
+    // علامة ? تعني قيمة اختيارية قد تكون nil؛ يجب التحقق منها قبل استخدامها.
     var courseID: Course.ID? = nil
 
+    // يتحكم في ظهور منتقي الملفات.
+    // @State حالة تملكها الواجهة وتحافظ SwiftUI عليها بين تحديثاتها؛ الرمز $ يتيح ربطها بعنصر إدخال.
     @State private var isFileImporterPresented = false
+    // عدد أيام الخطة.
     @State private var durationDays = 7
+    // عدد دقائق الدراسة اليومية.
     @State private var dailyMinutes = 30
+    // اختيار تفعيل التذكيرات عند توليد الخطة.
     @State private var remindersEnabled = false
+    // الوقت المفضل للدراسة؛ تُستخدم الساعة والدقيقة عند إنشاء المواعيد.
     @State private var preferredStudyTime =
         Calendar.current.date(bySettingHour: 18, minute: 0, second: 0, of: .now) ?? .now
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
+        // يسمح بتمرير المحتوى عندما يتجاوز المساحة المتاحة.
         ScrollView {
+            // يرتب العناصر عموديًا؛ spacing يحدد المسافة بينها.
             VStack(spacing: 24) {
                 StudyMaterialIntroduction()
 
@@ -25,6 +41,7 @@ struct StudyMaterialImportView: View {
                     onRemoveFile: viewModel.removeImportedMaterial
                 )
 
+                // يفك قيمة اختيارية بأمان؛ ينفذ الفرع فقط إذا لم تكن nil.
                 if let material = viewModel.importedMaterial {
                     ExtractedTextPreview(text: material.text)
 
@@ -55,10 +72,12 @@ struct StudyMaterialImportView: View {
                     )
                 }
             }
+            // يضيف مسافة حول العنصر؛ ترتيب معدلات العرض يؤثر في النتيجة.
             .padding(.horizontal, 20)
             .padding(.vertical, 28)
         }
         .scrollIndicators(.hidden)
+        // يفتح منتقي الملفات ويعيد نتيجة الاختيار أو الخطأ إلى المعالج.
         .fileImporter(
             isPresented: $isFileImporterPresented,
             allowedContentTypes: [.pdf, .plainText]
@@ -72,6 +91,7 @@ struct StudyMaterialImportView: View {
                 set: { if !$0 { viewModel.materialImportError = nil } }
             )
         ) {
+            // الجزء التنفيذي يحدد ما يحدث عند الضغط، وlabel يحدد شكل الزر إن وُجد.
             Button("OK", role: .cancel) {}
         } message: {
             Text(viewModel.materialImportError ?? "")
@@ -100,6 +120,7 @@ struct StudyMaterialImportView: View {
         }
     }
 
+    // يفصل نجاح اختيار الملف عن فشله؛ يبدأ الاستيراد أو يعرض الخطأ.
     private func handleImportResult(_ result: Result<URL, any Error>) {
         switch result {
         case .success(let url):
@@ -113,6 +134,7 @@ struct StudyMaterialImportView: View {
 }
 
 private struct StudyMaterialIntroduction: View {
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         VStack(spacing: 10) {
             Image(systemName: "sparkles")
@@ -133,12 +155,18 @@ private struct StudyMaterialIntroduction: View {
 }
 
 private struct StudyMaterialDropZone: View {
+    // اسم الملف المحدد، أو nil قبل الاختيار.
     let selectedFileName: String?
+    // عدد صفحات PDF.
     let pageCount: Int?
+    // حالة انتظار استيراد الملف.
     let isImporting: Bool
+    // إجراء فتح اختيار الملف.
     let onChooseFile: () -> Void
+    // إجراء إزالة المادة المحددة.
     let onRemoveFile: () -> Void
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         VStack(spacing: 18) {
             Image(systemName: selectedFileName == nil ? "doc.badge.plus" : "doc.text.fill")
@@ -185,6 +213,7 @@ private struct StudyMaterialDropZone: View {
                     .font(.subheadline)
             }
         }
+        // يضبط مساحة تخطيط العنصر ومحاذاته.
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 24)
         .padding(.vertical, 36)
@@ -201,8 +230,10 @@ private struct StudyMaterialDropZone: View {
 }
 
 private struct ExtractedTextPreview: View {
+    // النص المستخدم في هذا المكوّن.
     let text: String
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Label("Extracted Text Preview", systemImage: "text.alignleft")
@@ -221,14 +252,23 @@ private struct ExtractedTextPreview: View {
 }
 
 private struct AIPlanControls: View {
+    // عدد أيام الخطة.
+    // @Binding رابط قراءة وكتابة إلى قيمة يملكها العرض الأب، حتى ينعكس التعديل في الطرفين.
     @Binding var durationDays: Int
+    // عدد دقائق الدراسة اليومية.
     @Binding var dailyMinutes: Int
+    // اختيار تفعيل التذكيرات عند توليد الخطة.
     @Binding var remindersEnabled: Bool
+    // الوقت المفضل للدراسة؛ تُستخدم الساعة والدقيقة عند إنشاء المواعيد.
     @Binding var preferredStudyTime: Date
+    // حالة توفر النموذج المحلي للاستخدام.
     let availability: AIModelAvailability
+    // حالة انتظار توليد الخطة.
     let isGenerating: Bool
+    // إجراء بدء توليد الخطة.
     let onGenerate: () -> Void
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             Label("AI Study Plan", systemImage: "apple.intelligence")
@@ -250,6 +290,7 @@ private struct AIPlanControls: View {
                 .datePickerStyle(.compact)
             }
 
+            // يرتب العناصر أفقيًا.
             HStack(spacing: 8) {
                 Circle()
                     .fill(availability == .available ? Color.green : Color.orange)
@@ -284,9 +325,12 @@ private struct AIPlanControls: View {
 }
 
 private struct GeneratedPlanDraftView: View {
+    // مسودة الخطة المطلوب عرضها.
     let draft: GeneratedStudyPlanDraft
+    // حالة حفظ المسودة المعروضة.
     let didSave: Bool
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Label("Generated Plan Draft", systemImage: "checklist")
@@ -301,6 +345,7 @@ private struct GeneratedPlanDraftView: View {
                 .font(.subheadline)
                 .foregroundStyle(PlanTheme.text.opacity(0.75))
 
+            // ينشئ عنصر واجهة لكل قيمة؛ المعرّف يربط العنصر ببياناته أثناء التحديث.
             ForEach(Array(draft.tasks.enumerated()), id: \.offset) { index, task in
                 HStack(alignment: .top, spacing: 12) {
                     Text("\(index + 1)")
@@ -337,7 +382,9 @@ private struct GeneratedPlanDraftView: View {
     }
 }
 
+// extension يضيف وظائف أو خصائص محسوبة إلى نوع موجود دون تعديل تعريفه الأصلي.
 extension AIModelAvailability {
+    // النص المناسب للحالة الحالية.
     var message: LocalizedStringKey {
         switch self {
         case .available:
@@ -356,7 +403,9 @@ extension AIModelAvailability {
     }
 }
 
+// معاينة داخل Xcode لتجربة الواجهة دون المرور بمسار التطبيق كاملًا.
 #Preview {
+    // يضع العناصر في طبقات متراكبة؛ العناصر اللاحقة تظهر فوق السابقة.
     ZStack {
         PlanTheme.background.ignoresSafeArea()
         StudyMaterialImportView(viewModel: AppDependencies().planViewModel)

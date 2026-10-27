@@ -1,25 +1,39 @@
+// MARK: - شرح الملف
+// مكونات قائمة مهام اللوحة ونموذج إضافة مهمة وشاشة تفاصيلها.
+// للقراءة: let يثبت القيمة، وvar يسمح بتغييرها، وprivate يحصر الوصول في نطاق التعريف.
+
 import SwiftUI
 
 struct BoardTaskList: View {
+    // المهام التي يستخدمها هذا الجزء من التطبيق.
     let tasks: [StudyTask]
+    // إجراء تبديل إنجاز المهمة.
     let toggle: (StudyTask) -> Void
+    // تفاصيل المهمة المتاحة للعرض.
     let details: (StudyTask) -> Void
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
+        // يرتب العناصر عموديًا؛ spacing يحدد المسافة بينها.
         VStack(spacing: 0) {
             if tasks.isEmpty {
                 Text("No tasks for this day")
                     .foregroundStyle(AppColors.secondaryText)
+                    // يضبط مساحة تخطيط العنصر ومحاذاته.
                     .frame(maxWidth: .infinity, minHeight: 110)
             }
+            // ينشئ عنصر واجهة لكل قيمة؛ المعرّف يربط العنصر ببياناته أثناء التحديث.
             ForEach(tasks) { task in
                 VStack(spacing: 0) {
+                    // يرتب العناصر أفقيًا.
                     HStack(spacing: 4) {
+                        // الجزء التنفيذي يحدد ما يحدث عند الضغط، وlabel يحدد شكل الزر إن وُجد.
                         Button { toggle(task) } label: {
                             Image(systemName: task.isCompleted ? "checkmark.circle" : "circle")
                                 .font(.title3)
                                 .frame(width: 44, height: 44)
                         }
+                        // يوفر اسمًا تقرؤه التقنيات المساعدة مثل VoiceOver.
                         .accessibilityLabel(task.isCompleted ? "Mark \(task.title) incomplete" : "Complete \(task.title)")
                         Button { details(task) } label: {
                             HStack(spacing: 8) {
@@ -40,6 +54,7 @@ struct BoardTaskList: View {
             }
         }
         .buttonStyle(.plain)
+        // يضيف مسافة حول العنصر؛ ترتيب معدلات العرض يؤثر في النتيجة.
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
         .boardCard()
@@ -47,12 +62,23 @@ struct BoardTaskList: View {
 }
 
 struct BoardAddTaskView: View {
+    // إجراء من بيئة SwiftUI لإغلاق العرض الحالي بحسب طريقة تقديمه.
+    // @Environment يقرأ قيمة أو كائنًا توفره بيئة SwiftUI لهذا العرض.
     @Environment(\.dismiss) private var dismiss
+    // العنوان المستخدم لهذا العنصر.
+    // @State حالة تملكها الواجهة وتحافظ SwiftUI عليها بين تحديثاتها؛ الرمز $ يتيح ربطها بعنصر إدخال.
     @State private var title = ""
+    // مدة المهمة كما أُدخلت نصيًا، ثم تُحوّل إلى عدد.
     @State private var minutes = "25"
+    // التاريخ المرتبط بالعنصر.
     @State private var date: Date
+    // الحقل الذي يمتلك تركيز لوحة المفاتيح.
+    // علامة ? تعني قيمة اختيارية قد تكون nil؛ يجب التحقق منها قبل استخدامها.
+    // @FocusState يربط حالة التركيز بحقول الإدخال للتحكم بلوحة المفاتيح.
     @FocusState private var focusedField: Field?
+    // ارتفاع النافذة السفلية المختار.
     @State private var selectedDetent: PresentationDetent = .medium
+    // إجراء تمرير بيانات الحفظ إلى الجهة المالكة.
     let onSave: (String, Date, Int) -> Void
 
     private enum Field: Hashable {
@@ -60,24 +86,30 @@ struct BoardAddTaskView: View {
         case duration
     }
 
+    // المهيئ init يجهز النسخة ويستقبل القيم أو الخدمات اللازمة؛ self تشير إلى النسخة الحالية.
     init(date: Date, onSave: @escaping (String, Date, Int) -> Void) {
         _date = State(initialValue: date)
         self.onSave = onSave
     }
 
+    // نتيجة التحقق من صلاحية مدخلات المهمة.
     private var valid: Bool {
         !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
         (Int(minutes) ?? 0) > 0
     }
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
+        // حاوية تدير الانتقال إلى شاشات التفاصيل والرجوع منها.
         NavigationStack {
+            // يسمح بتمرير المحتوى عندما يتجاوز المساحة المتاحة.
             ScrollView {
                 VStack(spacing: 0) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Task name")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
+                        // حقل إدخال نص؛ الربط $ يكتب إدخال المستخدم في الخاصية المرتبطة.
                         TextField("Enter task name", text: $title)
                             .multilineTextAlignment(.leading)
                             .frame(minHeight: 44)
@@ -138,6 +170,7 @@ struct BoardAddTaskView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
+                        // يتحقق من شرط لازم للاستمرار؛ ينفذ مسار الخروج عند عدم تحققه.
                         guard valid, let duration = Int(minutes) else { return }
                         focusedField = nil
                         onSave(title.trimmingCharacters(in: .whitespacesAndNewlines), date, duration)
@@ -153,6 +186,7 @@ struct BoardAddTaskView: View {
         .presentationBackground(AppColors.background)
         .presentationDetents([.medium, .large], selection: $selectedDetent)
         .presentationDragIndicator(.visible)
+        // ينفذ الإجراء عند تغير القيمة المراقبة.
         .onChange(of: focusedField) { _, field in
             if field != nil {
                 selectedDetent = .large
@@ -161,18 +195,24 @@ struct BoardAddTaskView: View {
     }
 }
 
+// معاينة داخل Xcode لتجربة الواجهة دون المرور بمسار التطبيق كاملًا.
 #Preview("New Task Sheet") {
     BoardAddTaskView(date: .now) { _, _, _ in }
 }
 
 struct BoardTaskDetailView: View {
+    // نموذج العرض الذي يزوّد هذه الواجهة بالبيانات والإجراءات.
     let viewModel: BoardViewModel
+    // معرّف المهمة المطلوب عرضها.
     let taskID: StudyTask.ID
+    // إجراء من بيئة SwiftUI لإغلاق العرض الحالي بحسب طريقة تقديمه.
     @Environment(\.dismiss) private var dismiss
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         NavigationStack {
             Form {
+                // يفك قيمة اختيارية بأمان؛ ينفذ الفرع فقط إذا لم تكن nil.
                 if let task = viewModel.repository.tasks.first(where: { $0.id == taskID }) {
                     LabeledContent("Name", value: task.title)
                     if let date = task.dueDate {
