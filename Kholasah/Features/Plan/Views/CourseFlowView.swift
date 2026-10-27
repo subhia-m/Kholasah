@@ -51,6 +51,24 @@ struct CourseFlowView: View {
         return allTasks.filter { $0.courseID == course.id }
     }
 
+    // NEW: the plan's length in days, worked out from the due dates of this course's tasks.
+    //   total = days from the first due date to the last one (both counted)
+    //   done  = whole days that have passed since the first due date, kept between 0 and total
+    // Tasks added by hand have no due date, so they don't change it. It's only worked out
+    // for a course, so the Plan tab (which mixes every course) shows 0 / 0.
+    private var studyDays: (done: Int, total: Int) {
+        guard course != nil else { return (0, 0) }
+
+        let calendar = Calendar.current
+        let dueDays = tasks.compactMap(\.dueDate).map { calendar.startOfDay(for: $0) }
+        guard let first = dueDays.min(), let last = dueDays.max() else { return (0, 0) }
+
+        let total = (calendar.dateComponents([.day], from: first, to: last).day ?? 0) + 1
+        let today = calendar.startOfDay(for: Date())
+        let passed = calendar.dateComponents([.day], from: first, to: today).day ?? 0
+        return (min(max(passed, 0), total), total)
+    }
+
     private func addTask(_ title: String) {
         if let viewModel {
             viewModel.addTask(title: title, courseID: course?.id)
@@ -119,7 +137,9 @@ struct CourseFlowView: View {
                                  selection: $selection,
                                  onBack: back,
                                  tasks: tasks,
-                                 reminders: reminders)
+                                 reminders: reminders,
+                                 daysDone: studyDays.done,        // NEW
+                                 daysTotal: studyDays.total)      // NEW
             case .plan:
                 PlanView(courseTitle: title,
                          courseID: course?.id,
