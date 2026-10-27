@@ -18,17 +18,25 @@ final class CoursesViewModel {
     }
 
     func addCourse(title: String, instructor: String) -> Bool {
+        createCourse(title: title, instructor: instructor) != nil
+    }
+
+    func createCourse(title: String, instructor: String) -> Course? {
         do {
-            try service.addCourse(title: title, instructor: instructor)
+            let course = try service.addCourse(title: title, instructor: instructor)
             errorMessage = nil
-            return true
+            return course
         } catch {
             errorMessage = error.localizedDescription
-            return false
+            return nil
         }
     }
 
     func clearError() {
         errorMessage = nil
+    }
+
+    func removeCourse(id: Course.ID) {
+        service.removeCourse(id: id)
     }
 }
