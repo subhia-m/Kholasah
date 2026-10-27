@@ -5,8 +5,13 @@ struct ContentView: View {
 
     var body: some View {
         if dependencies.appState.hasCompletedOnboarding {
-            MainTabView(dependencies: dependencies)
+            if dependencies.appState.hasCompletedFirstCourseSetup {
+                MainTabView(dependencies: dependencies)
+            } else {
+                FirstCourseSetupView(dependencies: dependencies)
+            }
         } else {
+            intredac(viewModel: dependencies.onboardingViewModel)
         }
     }
 }

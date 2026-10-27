@@ -7,6 +7,7 @@
 import SwiftUI
 
 struct intredac: View {
+    let viewModel: OnboardingViewModel
     @State private var currentPage = 0
     
     var body: some View {
@@ -41,7 +42,7 @@ struct intredac: View {
                     PageView2().tag(1)
                     PageView3().tag(2)
                     PageView4().tag(3)
-                    PageView5().tag(4)
+                    PageView5(onGetStarted: viewModel.finish).tag(4)
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 
@@ -300,6 +301,8 @@ struct PlanRow: View {
 
 // Page 5
 struct PageView5: View {
+    let onGetStarted: () -> Void
+
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -336,9 +339,7 @@ struct PageView5: View {
                     .padding(.horizontal, 24)
                 
                 // Get Started Action Button
-                Button(action: {
-                    // Add your action to navigate to main app here
-                }) {
+                Button(action: onGetStarted) {
                     Text("Get Started")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
@@ -373,5 +374,5 @@ struct FeatureRow: View {
 }
 
 #Preview {
-    intredac()
+    intredac(viewModel: AppDependencies().onboardingViewModel)
 }

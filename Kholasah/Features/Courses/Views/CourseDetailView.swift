@@ -5,6 +5,7 @@ import UIKit
 struct CourseView: View {
     let coursesViewModel: CoursesViewModel
     let planViewModel: PlanViewModel?
+    var onPlanGenerated: ((Course) -> Void)? = nil
 
     // MARK: - Form Data
 
@@ -413,7 +414,11 @@ struct CourseView: View {
             )
 
             if planViewModel.didSaveGeneratedPlan {
-                generatedCourse = course
+                if let onPlanGenerated {
+                    onPlanGenerated(course)
+                } else {
+                    generatedCourse = course
+                }
             } else {
                 coursesViewModel.removeCourse(id: course.id)
                 alertMessage = planViewModel.planGenerationError ?? "Unable to generate the study plan."
