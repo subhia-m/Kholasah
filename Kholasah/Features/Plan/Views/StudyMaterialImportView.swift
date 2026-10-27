@@ -337,7 +337,7 @@ private struct GeneratedPlanDraftView: View {
     }
 }
 
-private extension AIModelAvailability {
+extension AIModelAvailability {
     var message: LocalizedStringKey {
         switch self {
         case .available:

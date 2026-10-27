@@ -12,18 +12,23 @@ final class CourseService {
         repository.courses
     }
 
-    func addCourse(title: String, instructor: String) throws {
+    @discardableResult
+    func addCourse(title: String, instructor: String) throws -> Course {
         let normalizedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedTitle.isEmpty else {
             throw CourseServiceError.emptyTitle
         }
 
-        repository.add(
-            Course(
-                title: normalizedTitle,
-                instructor: instructor.trimmingCharacters(in: .whitespacesAndNewlines)
-            )
+        let course = Course(
+            title: normalizedTitle,
+            instructor: instructor.trimmingCharacters(in: .whitespacesAndNewlines)
         )
+        repository.add(course)
+        return course
+    }
+
+    func removeCourse(id: Course.ID) {
+        repository.remove(id: id)
     }
 }
 

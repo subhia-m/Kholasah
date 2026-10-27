@@ -196,23 +196,81 @@ struct PlanView: View {
     var selection: Binding<PlanScreenTab>? = nil
     var onBack: (() -> Void)? = nil
 
+    private var planTasks: [StudyTask] {
+        guard let viewModel else { return [] }
+        guard let courseID else { return viewModel.tasks }
+        return viewModel.tasks.filter { $0.courseID == courseID }
+    }
+
     var body: some View {
         if let selection {
             PlanPageScaffold(title: courseTitle, selection: selection, onBack: onBack) {
-                if let viewModel {
-                    StudyMaterialImportView(viewModel: viewModel, courseID: courseID)
-                } else {
-                    ContentUnavailableView(
-                        "File Import Unavailable",
-                        systemImage: "doc.badge.ellipsis"
-                    )
-                }
+                GeneratedPlanSchedule(tasks: planTasks)
             }
         } else {
             CourseFlowView(course: nil,
                            viewModel: viewModel,
                            showsBackButton: showsBackButton,
                            startingAt: .plan)
+        }
+    }
+}
+
+private struct GeneratedPlanSchedule: View {
+    let tasks: [StudyTask]
+
+    var body: some View {
+        if tasks.isEmpty {
+            ContentUnavailableView(
+                "No Study Plan Yet",
+                systemImage: "calendar.badge.plus",
+                description: Text("Create a course and generate its plan from the Add Course page.")
+            )
+        } else {
+            ScrollView(showsIndicators: false) {
+                LazyVStack(spacing: 14) {
+                    ForEach(Array(tasks.enumerated()), id: \.element.id) { index, task in
+                        HStack(alignment: .top, spacing: 14) {
+                            Text("\(index + 1)")
+                                .font(.headline)
+                                .foregroundStyle(.white)
+                                .frame(width: 34, height: 34)
+                                .background(PlanTheme.deepClay, in: Circle())
+
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(task.title)
+                                    .font(.headline)
+                                    .foregroundStyle(PlanTheme.text)
+
+                                if let concept = task.concept, !concept.isEmpty {
+                                    Text(concept)
+                                        .font(.subheadline)
+                                        .foregroundStyle(PlanTheme.text.opacity(0.7))
+                                }
+
+                                HStack(spacing: 12) {
+                                    if let dueDate = task.dueDate {
+                                        Label(
+                                            dueDate.formatted(date: .abbreviated, time: .shortened),
+                                            systemImage: "calendar"
+                                        )
+                                    }
+                                    if let minutes = task.durationMinutes {
+                                        Label("\(minutes) min", systemImage: "clock")
+                                    }
+                                }
+                                .font(.caption)
+                                .foregroundStyle(PlanTheme.mauve)
+                            }
+
+                            Spacer(minLength: 0)
+                        }
+                        .padding(16)
+                        .background(.white.opacity(0.85), in: RoundedRectangle(cornerRadius: 18))
+                    }
+                }
+                .padding(20)
+            }
         }
     }
 }

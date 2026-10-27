@@ -71,7 +71,10 @@ struct CoursesView: View {
                            startingAt: .overview)
         }
         .navigationDestination(isPresented: $showingCourseDetails) {
-            CourseView()
+            CourseView(
+                coursesViewModel: viewModel,
+                planViewModel: planViewModel
+            )
         }
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
