@@ -67,18 +67,19 @@ private struct MusicArtworkPlaceholder: View {
     let imageName: String
 
     var body: some View {
-        ZStack {
-            Image(imageName)
-                .resizable()
-                .scaledToFill()
-        }
-        .aspectRatio(0.76, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: 15))
-        .overlay {
-            RoundedRectangle(cornerRadius: 15)
-                .stroke(Color.black.opacity(0.12), lineWidth: 1)
-        }
-        .accessibilityLabel(title)
+        Image(imageName)
+            .resizable()
+            .interpolation(.high)
+            .scaledToFill()
+            .frame(maxWidth: .infinity)
+            .aspectRatio(3 / 4, contentMode: .fit)
+            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 15, style: .continuous)
+                    .stroke(Color.black.opacity(0.12), lineWidth: 1)
+            }
+            .accessibilityLabel(title)
     }
 }
 

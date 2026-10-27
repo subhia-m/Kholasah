@@ -57,4 +57,54 @@ final class StudyPlanService {
         updatedTask.isCompleted.toggle()
         taskRepository.update(updatedTask)
     }
+
+    @discardableResult
+    func saveGeneratedPlan(
+        _ draft: GeneratedStudyPlanDraft,
+        courseID: Course.ID?,
+        durationDays: Int,
+        dailyMinutes: Int,
+        preferredStudyTime: Date = .now,
+        startDate: Date = .now
+    ) -> StudyPlan {
+        var taskIDs: [StudyTask.ID] = []
+        let calendar = Calendar.current
+        let planDayCount = max(durationDays, 1)
+        let time = calendar.dateComponents([.hour, .minute], from: preferredStudyTime)
+        let firstCandidate = calendar.date(
+            bySettingHour: time.hour ?? 18,
+            minute: time.minute ?? 0,
+            second: 0,
+            of: startDate
+        ) ?? startDate
+        let firstStudyDate = firstCandidate > startDate
+            ? firstCandidate
+            : calendar.date(byAdding: .day, value: 1, to: firstCandidate) ?? firstCandidate
+
+        for (dayOffset, item) in draft.tasks.prefix(planDayCount).enumerated() {
+            let duration = min(max(item.estimatedMinutes, 15), max(dailyMinutes, 15))
+            let dueDate = calendar.date(
+                byAdding: .day,
+                value: dayOffset,
+                to: firstStudyDate
+            ) ?? firstStudyDate
+            let task = StudyTask(
+                courseID: courseID,
+                title: item.title,
+                dueDate: dueDate,
+                durationMinutes: duration,
+                concept: item.concept,
+                explanation: item.explanation,
+                keyPoints: item.keyPoints,
+                reviewPrompt: item.reviewPrompt,
+                reminderMessage: item.reminderMessage
+            )
+            taskRepository.add(task)
+            taskIDs.append(task.id)
+        }
+
+        let plan = StudyPlan(title: draft.title, taskIDs: taskIDs)
+        planRepository.save(plan)
+        return plan
+    }
 }

@@ -17,6 +17,7 @@ struct PlanReminderItem: Identifiable, Equatable, Hashable {
     var title: String
     var date: Date
     var isOn: Bool = true
+    var generatedTaskID: StudyTask.ID?
 }
 
 // MARK: - Store
@@ -41,6 +42,23 @@ final class PlanRemindersStore {
         let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         reminders.append(PlanReminderItem(courseID: courseID, title: trimmed, date: date))
+        reminders.sort { $0.date < $1.date }
+    }
+
+    /// Replaces only AI-generated reminders while preserving reminders added by the user.
+    func replaceGeneratedReminders(with tasks: [StudyTask], courseID: Course.ID?) {
+        reminders.removeAll {
+            $0.courseID == courseID && $0.generatedTaskID != nil
+        }
+
+        reminders.append(contentsOf: tasks.map { task in
+            PlanReminderItem(
+                courseID: courseID,
+                title: task.reminderMessage ?? "Time to study: \(task.title)",
+                date: task.dueDate ?? .now,
+                generatedTaskID: task.id
+            )
+        })
         reminders.sort { $0.date < $1.date }
     }
 

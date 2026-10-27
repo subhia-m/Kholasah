@@ -2,7 +2,7 @@ import SwiftUI
 
 struct MusicView: View {
     private let sounds = [
-        FocusSound(id: "night", title: "Night", assetName: "najd"),
+        FocusSound(id: "night", title: "Night", assetName: "sandHouse"),
         FocusSound(id: "palms", title: "Palms", assetName: "khobar"),
         FocusSound(id: "rain", title: "Rain", assetName: "car"),
         FocusSound(id: "desert", title: "Desert", assetName: "mountain")
@@ -44,3 +44,4 @@ private struct FocusSound: Identifiable {
     let title: LocalizedStringKey
     let assetName: String
 }
+
