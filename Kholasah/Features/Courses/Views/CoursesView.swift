@@ -18,7 +18,7 @@ struct CoursesView: View {
 
     @State private var expandedID: Course.ID?
     @State private var selectedCourse: Course?
-    @State private var showingAddSheet = false
+    @State private var showingCourseDetails = false
 
     var body: some View {
         // No NavigationStack here: MainTabView already provides one.
@@ -60,7 +60,7 @@ struct CoursesView: View {
                 }
             }
 
-            PlanAddButton(label: "Add course") { showingAddSheet = true }
+            PlanAddButton(label: "Add course") { showingCourseDetails = true }
                 .padding(.trailing, 28)
                 .padding(.bottom, 16)
         }
@@ -70,14 +70,10 @@ struct CoursesView: View {
                            showsBackButton: true,
                            startingAt: .overview)
         }
-        .toolbar(.hidden, for: .navigationBar)
-        .sheet(isPresented: $showingAddSheet) {
-            NewCourseSheet(viewModel: viewModel) {
-                withAnimation { expandedID = viewModel.courses.last?.id }
-            }
-            .presentationDetents([.height(340)])
-            .presentationDragIndicator(.visible)
+        .navigationDestination(isPresented: $showingCourseDetails) {
+            CourseView()
         }
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             if expandedID == nil { expandedID = viewModel.courses.last?.id }
         }
