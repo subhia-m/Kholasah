@@ -363,7 +363,14 @@ struct CourseView: View {
                     .padding(.horizontal, 24)
                 }
             }
+
+            if planViewModel?.isGeneratingPlan == true {
+                PlanGenerationLoadingView()
+                    .transition(.opacity)
+                    .zIndex(1)
+            }
         }
+        .animation(.easeInOut(duration: 0.25), value: planViewModel?.isGeneratingPlan == true)
         // MARK: File Importer
         // يفتح منتقي الملفات ويعيد نتيجة الاختيار أو الخطأ إلى المعالج.
         .fileImporter(
@@ -473,6 +480,101 @@ struct CourseView: View {
                 showAlert = true
             }
         }
+    }
+}
+
+private struct PlanGenerationLoadingView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var isAnimating = false
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.22)
+                .ignoresSafeArea()
+
+            ZStack(alignment: .bottomLeading) {
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .fill(Color(red: 0.96, green: 0.94, blue: 0.92))
+                    .shadow(color: .black.opacity(0.16), radius: 18, y: 8)
+
+                Image("palm-tree")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 190)
+                    .offset(x: -74, y: 62)
+                    .opacity(0.22)
+                    .accessibilityHidden(true)
+
+                VStack(spacing: 18) {
+                    Image("date")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 92, height: 92)
+                        .rotationEffect(.degrees(isAnimating && !reduceMotion ? 6 : -6))
+                        .offset(y: isAnimating && !reduceMotion ? -8 : 2)
+                        .accessibilityHidden(true)
+
+                    Text("Creating your study plan")
+                        .font(.system(size: 21, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color(red: 0.42, green: 0.10, blue: 0.06))
+
+                    Text("Reading your material and organizing each study day…")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+
+                    ModernPlanLoader()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(28)
+            }
+            .frame(maxWidth: 330, minHeight: 330, maxHeight: 330)
+            .padding(24)
+        }
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) {
+                isAnimating = true
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Creating your study plan. Reading your material and organizing each study day.")
+        .accessibilityAddTraits(.updatesFrequently)
+    }
+}
+
+private struct ModernPlanLoader: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private let accent = Color(red: 0.42, green: 0.10, blue: 0.06)
+
+    var body: some View {
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: reduceMotion)) { context in
+            let rotation = context.date.timeIntervalSinceReferenceDate
+                .truncatingRemainder(dividingBy: 1.15) / 1.15 * 360
+
+            ZStack {
+                Circle()
+                    .stroke(accent.opacity(0.13), lineWidth: 6)
+
+                Circle()
+                    .trim(from: 0.08, to: 0.72)
+                    .stroke(
+                        AngularGradient(
+                            colors: [accent.opacity(0.15), accent, Color(red: 0.73, green: 0.36, blue: 0.16)],
+                            center: .center
+                        ),
+                        style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(reduceMotion ? 0 : rotation))
+
+                Circle()
+                    .fill(accent)
+                    .frame(width: 8, height: 8)
+            }
+        }
+        .frame(width: 46, height: 46)
+        .accessibilityHidden(true)
     }
 }
 
