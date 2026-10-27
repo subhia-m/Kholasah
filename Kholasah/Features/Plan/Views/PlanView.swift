@@ -16,13 +16,13 @@ extension Color {
 }
 
 enum PlanTheme {
-    static let background        = Color(planHex: "#F1EFEC")
-    static let text              = Color(planHex: "#4A1B14")
-    static let deepClay          = Color(planHex: "#703B2F")
-    static let mauve             = Color(planHex: "#9A7B72")
-    static let progressBrown     = Color(planHex: "#6E4840")
-    static let controlBackground = Color(planHex: "#ECE8E3")
-    static let chip              = Color(planHex: "#DEDAD6")
+    static let background        = AppColors.background   // page background
+    static let text              = AppColors.burgundy     // titles and body text
+    static let deepClay          = AppColors.primary      // main buttons, checkmarks, first course card
+    static let mauve             = AppColors.brown        // "New Task" box, third course card
+    static let progressBrown     = AppColors.burgundy     // Course Progress box
+    static let controlBackground = AppColors.darkPage     // switcher bar and text fields
+    static let chip              = AppColors.darkPage     // round + / back buttons, Cancel buttons
 }
 
 // MARK: - Shared building blocks
