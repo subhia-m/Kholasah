@@ -205,15 +205,3 @@ final class FocusAudioPlayer {
         if resume { play() }
     }
 }
-
-
-// protocol عقد يحدد المتطلبات؛ النوع المطابق له يقدم التنفيذ الفعلي.
-protocol AudioService: Sendable {
-    // هل الصوت قيد التشغيل؟
-    // async يسمح بتعليق التنفيذ أثناء الانتظار؛ await ينتظر النتيجة، وthrows يعني أن العملية قد ترمي خطأ إذا ظهر في التوقيع.
-    var isPlaying: Bool { get async }
-    // يبدأ تشغيل الصوت ويتابع وقت الاستماع حتى بلوغ حد الجلسة.
-    func play() async
-    // يوقف التشغيل مؤقتًا مع الاحتفاظ بالتقدم الحالي.
-    func pause() async
-}
