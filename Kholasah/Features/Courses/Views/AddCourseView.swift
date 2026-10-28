@@ -1,46 +1,5 @@
 import SwiftUI
 
-// 1. الشاشة المسؤولة عن إعداد أول مقرر (وهي اللي تدير حالة الانتقال)
-struct FirstCourseSetupView: View {
-    let dependencies: AppDependencies
-    
-    // متغير حالة فقط لمراقبة متى ننتقل للشاشة التالية عند الضغط على زر الإضافة
-    @State private var showingCourseDetails = false
-
-    var body: some View {
-        NavigationStack {
-            AddCourseWelcomeView {
-                showingCourseDetails = true
-            }
-            .overlay(alignment: .topTrailing) {
-                Button {
-                    dependencies.appState.hasSkippedFirstCourseSetup = true
-                } label: {
-                    Text("Skip")
-                        .font(.footnote)
-                        .foregroundStyle(AppColors.brown.opacity(0.7))
-                        .frame(minWidth: 44, minHeight: 44)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityHint("Continue to Board, Focus, and Courses without adding a course")
-                .padding(.trailing, 20)
-                .padding(.top, 4)
-            }
-            // مسار التنقل للشاشة الفعلية اللي فيها حقول الإدخال (CourseView)
-            .navigationDestination(isPresented: $showingCourseDetails) {
-                CourseView(
-                    coursesViewModel: dependencies.coursesViewModel,
-                    planViewModel: dependencies.planViewModel
-                ) { _ in
-                    dependencies.appState.completeFirstCourseSetup()
-                }
-            }
-        }
-    }
-}
-
-// 2. الواجهة البصرية للترحيب (تحتوي الخلفية وزر الإضافة والرسومات)
 struct AddCourseWelcomeView: View {
     let onAddCourse: () -> Void
 
@@ -68,7 +27,6 @@ private struct WelcomeHeroView: View {
                     .offset(x: -150, y: 102)
                     .opacity(0.6)
 
-                // زر الإضافة (اللي يضغط عليه المستخدم عشان ينتقل للصفحة التالية)
                 Button(action: onAddCourse) {
                     Image(systemName: "plus")
                         .font(.system(size: 48, weight: .regular))
@@ -96,36 +54,65 @@ private struct WelcomeHeroView: View {
     }
 }
 
-private struct WelcomeTitleView: View {
+struct FirstCourseSetupView: View {
+    let dependencies: AppDependencies
+    @State private var showingCourseDetails = false
+
     var body: some View {
-        VStack(spacing: 8) {
-            Text("ADD YOUR")
-                .font(.system(size: 40, weight: .bold))
-                .foregroundStyle(Color.titleBrown)
-
-            HStack(spacing: 10) {
-                Text("FIRST COURSE")
-                    .font(.system(size: 40, weight: .bold))
-                    .foregroundStyle(Color.titleBrown)
-
-                Image("logo")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 35, height: 35)
+        NavigationStack {
+            AddCourseWelcomeView {
+                showingCourseDetails = true
+            }
+            .overlay(alignment: .topTrailing) {
+                Button {
+                    dependencies.appState.hasSkippedFirstCourseSetup = true
+                } label: {
+                    Text("Skip")
+                        .font(.footnote)
+                        .foregroundStyle(AppColors.brown.opacity(0.7))
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Continue to Board, Focus, and Courses without adding a course")
+                .padding(.trailing, 20)
+                .padding(.top, 4)
+            }
+            .navigationDestination(isPresented: $showingCourseDetails) {
+                CourseView(
+                    coursesViewModel: dependencies.coursesViewModel,
+                    planViewModel: dependencies.planViewModel
+                ) { _ in
+                    dependencies.appState.completeFirstCourseSetup()
+                }
             }
         }
-        .multilineTextAlignment(.center)
+    }
+}
+
+private struct WelcomeTitleView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Text("ADD YOUR\nFIRST COURSE")
+                .font(.system(size: 40, weight: .bold))
+                .foregroundStyle(Color.titleBrown)
+                .multilineTextAlignment(.center)
+
+            Image("logo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 35, height: 35)
+        }
     }
 }
 
 private struct FirstCoursePromptView: View {
     var body: some View {
         VStack(spacing: 31) {
-            Text("Add your first course!")
+            Text("your learning journey begins now!")
                 .font(.system(size: 21, weight: .regular, design: .rounded))
                 .foregroundStyle(Color.titleBrown)
         }
-        .accessibilityLabel("Add your first course")
     }
 }
 
@@ -147,14 +134,12 @@ private struct QuoteView: View {
                 Text("“ motivation quote here ”")
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .italic()
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.black)
                     .lineLimit(2)
                     .minimumScaleFactor(0.65)
                     .offset(x: -28)
             }
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Motivation quote")
     }
 }
 
