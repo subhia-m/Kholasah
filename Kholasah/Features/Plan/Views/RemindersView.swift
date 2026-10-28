@@ -180,6 +180,6 @@ private struct PlanAddReminderSheet: View {
     // Opens the whole flow on this page, so the switcher can reach every other page.
     // Use Live mode in the canvas (the play button) to tap around.
     NavigationStack {
-        CourseFlowView(course: Course(title: "Swift Basics"), showsBackButton: true, startingAt: .reminders)
+        CourseFlowView(course: Course(title: "Plan"), showsBackButton: true, startingAt: .reminders)
     }
 }

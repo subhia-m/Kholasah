@@ -77,7 +77,7 @@ struct TasksView: View {
             .padding(.bottom, 16)
             .padding(.top, 16)
         }
-        // NEW: the add sheet now uses the shared editor sheet (same look as before)
+        // NEW: the add sheet uses the shared editor sheet
         .sheet(isPresented: $showingAddSheet) {
             PlanTaskEditorSheet(heading: "New Task", buttonTitle: "Add") { title in
                 withAnimation { onAdd(title) }
@@ -274,6 +274,6 @@ private struct PlanTaskEditorSheet: View {
     // Opens the whole flow on this page, so the switcher can reach every other page.
     // Use Live mode in the canvas (the play button) to tap around.
     NavigationStack {
-        CourseFlowView(course: Course(title: "Swift Basics"), showsBackButton: true, startingAt: .tasks)
+        CourseFlowView(course: Course(title: "Plan"), showsBackButton: true, startingAt: .tasks)
     }
 }

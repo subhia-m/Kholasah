@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Overview page
 
 struct PlanOverviewView: View {
-    var courseTitle: String = "Swift Basics"
+    var courseTitle: String = "Plan"
     @Binding var selection: PlanScreenTab
     var onBack: (() -> Void)? = nil
     var tasks: [StudyTask] = []
@@ -190,6 +190,6 @@ private struct PlanOverviewContent: View {
     // Opens the whole flow on this page, so the switcher can reach every other page.
     // Use Live mode in the canvas (the play button) to tap around.
     NavigationStack {
-        CourseFlowView(course: Course(title: "Swift Basics"), showsBackButton: true, startingAt: .overview)
+        CourseFlowView(course: Course(title: "Plan"), showsBackButton: true, startingAt: .overview)
     }
 }

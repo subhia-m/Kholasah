@@ -76,7 +76,7 @@ struct PlanAddButton: View {
         .accessibilityLabel(label)
     }
 }
-
+//delete this
 struct PlanPalmLeaf: View {
     var body: some View {
         // Optional decoration: add an image named "palmLeaf" to Assets.
@@ -88,7 +88,7 @@ struct PlanPalmLeaf: View {
             .allowsHitTesting(false)
     }
 }
-
+//tont added
 /// White card with a soft shadow and a palm leaf in the corner.
 struct PlanCard<Content: View>: View {
     @ViewBuilder var content: Content
@@ -179,9 +179,8 @@ struct PlanPageScaffold<Content: View>: View {
     }
 }
 
-// MARK: - Plan page (intentionally empty for now)
+// MARK: - Plan page
 
-/// The "Plan" page. Empty until the team decides what goes here; it only shows
 /// the palm backdrop from the design (invisible if the image isn't in Assets).
 struct PlanView: View {
     var courseTitle: String = "Plan"
@@ -280,7 +279,7 @@ private struct GeneratedPlanSchedule: View {
     // Use Live mode in the canvas (the play button) to tap around.
     NavigationStack {
         CourseFlowView(
-            course: Course(title: "Swift Basics"),
+            course: Course(title: "Plan"),
             viewModel: AppDependencies().planViewModel,
             showsBackButton: true,
             startingAt: .plan
