@@ -46,11 +46,11 @@ struct TaskDetailView: View {
                 task.isCompleted ? "Completed" : "Upcoming Task",
                 systemImage: task.isCompleted ? "checkmark.circle.fill" : "circle"
             )
-            .font(.subheadline.weight(.semibold))
+            .font(AppTypography.subheadlineEmphasized)
             .foregroundStyle(PlanTheme.deepClay)
 
             Text(task.title)
-                .font(.title2.weight(.semibold))
+                .font(AppTypography.title)
                 .foregroundStyle(PlanTheme.text)
                 // يضبط مساحة تخطيط العنصر ومحاذاته.
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -117,7 +117,7 @@ struct TaskDetailView: View {
     private var keyPointsCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             Label("Key Points", systemImage: "list.bullet")
-                .font(.headline)
+                .font(AppTypography.headline)
                 .foregroundStyle(PlanTheme.deepClay)
 
             // ينشئ عنصر واجهة لكل قيمة؛ المعرّف يربط العنصر ببياناته أثناء التحديث.
@@ -130,7 +130,7 @@ struct TaskDetailView: View {
                         .padding(.top, 7)
 
                     Text(point)
-                        .font(.body)
+                        .font(AppTypography.body)
                         .foregroundStyle(PlanTheme.text)
                 }
             }
@@ -144,11 +144,11 @@ struct TaskDetailView: View {
     private func detailCard(title: LocalizedStringKey, systemImage: String, text: String) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Label(title, systemImage: systemImage)
-                .font(.headline)
+                .font(AppTypography.headline)
                 .foregroundStyle(PlanTheme.deepClay)
 
             Text(text)
-                .font(.body)
+                .font(AppTypography.body)
                 .foregroundStyle(PlanTheme.text)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }

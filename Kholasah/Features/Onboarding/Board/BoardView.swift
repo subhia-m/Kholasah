@@ -47,7 +47,7 @@ struct BoardView: View {
                         withAnimation(animation) { showingStreak = true }
                     } label: {
                         Label("\(viewModel.streak.count) Day Streak", systemImage: "flame")
-                            .font(.subheadline)
+                            .font(AppTypography.subheadline)
                             // يضيف مسافة حول العنصر؛ ترتيب معدلات العرض يؤثر في النتيجة.
                             .padding(.horizontal, 14)
                             .padding(.vertical, 10)
@@ -60,19 +60,21 @@ struct BoardView: View {
                         .frame(width: 78, height: 78)
                         .accessibilityHidden(true)
                 }
-                HStack(alignment: .center) {
+                ZStack {
                     Text("Today’s Tasks")
-                        .font(AppTypography.largeTitle)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    Button { showingAdd = true } label: {
-                        Image(systemName: "plus")
-                            .font(.system(size: 24, weight: .medium))
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
+                        .font(AppTypography.screenTitle)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                    HStack {
+                        Spacer()
+                        Button { showingAdd = true } label: {
+                            Image(systemName: "plus")
+                                .font(.system(size: 24, weight: .medium))
+                                .frame(width: 44, height: 44)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Add task")
                     }
-                    .buttonStyle(.plain)
-                    // يوفر اسمًا تقرؤه التقنيات المساعدة مثل VoiceOver.
-                    .accessibilityLabel("Add task")
                 }
                 VStack(spacing: 14) {
                     BoardTaskList(tasks: viewModel.tasks, toggle: viewModel.toggle) { selectedTask = $0 }

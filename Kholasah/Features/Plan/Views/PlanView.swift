@@ -46,7 +46,7 @@ struct PlanTopBar: View {
         
         ZStack {
             Text(title)
-                .font(.system(size: 26, weight: .regular))
+                .font(AppTypography.screenTitle)
                 .foregroundStyle(PlanTheme.text)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
@@ -130,7 +130,7 @@ struct PlanSectionPicker: View {
             ForEach(PlanScreenTab.allCases, id: \.self) { tab in
                 let isSelected = tab == selection
                 Text(tab.rawValue)
-                    .font(.system(size: 12, weight: isSelected ? .semibold : .regular))
+                    .font(isSelected ? AppTypography.captionEmphasized : AppTypography.caption)
                     .foregroundStyle(PlanTheme.text)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 9)
@@ -246,19 +246,19 @@ private struct GeneratedPlanSchedule: View {
                     ForEach(Array(tasks.enumerated()), id: \.element.id) { index, task in
                         HStack(alignment: .top, spacing: 14) {
                             Text("\(index + 1)")
-                                .font(.headline)
+                                .font(AppTypography.headline)
                                 .foregroundStyle(.white)
                                 .frame(width: 34, height: 34)
                                 .background(PlanTheme.deepClay, in: Circle())
 
                             VStack(alignment: .leading, spacing: 6) {
                                 Text(task.title)
-                                    .font(.headline)
+                                    .font(AppTypography.headline)
                                     .foregroundStyle(PlanTheme.text)
 
                                 if let concept = task.concept, !concept.isEmpty {
                                     Text(concept)
-                                        .font(.subheadline)
+                                        .font(AppTypography.subheadline)
                                         .foregroundStyle(PlanTheme.text.opacity(0.7))
                                 }
 
@@ -273,7 +273,7 @@ private struct GeneratedPlanSchedule: View {
                                         Label("\(minutes) min", systemImage: "clock")
                                     }
                                 }
-                                .font(.caption)
+                                .font(AppTypography.caption)
                                 .foregroundStyle(PlanTheme.mauve)
                             }
 

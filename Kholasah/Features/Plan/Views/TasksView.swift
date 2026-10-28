@@ -64,7 +64,7 @@ struct TasksView: View {
                             .font(.system(size: 22))
                         if !tasks.isEmpty {
                             Text("\(doneCount) of \(tasks.count) done")
-                                .font(.system(size: 13))
+                                .font(AppTypography.caption)
                                 .opacity(0.7)
                         }
                     }
@@ -108,9 +108,9 @@ struct TasksView: View {
         VStack(spacing: 6) {
             Spacer()
             Text("No tasks yet")
-                .font(.system(size: 16, weight: .medium))
+                .font(AppTypography.headline)
             Text("Tap + to add your first task.")
-                .font(.system(size: 13))
+                .font(AppTypography.caption)
                 .opacity(0.6)
             Spacer()
         }
@@ -188,7 +188,7 @@ private struct PlanTaskRow: View {
             } label: {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(task.title)
-                        .font(.system(size: 16))
+                        .font(AppTypography.body)
                         .strikethrough(task.isCompleted)
 
                     HStack(spacing: 8) {
@@ -200,7 +200,7 @@ private struct PlanTaskRow: View {
                             Text("\(durationMinutes) min")
                         }
                     }
-                    .font(.caption)
+                    .font(AppTypography.caption)
                     .opacity(0.65)
                 }
                 .foregroundStyle(PlanTheme.text.opacity(task.isCompleted ? 0.45 : 1))
@@ -247,7 +247,7 @@ private struct PlanTaskEditorSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text(heading)
-                .font(.system(size: 20, weight: .medium))
+                .font(AppTypography.title)
                 .foregroundStyle(PlanTheme.text)
 
             
@@ -263,14 +263,14 @@ private struct PlanTaskEditorSheet: View {
 
             HStack(spacing: 12) {
                 Button("Cancel") { dismiss() }
-                    .font(.system(size: 16))
+                    .font(AppTypography.body)
                     .foregroundStyle(PlanTheme.text)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
                     .background(Capsule().fill(PlanTheme.chip))
 
                 Button(buttonTitle, action: save)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(AppTypography.button)
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)

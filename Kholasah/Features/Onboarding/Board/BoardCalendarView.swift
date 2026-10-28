@@ -21,7 +21,7 @@ struct BoardCalendarView: View {
                 Text(viewModel.displayedMonth.formatted(
                     .dateTime.month(.wide).year().locale(Locale(identifier: "en_US"))
                 ))
-                .font(.subheadline.weight(.semibold))
+                .font(AppTypography.subheadlineEmphasized)
                 Spacer(minLength: 0)
                 // الجزء التنفيذي يحدد ما يحدث عند الضغط، وlabel يحدد شكل الزر إن وُجد.
                 Button { viewModel.moveMonth(-1) } label: {
@@ -40,7 +40,7 @@ struct BoardCalendarView: View {
                 // ينشئ عنصر واجهة لكل قيمة؛ المعرّف يربط العنصر ببياناته أثناء التحديث.
                 ForEach(0..<7) { index in
                     Text(viewModel.calendar.shortWeekdaySymbols[index].uppercased())
-                        .font(.caption2.weight(.semibold))
+                        .font(AppTypography.caption2)
                         .foregroundStyle(AppColors.secondaryText)
                         // يضبط مساحة تخطيط العنصر ومحاذاته.
                         .frame(height: 20)
@@ -68,7 +68,7 @@ struct BoardCalendarView: View {
             viewModel.selectedDate = date
         } label: {
             Text("\(viewModel.calendar.component(.day, from: date))")
-                .font(.body)
+                .font(AppTypography.body)
                 .foregroundStyle(selected ? Color.white : PlanTheme.text)
                 .frame(maxWidth: .infinity)
                 .frame(height: dayHeight)

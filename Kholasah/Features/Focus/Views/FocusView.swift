@@ -50,7 +50,7 @@ struct FocusView: View {
         // يضع العناصر في طبقات متراكبة؛ العناصر اللاحقة تظهر فوق السابقة.
         ZStack {
             Text("Focus")
-                .font(.system(.largeTitle, design: .rounded, weight: .regular))
+                .font(AppTypography.screenTitle)
                 .foregroundStyle(AppColors.burgundy)
 
             // يرتب العناصر أفقيًا.
@@ -92,7 +92,7 @@ struct FocusView: View {
             }
         } label: {
             Text(mode.title)
-                .font(.subheadline.weight(.medium))
+                .font(AppTypography.subheadlineEmphasized)
                 .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)

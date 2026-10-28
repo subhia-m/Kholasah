@@ -74,7 +74,7 @@ struct BoardStreakCard: View {
             }
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.4), value: streak.lastRecordedDay)
             Text("\(streak.count) DAY STREAK")
-                .font(.subheadline.weight(.medium))
+                .font(AppTypography.subheadlineEmphasized)
                 .foregroundStyle(AppColors.date)
         }
         .padding(14)
@@ -118,7 +118,7 @@ struct BoardMotivationCard: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text("Keep going!").font(AppTypography.title)
                 Text("Every small step counts.")
-                    .font(.caption.weight(.semibold))
+                    .font(AppTypography.captionEmphasized)
                     .foregroundStyle(AppColors.date)
             }
             Spacer(minLength: 0)
@@ -182,8 +182,8 @@ struct BoardQuotesView: View {
             HStack(spacing: 12) {
                 Image(systemName: "bell.and.waves.left.and.right")
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Quotes").font(.subheadline.weight(.semibold))
-                    Text("“\(quotes[index])”").font(.subheadline)
+                    Text("Quotes").font(AppTypography.subheadlineEmphasized)
+                    Text("“\(quotes[index])”").font(AppTypography.subheadline)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 Image(systemName: "chevron.right")

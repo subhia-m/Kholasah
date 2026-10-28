@@ -1,16 +1,9 @@
-// MARK: - شرح الملف
-// يحتوي مكونات الترحيب وإعداد أول مقرر.
-// للقراءة: let يثبت القيمة، وvar يسمح بتغييرها، وprivate يحصر الوصول في نطاق التعريف.
-
 import SwiftUI
 
 struct AddCourseWelcomeView: View {
-    // إجراء فتح مسار إضافة مقرر.
     let onAddCourse: () -> Void
-
-    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
+//بوابتك الخاصة عشان تقولي للشاشة اللي برا: "ترى المستخدم ضغط الزر الفلاني، وش تبغيني أسوي الحين؟".
     var body: some View {
-        // يضع العناصر في طبقات متراكبة؛ العناصر اللاحقة تظهر فوق السابقة.
         ZStack {
             Color.backgroundCream
                 .ignoresSafeArea()
@@ -21,20 +14,14 @@ struct AddCourseWelcomeView: View {
 }
 
 private struct WelcomeHeroView: View {
-    // إجراء فتح مسار إضافة مقرر.
     let onAddCourse: () -> Void
 
-    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
-        // يوفر حجم المساحة المتاحة ليحسب المحتوى أبعاده بناءً عليها.
         GeometryReader { proxy in
-            // Root ZStack to handle visual layers correctly inside GeometryReader
             ZStack {
                 Image("palm-tree")
                     .resizable()
                     .scaledToFit()
-                    // يضبط مساحة تخطيط العنصر ومحاذاته.
-                    .frame(width: proxy.size.width * 1)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
                     .ignoresSafeArea(edges: .bottom)
                     .offset(x: -150, y: 102)
@@ -47,11 +34,9 @@ private struct WelcomeHeroView: View {
                         .frame(width: 72, height: 72)
                         .background(Color.neutralGray.opacity(0.8), in: Circle())
                 }
-                
-                // يرتب العناصر عموديًا؛ spacing يحدد المسافة بينها.
+                 
                 VStack(spacing: 0) {
                     WelcomeTitleView()
-                        // يضيف مسافة حول العنصر؛ ترتيب معدلات العرض يؤثر في النتيجة.
                         .padding(.top, 58)
 
                     FirstCoursePromptView()
@@ -70,12 +55,9 @@ private struct WelcomeHeroView: View {
 }
 
 struct FirstCourseSetupView: View {
-    // الحاوية المشتركة للخدمات ونماذج العرض.
     let dependencies: AppDependencies
-    // يتحكم في فتح شاشة بيانات المقرر.
     @State private var showingCourseDetails = false
 
-    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         NavigationStack {
             AddCourseWelcomeView {
@@ -86,7 +68,7 @@ struct FirstCourseSetupView: View {
                     dependencies.appState.hasSkippedFirstCourseSetup = true
                 } label: {
                     Text("Skip")
-                        .font(.footnote)
+                        .font(AppTypography.footnote)
                         .foregroundStyle(AppColors.brown.opacity(0.7))
                         .frame(minWidth: 44, minHeight: 44)
                         .contentShape(Rectangle())
@@ -96,7 +78,6 @@ struct FirstCourseSetupView: View {
                 .padding(.trailing, 20)
                 .padding(.top, 4)
             }
-            // يربط حالة التنقل بالشاشة التي ستفتح داخل NavigationStack.
             .navigationDestination(isPresented: $showingCourseDetails) {
                 CourseView(
                     coursesViewModel: dependencies.coursesViewModel,
@@ -110,17 +91,16 @@ struct FirstCourseSetupView: View {
 }
 
 private struct WelcomeTitleView: View {
-    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         VStack(spacing: 8) {
             Text("ADD YOUR")
-                .font(.system(size: 40, weight: .bold))
+                .font(AppTypography.displayTitle)
                 .foregroundStyle(Color.titleBrown)
 
             // يرتب العناصر أفقيًا.
             HStack(spacing: 10) {
                 Text("FIRST COURSE")
-                    .font(.system(size: 40, weight: .bold))
+                    .font(AppTypography.displayTitle)
                     .foregroundStyle(Color.titleBrown)
 
                 Image("logo")
@@ -134,20 +114,16 @@ private struct WelcomeTitleView: View {
 }
 
 private struct FirstCoursePromptView: View {
-    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         VStack(spacing: 31) {
             Text("Add your first course!")
-                .font(.system(size: 21, weight: .regular, design: .rounded))
+                .font(AppTypography.title)
                 .foregroundStyle(Color.titleBrown)
         }
-        // يوفر اسمًا تقرؤه التقنيات المساعدة مثل VoiceOver.
-        .accessibilityLabel("Add your first course")
     }
 }
 
 private struct QuoteView: View {
-    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         ZStack(alignment: .leading) {
             Capsule()
@@ -163,32 +139,24 @@ private struct QuoteView: View {
                     .offset(x: -22, y: 19)
 
                 Text("“ motivation quote here ”")
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .font(AppTypography.subheadlineEmphasized)
                     .italic()
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.black)
                     .lineLimit(2)
                     .minimumScaleFactor(0.65)
                     .offset(x: -28)
             }
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Motivation quote")
     }
 }
 
-// extension يضيف وظائف أو خصائص محسوبة إلى نوع موجود دون تعديل تعريفه الأصلي.
 private extension Color {
-    // لون مشترك من لوحة ألوان التصميم.
     static let backgroundCream = Color(red: 242 / 255, green: 238 / 255, blue: 234 / 255)
-    // لون مشترك من لوحة ألوان التصميم.
     static let quoteBrown = Color(red: 72 / 255, green: 9 / 255, blue: 2 / 255)
-    // لون العناوين.
     static let titleBrown = Color(red: 100 / 255, green: 25 / 255, blue: 14 / 255)
-    // لون مشترك من لوحة ألوان التصميم.
     static let neutralGray = Color(red: 151 / 255, green: 151 / 255, blue: 151 / 255)
 }
 
-// معاينة داخل Xcode لتجربة الواجهة دون المرور بمسار التطبيق كاملًا.
 #Preview {
     AddCourseWelcomeView(onAddCourse: {})
 }

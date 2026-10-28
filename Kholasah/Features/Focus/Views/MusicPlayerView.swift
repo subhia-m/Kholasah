@@ -75,7 +75,7 @@ private struct MusicPlayerHeader: View {
     var body: some View {
         ZStack {
             Text("Focus")
-                .font(.system(.largeTitle, design: .rounded, weight: .regular))
+                .font(AppTypography.screenTitle)
                 .foregroundStyle(AppColors.burgundy)
 
             // يرتب العناصر أفقيًا.
@@ -193,7 +193,7 @@ private struct MusicPlaybackControls: View {
                     Spacer()
                     Text(Self.timeString(audioPlayer.duration))
                 }
-                .font(.caption)
+                .font(AppTypography.caption)
                 .monospacedDigit()
                 .foregroundStyle(.primary)
             }

@@ -88,11 +88,12 @@ private struct PomodoroDial: View {
 
             VStack(spacing: 20) {
                 Text("\(remainingSeconds) SEC")
-                    .font(.caption.weight(.semibold))
+                    .font(AppTypography.captionEmphasized)
                     .foregroundStyle(.secondary)
 
                 Text(formattedTime)
-                    .font(.system(size: 58, weight: .light, design: .rounded))
+                    .font(AppTypography.timer)
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility2)
                     .monospacedDigit()
                     .foregroundStyle(AppColors.burgundy)
             }
@@ -120,7 +121,7 @@ private struct PomodoroTimerControls: View {
         HStack(spacing: 12) {
             // الجزء التنفيذي يحدد ما يحدث عند الضغط، وlabel يحدد شكل الزر إن وُجد.
             Button(primaryButtonTitle, action: onToggle)
-                .font(.headline)
+                .font(AppTypography.button)
                 .foregroundStyle(.primary)
                 .frame(width: 170)
                 .padding(.vertical, 12)
@@ -140,7 +141,7 @@ private struct PomodoroTimerControls: View {
 
             Button("Reset Timer", systemImage: "arrow.counterclockwise", action: onReset)
                 .labelStyle(.iconOnly)
-                .font(.headline)
+                .font(AppTypography.headline)
                 .foregroundStyle(AppColors.burgundy)
                 .frame(width: 44, height: 44)
                 .background(.white.opacity(0.7), in: Circle())
@@ -172,7 +173,7 @@ private struct PomodoroNoteEditor: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Write a Note")
-                .font(.caption)
+                .font(AppTypography.caption)
                 .foregroundStyle(AppColors.burgundy)
 
             HStack(spacing: 10) {

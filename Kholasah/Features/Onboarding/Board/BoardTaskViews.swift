@@ -30,7 +30,7 @@ struct BoardTaskList: View {
                         // الجزء التنفيذي يحدد ما يحدث عند الضغط، وlabel يحدد شكل الزر إن وُجد.
                         Button { toggle(task) } label: {
                             Image(systemName: task.isCompleted ? "checkmark.circle" : "circle")
-                                .font(.title3)
+                                .font(AppTypography.sectionTitle)
                                 .frame(width: 44, height: 44)
                         }
                         // يوفر اسمًا تقرؤه التقنيات المساعدة مثل VoiceOver.
@@ -41,7 +41,7 @@ struct BoardTaskList: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                 Image(systemName: "alarm")
                                 Text(task.durationMinutes.map { "\($0) min" } ?? "— min")
-                                    .font(.subheadline)
+                                    .font(AppTypography.subheadline)
                                 Image(systemName: "chevron.right")
                             }
                             .frame(minHeight: 44)
@@ -107,7 +107,7 @@ struct BoardAddTaskView: View {
                 VStack(spacing: 0) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Task name")
-                            .font(.subheadline)
+                            .font(AppTypography.subheadline)
                             .foregroundStyle(.secondary)
                         // حقل إدخال نص؛ الربط $ يكتب إدخال المستخدم في الخاصية المرتبطة.
                         TextField("Enter task name", text: $title)

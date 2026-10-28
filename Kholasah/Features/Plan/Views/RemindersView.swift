@@ -75,9 +75,9 @@ struct RemindersView: View {
         VStack(spacing: 6) {
             Spacer()
             Text("No reminders yet")
-                .font(.system(size: 16, weight: .medium))
+                .font(AppTypography.headline)
             Text("Tap + to add one.")
-                .font(.system(size: 13))
+                .font(AppTypography.caption)
                 .opacity(0.6)
             Spacer()
         }
@@ -92,9 +92,9 @@ struct RemindersView: View {
                 HStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(reminder.title)
-                            .font(.system(size: 18))
+                            .font(AppTypography.headline)
                         Text(reminder.date.formatted(date: .abbreviated, time: .shortened))
-                            .font(.system(size: 12))
+                            .font(AppTypography.caption)
                             .opacity(0.6)
                     }
                     .foregroundStyle(PlanTheme.text)
@@ -145,7 +145,7 @@ private struct PlanAddReminderSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("New Reminder")
-                .font(.system(size: 20, weight: .medium))
+                .font(AppTypography.title)
                 .foregroundStyle(PlanTheme.text)
 
            
@@ -165,7 +165,7 @@ private struct PlanAddReminderSheet: View {
 
             HStack(spacing: 12) {
                 Button("Cancel") { dismiss() }
-                    .font(.system(size: 16))
+                    .font(AppTypography.body)
                     .foregroundStyle(PlanTheme.text)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
@@ -177,7 +177,7 @@ private struct PlanAddReminderSheet: View {
                     onAdd(trimmed, date)
                     dismiss()
                 }
-                .font(.system(size: 16, weight: .medium))
+                .font(AppTypography.button)
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)

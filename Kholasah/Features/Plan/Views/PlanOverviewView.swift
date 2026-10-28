@@ -69,9 +69,9 @@ private struct PlanOverviewContent: View {
                     if let reminder = nextReminder {
                         VStack(spacing: 4) {
                             Text(reminder.title)
-                                .font(.system(size: 17, weight: .medium))
+                                .font(AppTypography.headline)
                             Text(reminder.date.formatted(date: .abbreviated, time: .shortened))
-                                .font(.system(size: 13))
+                                .font(AppTypography.caption)
                                 .opacity(0.7)
                         }
                         .foregroundStyle(PlanTheme.text)
@@ -90,7 +90,7 @@ private struct PlanOverviewContent: View {
                         .fill(PlanTheme.mauve)
                     if let task = newestOpenTask {
                         Text(task.title)
-                            .font(.system(size: 17, weight: .medium))
+                            .font(AppTypography.headline)
                             .foregroundStyle(.white)
                             .padding(.horizontal, 16)
                     } else {
@@ -108,12 +108,12 @@ private struct PlanOverviewContent: View {
                     VStack(spacing: 10) {
                         ZStack {
                             ring(progress: taskProgress)
-                            Image(systemName: "list.clipboard")       // NEW: clipboard instead of the 0 / 0 fraction
+                            Image(systemName: "list.clipboard")       
                                 .font(.system(size: 18))
                                 .foregroundStyle(.white)
                         }
                         Text("\(tasksDone) / \(tasks.count) Tasks")
-                            .font(.system(size: 12))
+                            .font(AppTypography.caption)
                             .foregroundStyle(.white)
                     }
 
@@ -127,7 +127,7 @@ private struct PlanOverviewContent: View {
                                 .foregroundStyle(.white)
                         }
                         Text("\(daysDone) / \(daysTotal) Days")
-                            .font(.system(size: 12))
+                            .font(AppTypography.caption)
                             .foregroundStyle(.white)
                     }
 
@@ -154,7 +154,7 @@ private struct PlanOverviewContent: View {
 
     private func header(systemImage: String, title: String) -> some View {
         Label {
-            Text(title).font(.system(size: 13))
+            Text(title).font(AppTypography.captionEmphasized)
         } icon: {
             Image(systemName: systemImage).font(.system(size: 14))
         }
@@ -163,7 +163,7 @@ private struct PlanOverviewContent: View {
 
     private func emptyLabel(_ text: String, color: Color) -> some View {
         Text(text)
-            .font(.system(size: 14))
+            .font(AppTypography.subheadline)
             .foregroundStyle(color.opacity(0.6))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
