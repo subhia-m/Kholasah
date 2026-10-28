@@ -15,7 +15,7 @@ struct PrimaryButton: View {
         // الجزء التنفيذي يحدد ما يحدث عند الضغط، وlabel يحدد شكل الزر إن وُجد.
         Button(action: action) {
             Text(title)
-                .font(.headline)
+                .font(AppTypography.button)
                 // يضبط مساحة تخطيط العنصر ومحاذاته.
                 .frame(maxWidth: .infinity)
                 // يضيف مسافة حول العنصر؛ ترتيب معدلات العرض يؤثر في النتيجة.

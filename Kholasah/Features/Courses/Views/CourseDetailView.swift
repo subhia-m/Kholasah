@@ -7,6 +7,8 @@ import UniformTypeIdentifiers
 import UIKit
 
 struct CourseView: View {
+    @Environment(\.dismiss) private var dismiss
+
     // نموذج عرض إدارة المقررات.
     let coursesViewModel: CoursesViewModel
     // نموذج عرض الخطة والمهام وتوليد المحتوى.
@@ -26,11 +28,6 @@ struct CourseView: View {
     @State private var endDate =
         Calendar.current.date(byAdding: .day, value: 6, to: .now) ?? .now
     // نوع الدافع المحدد في النموذج.
-    @State private var motivationType = "Choose a type"
-    // الأهداف المدخلة في النموذج.
-    @State private var goals = ""
-    // الأهداف الإضافية المدخلة.
-    @State private var additionalGoals = ""
 
     // Upload states
     // يتحكم في ظهور منتقي الملفات.
@@ -50,16 +47,6 @@ struct CourseView: View {
     @State private var showAlert = false
     // النص المعروض في التنبيه.
     @State private var alertMessage = ""
-
-
-    // الخيارات المعروضة للدافع؛ القيم الحالية تتضمن نصوصًا تجريبية.
-    private let motivationTypes = [
-        "bbbbb",
-        "aaaaa",
-        "ccccc",
-        "ddddd",
-        "Other"
-    ]
 
     // عدد أيام الخطة.
     private var durationDays: Int {
@@ -122,12 +109,8 @@ struct CourseView: View {
                 
                 // MARK: Header
                 
-                Text("Add Course")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundStyle(titleBrown)
-                    // يضيف مسافة حول العنصر؛ ترتيب معدلات العرض يؤثر في النتيجة.
-                    .padding(.top, 16)
-                    .padding(.bottom, 8)
+                PlanTopBar(title: "Add Course", onBack: { dismiss() })
+                    .padding(.top, 12)
 
                 // MARK: Form
                 
@@ -150,160 +133,107 @@ struct CourseView: View {
                             .textInputAutocapitalization(.words)
                         }
                         
-                        // Start Date and End Date
-                        // يرتب العناصر أفقيًا.
-                        HStack(alignment: .top, spacing: 12) {
-                            VStack(alignment: .leading, spacing: 0) {
-                                fieldLabel("Start Date:")
-                                
-                                DatePicker(
-                                    "Start Date",
-                                    selection: $startDate,
-                                    displayedComponents: .date
-                                )
-                                .datePickerStyle(.compact)
-                                .labelsHidden()
-                                .frame(
-                                    maxWidth: .infinity,
-                                    minHeight: 64,
-                                    alignment: .leading
-                                )
-                                .padding(.leading, 12)
-                                .background(fieldBackground)
-                                // ينفذ الإجراء عند تغير القيمة المراقبة.
-                                .onChange(of: startDate) { _, newStartDate in
-                                    if endDate < newStartDate {
-                                        endDate = newStartDate
-                                    }
+                        // MARK: Study dates
+                        VStack(alignment: .leading, spacing: 12) {
+                            fieldLabel("Study dates")
+
+                            ViewThatFits(in: .horizontal) {
+                                HStack(spacing: 12) {
+                                    studyDateCard(
+                                        title: "Starts",
+                                        systemImage: "calendar.badge.plus",
+                                        selection: $startDate,
+                                        range: Date.distantPast...Date.distantFuture
+                                    )
+                                    studyDateCard(
+                                        title: "Ends",
+                                        systemImage: "calendar.badge.checkmark",
+                                        selection: $endDate,
+                                        range: startDate...Date.distantFuture
+                                    )
+                                }
+
+                                VStack(spacing: 12) {
+                                    studyDateCard(
+                                        title: "Starts",
+                                        systemImage: "calendar.badge.plus",
+                                        selection: $startDate,
+                                        range: Date.distantPast...Date.distantFuture
+                                    )
+                                    studyDateCard(
+                                        title: "Ends",
+                                        systemImage: "calendar.badge.checkmark",
+                                        selection: $endDate,
+                                        range: startDate...Date.distantFuture
+                                    )
                                 }
                             }
-                            
-                            VStack(alignment: .leading, spacing: 0) {
-                                fieldLabel("End Date:")
-                                
-                                DatePicker(
-                                    "End Date",
-                                    selection: $endDate,
-                                    in: startDate...,
-                                    displayedComponents: .date
-                                )
-                                .datePickerStyle(.compact)
-                                .labelsHidden()
-                                .frame(
-                                    maxWidth: .infinity,
-                                    minHeight: 64,
-                                    alignment: .leading
-                                )
-                                .padding(.leading, 12)
-                                .background(fieldBackground)
+
+                            Label("\(durationDays) day study plan", systemImage: "clock")
+                                .font(AppTypography.captionEmphasized)
+                                .foregroundStyle(titleBrown.opacity(0.75))
+                                .padding(.leading, 10)
+                        }
+                        .onChange(of: startDate) { _, newStartDate in
+                            if endDate < newStartDate {
+                                endDate = newStartDate
                             }
                         }
-                        
-                        // Motivation Type
-                        VStack(alignment: .leading, spacing: 0) {
-                            fieldLabel("Motivation Type:")
-                            
-                            Picker(
-                                "Motivation Type",
-                                selection: $motivationType
-                            ) {
-                                Text("Choose a type")
-                                    .tag("Choose a type")
-                                
-                                // ينشئ عنصر واجهة لكل قيمة؛ المعرّف يربط العنصر ببياناته أثناء التحديث.
-                                ForEach(
-                                    motivationTypes,
-                                    id: \.self
-                                ) { type in
-                                    Text(type)
-                                        .tag(type)
-                                }
-                            }
-                            .pickerStyle(.menu)
-                            .tint(darkBrown)
-                            .frame(
-                                maxWidth: .infinity,
-                                minHeight: 70,
-                                alignment: .leading
-                            )
-                            .padding(.horizontal, 18)
-                            .background(fieldBackground)
-                        }
-                        
-                        // Goals
-                        VStack(alignment: .leading, spacing: 0) {
-                            fieldLabel("Goals:")
-                            
-                            TextField(
-                                "What do you want to achieve?",
-                                text: $goals,
-                                axis: .vertical
-                            )
-                            .lineLimit(3...5)
-                            .padding(18)
-                            .frame(
-                                maxWidth: .infinity,
-                                minHeight: 95,
-                                alignment: .topLeading
-                            )
-                            .background(fieldBackground)
-                        }
-                        
-                        // Tasks
-                        VStack(alignment: .leading, spacing: 0) {
-                            fieldLabel("Tasks:")
-                            
-                            TextField(
-                                "Add your tasks",
-                                text: $additionalGoals,
-                                axis: .vertical
-                            )
-                            .lineLimit(3...5)
-                            .padding(18)
-                            .frame(
-                                maxWidth: .infinity,
-                                minHeight: 95,
-                                alignment: .topLeading
-                            )
-                            .background(fieldBackground)
-                        }
-                        
+
                         // MARK: Course Materials
-                        VStack(alignment: .leading, spacing: 8) {
-                            fieldLabel("Course Materials:")
-                            
-                            // الجزء التنفيذي يحدد ما يحدث عند الضغط، وlabel يحدد شكل الزر إن وُجد.
+                        VStack(alignment: .leading, spacing: 12) {
+                            fieldLabel("Study material")
+
                             Button {
                                 showFileImporter = true
                             } label: {
-                                HStack(spacing: 12) {
-                                    Image(systemName: "paperclip")
-                                        .font(.system(size: 21))
-                                        .foregroundStyle(darkBrown)
-                                    
-                                    VStack(
-                                        alignment: .leading,
-                                        spacing: 4
-                                    ) {
-                                        Text("Upload materials")
-                                            .font(.system(size: 15))
+                                VStack(spacing: 14) {
+                                    Image(systemName: planViewModel?.importedMaterial == nil
+                                          ? "arrow.up.doc"
+                                          : "checkmark.circle.fill")
+                                        .font(.title)
+                                        .foregroundStyle(planViewModel?.importedMaterial == nil
+                                                         ? titleBrown
+                                                         : AppColors.green)
+
+                                    VStack(spacing: 5) {
+                                        Text(planViewModel?.importedMaterial == nil
+                                             ? "Upload study material"
+                                             : "Material ready")
+                                            .font(AppTypography.headline)
                                             .foregroundStyle(darkBrown)
-                                        
-                                        Text(planViewModel?.importedMaterial?.fileName ?? "No file selected")
-                                        .font(.system(size: 12))
-                                        .foregroundStyle(.secondary)
+
+                                        Text(planViewModel?.importedMaterial?.fileName
+                                             ?? "Choose a PDF or text file")
+                                            .font(AppTypography.caption)
+                                            .foregroundStyle(.secondary)
+                                            .multilineTextAlignment(.center)
+                                            .lineLimit(2)
                                     }
-                                    
-                                    Spacer()
+
+                                    Text(planViewModel?.importedMaterial == nil
+                                         ? "Choose file"
+                                         : "Replace file")
+                                        .font(AppTypography.button)
+                                        .foregroundStyle(.white)
+                                        .padding(.horizontal, 22)
+                                        .padding(.vertical, 10)
+                                        .background(titleBrown, in: Capsule())
                                 }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 22)
                                 .padding(.horizontal, 16)
-                                .frame(
-                                    maxWidth: .infinity,
-                                    minHeight: 62
-                                )
-                                .background(fieldBackground)
+                                .background(Color.white.opacity(0.72), in: RoundedRectangle(cornerRadius: 24))
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 24)
+                                        .stroke(
+                                            titleBrown.opacity(0.45),
+                                            style: StrokeStyle(lineWidth: 1.5, dash: [7, 6])
+                                        )
+                                }
                             }
                             .buttonStyle(.plain)
+                            .accessibilityHint("Opens the document picker")
                         }
 
                         VStack(alignment: .leading, spacing: 12) {
@@ -332,7 +262,7 @@ struct CourseView: View {
                             // يفك قيمة اختيارية بأمان؛ ينفذ الفرع فقط إذا لم تكن nil.
                             if let planViewModel {
                                 Text(planViewModel.aiAvailability.message)
-                                    .font(.caption)
+                                    .font(AppTypography.caption)
                                     .foregroundStyle(.secondary)
                             }
                         }
@@ -345,8 +275,7 @@ struct CourseView: View {
                             generatePlan()
                         } label: {
                             Text(planViewModel?.isGeneratingPlan == true ? "Creating plan…" : "Generate study plan")
-                                .font(.system(size: 20))
-                                .fontWeight(.bold)
+                                .font(AppTypography.button)
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity, minHeight: 64)
                                 .background(darkBrown)
@@ -368,6 +297,8 @@ struct CourseView: View {
                     .zIndex(1)
             }
         }
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
         .animation(.easeInOut(duration: 0.25), value: planViewModel?.isGeneratingPlan == true)
         // MARK: File Importer
         // يفتح منتقي الملفات ويعيد نتيجة الاختيار أو الخطأ إلى المعالج.
@@ -424,10 +355,41 @@ struct CourseView: View {
             )
     }
 
+    private func studyDateCard(
+        title: LocalizedStringKey,
+        systemImage: String,
+        selection: Binding<Date>,
+        range: ClosedRange<Date>
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label(title, systemImage: systemImage)
+                .font(AppTypography.subheadlineEmphasized)
+                .foregroundStyle(titleBrown)
+
+            DatePicker(
+                title,
+                selection: selection,
+                in: range,
+                displayedComponents: .date
+            )
+            .labelsHidden()
+            .datePickerStyle(.compact)
+            .tint(titleBrown)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(Color.white.opacity(0.92), in: RoundedRectangle(cornerRadius: 20))
+        .overlay {
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(titleBrown.opacity(0.1), lineWidth: 1)
+        }
+        .shadow(color: Color.brown.opacity(0.1), radius: 8, y: 4)
+    }
+
     // يبني عنوان حقل إدخال بالتنسيق المشترك.
     private func fieldLabel(_ title: String) -> some View {
         Text(title)
-            .font(.system(size: 20, weight: .regular))
+            .font(AppTypography.sectionTitle)
             .foregroundStyle(titleBrown)
             .padding(.leading, 10)
     }
@@ -512,11 +474,11 @@ private struct PlanGenerationLoadingView: View {
                         .accessibilityHidden(true)
 
                     Text("Creating your study plan")
-                        .font(.system(size: 21, weight: .bold, design: .rounded))
+                        .font(AppTypography.title)
                         .foregroundStyle(Color(red: 0.42, green: 0.10, blue: 0.06))
 
                     Text("Reading your material and organizing each study day…")
-                        .font(.subheadline)
+                        .font(AppTypography.subheadline)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
 

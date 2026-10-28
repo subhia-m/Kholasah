@@ -86,7 +86,7 @@ struct FirstCourseSetupView: View {
                     dependencies.appState.hasSkippedFirstCourseSetup = true
                 } label: {
                     Text("Skip")
-                        .font(.footnote)
+                        .font(AppTypography.footnote)
                         .foregroundStyle(AppColors.brown.opacity(0.7))
                         .frame(minWidth: 44, minHeight: 44)
                         .contentShape(Rectangle())
@@ -114,13 +114,13 @@ private struct WelcomeTitleView: View {
     var body: some View {
         VStack(spacing: 8) {
             Text("ADD YOUR")
-                .font(.system(size: 40, weight: .bold))
+                .font(AppTypography.displayTitle)
                 .foregroundStyle(Color.titleBrown)
 
             // يرتب العناصر أفقيًا.
             HStack(spacing: 10) {
                 Text("FIRST COURSE")
-                    .font(.system(size: 40, weight: .bold))
+                    .font(AppTypography.displayTitle)
                     .foregroundStyle(Color.titleBrown)
 
                 Image("logo")
@@ -138,7 +138,7 @@ private struct FirstCoursePromptView: View {
     var body: some View {
         VStack(spacing: 31) {
             Text("Add your first course!")
-                .font(.system(size: 21, weight: .regular, design: .rounded))
+                .font(AppTypography.title)
                 .foregroundStyle(Color.titleBrown)
         }
         // يوفر اسمًا تقرؤه التقنيات المساعدة مثل VoiceOver.
@@ -163,7 +163,7 @@ private struct QuoteView: View {
                     .offset(x: -22, y: 19)
 
                 Text("“ motivation quote here ”")
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .font(AppTypography.subheadlineEmphasized)
                     .italic()
                     .foregroundStyle(.white)
                     .lineLimit(2)

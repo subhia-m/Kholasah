@@ -90,9 +90,9 @@ private struct PlanOverviewContent: View {
                     if let reminder = nextReminder {
                         VStack(spacing: 4) {
                             Text(reminder.title)
-                                .font(.system(size: 17, weight: .medium))
+                                .font(AppTypography.headline)
                             Text(reminder.date.formatted(date: .abbreviated, time: .shortened))
-                                .font(.system(size: 13))
+                                .font(AppTypography.caption)
                                 .opacity(0.7)
                         }
                         .foregroundStyle(PlanTheme.text)
@@ -112,7 +112,7 @@ private struct PlanOverviewContent: View {
                         .fill(PlanTheme.mauve)
                     if let task = newestOpenTask {
                         Text(task.title)
-                            .font(.system(size: 17, weight: .medium))
+                            .font(AppTypography.headline)
                             .foregroundStyle(.white)
                             // يضيف مسافة حول العنصر؛ ترتيب معدلات العرض يؤثر في النتيجة.
                             .padding(.horizontal, 16)
@@ -139,11 +139,11 @@ private struct PlanOverviewContent: View {
                                     .frame(width: 14, height: 1)
                                 Text("\(tasks.count)")
                             }
-                            .font(.system(size: 12))
+                            .font(AppTypography.caption)
                             .foregroundStyle(.white)
                         }
                         Text("\(tasksDone) / \(tasks.count) Tasks")
-                            .font(.system(size: 12))
+                            .font(AppTypography.caption)
                             .foregroundStyle(.white)
                     }
 
@@ -157,7 +157,7 @@ private struct PlanOverviewContent: View {
                                 .foregroundStyle(.white)
                         }
                         Text("\(daysDone) / \(daysTotal) Days")
-                            .font(.system(size: 12))
+                            .font(AppTypography.caption)
                             .foregroundStyle(.white)
                     }
 
@@ -186,7 +186,7 @@ private struct PlanOverviewContent: View {
     // يبني عنوان القسم مع الرمز المرتبط به.
     private func header(systemImage: String, title: String) -> some View {
         Label {
-            Text(title).font(.system(size: 13))
+            Text(title).font(AppTypography.captionEmphasized)
         } icon: {
             Image(systemName: systemImage).font(.system(size: 14))
         }
@@ -196,7 +196,7 @@ private struct PlanOverviewContent: View {
     // يبني النص المعروض عند غياب المحتوى.
     private func emptyLabel(_ text: String, color: Color) -> some View {
         Text(text)
-            .font(.system(size: 14))
+            .font(AppTypography.subheadline)
             .foregroundStyle(color.opacity(0.6))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

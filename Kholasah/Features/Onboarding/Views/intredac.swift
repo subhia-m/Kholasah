@@ -38,7 +38,7 @@ struct intredac: View {
                                 currentPage = 4
                             }
                         }
-                        .font(.subheadline)
+                        .font(AppTypography.subheadline)
                         .foregroundColor(.gray)
                         // يضيف مسافة حول العنصر؛ ترتيب معدلات العرض يؤثر في النتيجة.
                         .padding(.horizontal, 24)
@@ -113,14 +113,14 @@ struct PageView1: View {
                 }
             }
             Text("خُلاصة")
-                .font(.system(size: 32, weight: .bold))
+                .font(AppTypography.displayTitle)
                 .foregroundColor(Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)))
             Text("Kholasah")
-                .font(.system(size: 32, weight: .bold))
+                .font(AppTypography.displayTitle)
                 .foregroundColor(Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)))
             
             Text("Turn your materials\ninto progress.")
-                .font(.system(size: 16))
+                .font(AppTypography.body)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.gray)
             
@@ -149,7 +149,7 @@ struct PageView2: View {
                         .font(.system(size: 20))
                         .foregroundColor(Color(#colorLiteral(red: 0.3098039329, green: 0.2039215714, blue: 0.03921568766, alpha: 1)))
                     Text("Upload. Plan. Learn. Progress.")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(AppTypography.subheadlineEmphasized)
                         .foregroundColor(Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)))
                         .padding(.top, 8)
                 }
@@ -158,12 +158,12 @@ struct PageView2: View {
             
             VStack(spacing: 12) {
                 Text("Welcome to\nKholasah")
-                    .font(.system(size: 28, weight: .bold))
+                    .font(AppTypography.screenTitle)
                     .multilineTextAlignment(.center)
                     .foregroundColor(Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)))
                 
                 Text("Your personal study companion that turns your materials into a clear plan.")
-                    .font(.system(size: 15))
+                    .font(AppTypography.subheadline)
                     .multilineTextAlignment(.center)
                     .foregroundColor(.gray)
                     .padding(.horizontal, 24)
@@ -198,10 +198,10 @@ struct PageView3: View {
                             .font(.system(size: 40))
                             .foregroundColor(Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)))
                         Text("Upload your files")
-                            .font(.system(size: 14, weight: .bold))
+                            .font(AppTypography.subheadlineEmphasized)
                             .foregroundColor(Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)))
                         Text("PDF, PPT, DOC, or images")
-                            .font(.system(size: 12))
+                            .font(AppTypography.caption)
                             .foregroundColor(.gray)
                     }
                     .padding()
@@ -214,12 +214,12 @@ struct PageView3: View {
             
             VStack(spacing: 12) {
                 Text("Upload your\nstudy materials")
-                    .font(.system(size: 28, weight: .bold))
+                    .font(AppTypography.screenTitle)
                     .multilineTextAlignment(.center)
                     .foregroundColor(Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)))
                 
                 Text("Upload your slides, notes, or files and let AI create a personalized study plan.")
-                    .font(.system(size: 15))
+                    .font(AppTypography.subheadline)
                     .multilineTextAlignment(.center)
                     .foregroundColor(.gray)
                     .padding(.horizontal, 24)
@@ -239,7 +239,7 @@ struct FileBadge: View {
     // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         Text(title)
-            .font(.system(size: 12, weight: .bold))
+            .font(AppTypography.captionEmphasized)
             .foregroundColor(.white)
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
@@ -264,7 +264,7 @@ struct PageView4: View {
                     HStack {
                         Image(systemName: "calendar")
                         Text("Your Plan")
-                            .font(.system(size: 14, weight: .bold))
+                            .font(AppTypography.subheadlineEmphasized)
                         Spacer()
                         Image(systemName: "chevron.right")
                     }
@@ -284,12 +284,12 @@ struct PageView4: View {
             
             VStack(spacing: 12) {
                 Text("Get a clear\nstudy plan")
-                    .font(.system(size: 28, weight: .bold))
+                    .font(AppTypography.screenTitle)
                     .multilineTextAlignment(.center)
                     .foregroundColor(Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)))
                 
                 Text("Kholasah breaks your materials into topics, sets a schedule, and helps you stay consistent with reminders.")
-                    .font(.system(size: 15))
+                    .font(AppTypography.subheadline)
                     .multilineTextAlignment(.center)
                     .foregroundColor(.gray)
                     .padding(.horizontal, 24)
@@ -315,10 +315,10 @@ struct PlanRow: View {
                 .foregroundColor(Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)))
                 .frame(width: 20)
             Text(title)
-                .font(.system(size: 13, weight: .medium))
+                .font(AppTypography.captionEmphasized)
             Spacer()
             Text(time)
-                .font(.system(size: 12))
+                .font(AppTypography.caption)
                 .foregroundColor(.gray)
         }
         .padding(.vertical, 4)
@@ -356,12 +356,12 @@ struct PageView5: View {
             
             VStack(spacing: 12) {
                 Text("Stay motivated\nevery day")
-                    .font(.system(size: 28, weight: .bold))
+                    .font(AppTypography.screenTitle)
                     .multilineTextAlignment(.center)
                     .foregroundColor(Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)))
                 
                 Text("Daily notifications, small quizzes, and progress tracking to help you build a consistent habit.")
-                    .font(.system(size: 15))
+                    .font(AppTypography.subheadline)
                     .multilineTextAlignment(.center)
                     .foregroundColor(.gray)
                     .padding(.horizontal, 24)
@@ -369,7 +369,7 @@ struct PageView5: View {
                 // Get Started Action Button
                 Button(action: onGetStarted) {
                     Text("Get Started")
-                        .font(.system(size: 16, weight: .bold))
+                        .font(AppTypography.button)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -398,7 +398,7 @@ struct FeatureRow: View {
                 .foregroundColor(Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)))
                 .frame(width: 24)
             Text(title)
-                .font(.system(size: 13, weight: .medium))
+                .font(AppTypography.captionEmphasized)
             Spacer()
         }
     }

@@ -109,9 +109,9 @@ struct CoursesView: View {
             Image(systemName: "book")
                 .font(.system(size: 34))
             Text("No courses yet")
-                .font(.system(size: 18, weight: .medium))
+                .font(AppTypography.sectionTitle)
             Text("Tap + to add your first course.")
-                .font(.system(size: 14))
+                .font(AppTypography.subheadline)
                 .opacity(0.6)
             Spacer()
             Spacer()
@@ -142,12 +142,12 @@ private struct StackedCourseCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(course.title)
-                .font(.system(size: 22, weight: .regular, design: .serif))
+                .font(AppTypography.title)
 
             if isExpanded {
                 if !course.instructor.isEmpty {
                     Label(course.instructor, systemImage: "person")
-                        .font(.system(size: 13))
+                        .font(AppTypography.caption)
                         .padding(.top, 8)
                 }
                 Spacer(minLength: 0)
