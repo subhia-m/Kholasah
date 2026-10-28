@@ -1,8 +1,9 @@
+// MARK:
 import SwiftUI
 
 // MARK: - Theme (used only by the Plan and Courses screens)
-
 extension Color {
+   
     init(planHex hex: String) {
         let cleaned = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var value: UInt64 = 0
@@ -16,37 +17,53 @@ extension Color {
 }
 
 enum PlanTheme {
+  
     static let background        = AppColors.background   // page background
+    
     static let text              = AppColors.burgundy     // titles and body text
+    
     static let deepClay          = AppColors.primary      // main buttons, checkmarks, first course card
+    
     static let mauve             = AppColors.brown        // "New Task" box, third course card
+    
     static let progressBrown     = AppColors.burgundy     // Course Progress box
+    
     static let controlBackground = AppColors.darkPage     // switcher bar and text fields
+    
     static let chip              = AppColors.darkPage     // round + / back buttons, Cancel buttons
 }
 
 // MARK: - Shared building blocks
 
 struct PlanTopBar: View {
+   
     let title: String
+    
     var onBack: (() -> Void)? = nil
 
+    
     var body: some View {
+        
         ZStack {
             Text(title)
                 .font(.system(size: 26, weight: .regular))
                 .foregroundStyle(PlanTheme.text)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
+                
                 .padding(.horizontal, 48)   // keeps long names clear of the back button
                 .accessibilityAddTraits(.isHeader)
 
+            
             if let onBack {
+                
                 HStack {
+                   
                     Button(action: onBack) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .medium))
                             .foregroundStyle(PlanTheme.text)
+            
                             .frame(width: 36, height: 36)
                             .background(Circle().fill(PlanTheme.chip))
                     }
@@ -76,28 +93,14 @@ struct PlanAddButton: View {
         .accessibilityLabel(label)
     }
 }
-
-struct PlanPalmLeaf: View {
-    var body: some View {
-        // Optional decoration: add an image named "palmLeaf" to Assets.
-        Image("palmLeaf")
-            .resizable()
-            .scaledToFit()
-            .frame(width: 40)
-            .opacity(0.35)
-            .allowsHitTesting(false)
-    }
-}
-
-/// White card with a soft shadow and a palm leaf in the corner.
 struct PlanCard<Content: View>: View {
+    
     @ViewBuilder var content: Content
 
-    var body: some View {
+        var body: some View {
         ZStack(alignment: .topTrailing) {
             RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .fill(Color.white)
-            PlanPalmLeaf().padding(8)
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
@@ -115,11 +118,15 @@ enum PlanScreenTab: String, CaseIterable {
 }
 
 struct PlanSectionPicker: View {
+    
     @Binding var selection: PlanScreenTab
+    
     @Namespace private var pill
 
+    
     var body: some View {
         HStack(spacing: 0) {
+            
             ForEach(PlanScreenTab.allCases, id: \.self) { tab in
                 let isSelected = tab == selection
                 Text(tab.rawValue)
@@ -153,15 +160,21 @@ struct PlanSectionPicker: View {
 // MARK: - Page scaffold (every page uses this: background, top bar, switcher, divider)
 
 struct PlanPageScaffold<Content: View>: View {
+    
     let title: String
+    
     @Binding var selection: PlanScreenTab
+    
     var onBack: (() -> Void)? = nil
+    
     @ViewBuilder var content: Content
+
 
     var body: some View {
         ZStack {
             PlanTheme.background.ignoresSafeArea()
 
+            
             VStack(spacing: 0) {
                 PlanTopBar(title: title, onBack: onBack)
 
@@ -179,12 +192,13 @@ struct PlanPageScaffold<Content: View>: View {
     }
 }
 
-// MARK: - Plan page (intentionally empty for now)
+// MARK: - Plan page
 
-/// The "Plan" page. Empty until the team decides what goes here; it only shows
 /// the palm backdrop from the design (invisible if the image isn't in Assets).
 struct PlanView: View {
+   
     var courseTitle: String = "Plan"
+    
     var courseID: Course.ID? = nil
     /// Passed in by MainTabView.
     var viewModel: PlanViewModel? = nil
@@ -196,17 +210,16 @@ struct PlanView: View {
     var selection: Binding<PlanScreenTab>? = nil
     var onBack: (() -> Void)? = nil
 
+    private var planTasks: [StudyTask] {
+        guard let viewModel else { return [] }
+        guard let courseID else { return viewModel.tasks }
+        return viewModel.tasks.filter { $0.courseID == courseID }
+    }
+
     var body: some View {
         if let selection {
             PlanPageScaffold(title: courseTitle, selection: selection, onBack: onBack) {
-                if let viewModel {
-                    StudyMaterialImportView(viewModel: viewModel, courseID: courseID)
-                } else {
-                    ContentUnavailableView(
-                        "File Import Unavailable",
-                        systemImage: "doc.badge.ellipsis"
-                    )
-                }
+                GeneratedPlanSchedule(tasks: planTasks)
             }
         } else {
             CourseFlowView(course: nil,
@@ -217,12 +230,72 @@ struct PlanView: View {
     }
 }
 
+private struct GeneratedPlanSchedule: View {
+    let tasks: [StudyTask]
+
+    var body: some View {
+        if tasks.isEmpty {
+            ContentUnavailableView(
+                "No Study Plan Yet",
+                systemImage: "calendar.badge.plus",
+                description: Text("Create a course and generate its plan from the Add Course page.")
+            )
+        } else {
+            ScrollView(showsIndicators: false) {
+                LazyVStack(spacing: 14) {
+                    ForEach(Array(tasks.enumerated()), id: \.element.id) { index, task in
+                        HStack(alignment: .top, spacing: 14) {
+                            Text("\(index + 1)")
+                                .font(.headline)
+                                .foregroundStyle(.white)
+                                .frame(width: 34, height: 34)
+                                .background(PlanTheme.deepClay, in: Circle())
+
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(task.title)
+                                    .font(.headline)
+                                    .foregroundStyle(PlanTheme.text)
+
+                                if let concept = task.concept, !concept.isEmpty {
+                                    Text(concept)
+                                        .font(.subheadline)
+                                        .foregroundStyle(PlanTheme.text.opacity(0.7))
+                                }
+
+                                HStack(spacing: 12) {
+                                    if let dueDate = task.dueDate {
+                                        Label(
+                                            dueDate.formatted(date: .abbreviated, time: .shortened),
+                                            systemImage: "calendar"
+                                        )
+                                    }
+                                    if let minutes = task.durationMinutes {
+                                        Label("\(minutes) min", systemImage: "clock")
+                                    }
+                                }
+                                .font(.caption)
+                                .foregroundStyle(PlanTheme.mauve)
+                            }
+
+                            Spacer(minLength: 0)
+                        }
+                        .padding(16)
+                        .background(.white.opacity(0.85), in: RoundedRectangle(cornerRadius: 18))
+                    }
+                }
+                .padding(20)
+            }
+        }
+    }
+}
+
+
 #Preview {
     // Opens the whole flow on this page, so the switcher can reach every other page.
     // Use Live mode in the canvas (the play button) to tap around.
     NavigationStack {
         CourseFlowView(
-            course: Course(title: "Swift Basics"),
+            course: Course(title: "Plan"),
             viewModel: AppDependencies().planViewModel,
             showsBackButton: true,
             startingAt: .plan

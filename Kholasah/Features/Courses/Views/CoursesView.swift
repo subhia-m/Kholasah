@@ -1,3 +1,5 @@
+// MARK: 
+
 import SwiftUI
 
 // MARK: - Card colors (cycled by position in the list)
@@ -18,7 +20,7 @@ struct CoursesView: View {
 
     @State private var expandedID: Course.ID?
     @State private var selectedCourse: Course?
-    @State private var showingAddSheet = false
+    @State private var showingCourseDetails = false
 
     var body: some View {
         // No NavigationStack here: MainTabView already provides one.
@@ -60,7 +62,7 @@ struct CoursesView: View {
                 }
             }
 
-            PlanAddButton(label: "Add course") { showingAddSheet = true }
+            PlanAddButton(label: "Add course") { showingCourseDetails = true }
                 .padding(.trailing, 28)
                 .padding(.bottom, 16)
         }
@@ -70,14 +72,13 @@ struct CoursesView: View {
                            showsBackButton: true,
                            startingAt: .overview)
         }
-        .toolbar(.hidden, for: .navigationBar)
-        .sheet(isPresented: $showingAddSheet) {
-            NewCourseSheet(viewModel: viewModel) {
-                withAnimation { expandedID = viewModel.courses.last?.id }
-            }
-            .presentationDetents([.height(340)])
-            .presentationDragIndicator(.visible)
+        .navigationDestination(isPresented: $showingCourseDetails) {
+            CourseView(
+                coursesViewModel: viewModel,
+                planViewModel: planViewModel
+            )
         }
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             if expandedID == nil { expandedID = viewModel.courses.last?.id }
         }
@@ -124,6 +125,7 @@ private struct StackedCourseCard: View {
                         .font(.system(size: 13))
                         .padding(.top, 8)
                 }
+
                 Spacer(minLength: 0)
             }
         }
@@ -138,83 +140,7 @@ private struct StackedCourseCard: View {
     }
 }
 
-// MARK: - Add course sheet
-
-private struct NewCourseSheet: View {
-    let viewModel: CoursesViewModel
-    let onAdded: () -> Void
-
-    @Environment(\.dismiss) private var dismiss
-    @State private var title = ""
-    @State private var instructor = ""
-    @FocusState private var isFocused: Bool
-
-    private var trimmedTitle: String {
-        title.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("New Course")
-                .font(.system(size: 20, weight: .medium))
-                .foregroundStyle(PlanTheme.text)
-
-            TextField("Course name", text: $title)
-                .focused($isFocused)
-                .padding(14)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(PlanTheme.controlBackground)
-                )
-
-            TextField("Instructor (optional)", text: $instructor)
-                .padding(14)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(PlanTheme.controlBackground)
-                )
-
-            if let message = viewModel.errorMessage {
-                Text(message)
-                    .font(.system(size: 13))
-                    .foregroundStyle(.red)
-            }
-
-            HStack(spacing: 12) {
-                Button("Cancel") { dismiss() }
-                    .font(.system(size: 16))
-                    .foregroundStyle(PlanTheme.text)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Capsule().fill(PlanTheme.chip))
-
-                Button("Add") {
-                    if viewModel.addCourse(title: trimmedTitle, instructor: instructor) {
-                        onAdded()
-                        dismiss()
-                    }
-                }
-                .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(Capsule().fill(PlanTheme.deepClay))
-                .opacity(trimmedTitle.isEmpty ? 0.4 : 1)
-                .disabled(trimmedTitle.isEmpty)
-            }
-        }
-        .padding(.horizontal, 24)
-        .padding(.top, 28)
-        .background(PlanTheme.background.ignoresSafeArea())
-        .onAppear {
-            isFocused = true
-            viewModel.clearError()
-        }
-        .onDisappear { viewModel.clearError() }
-    }
-}
-
 #Preview {
-    
+
     MainTabView(dependencies: AppDependencies())
 }

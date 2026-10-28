@@ -1,8 +1,9 @@
+// MARK:
 import SwiftUI
 
 // MARK: - Legacy type
-
 struct PlanTaskItem: Identifiable, Equatable {
+   
     var id = UUID()
     var title: String
     var isDone: Bool = false
@@ -18,6 +19,7 @@ struct PlanTaskItem: Identifiable, Equatable {
 // MARK: - Tasks page
 
 struct TasksView: View {
+
     var courseTitle: String = "Plan"
     @Binding var selection: PlanScreenTab
     var onBack: (() -> Void)? = nil
@@ -28,8 +30,10 @@ struct TasksView: View {
     var onDelete: (StudyTask) -> Void                   // NEW
 
     @State private var showingAddSheet = false
-    @State private var editingTask: StudyTask?          // NEW
+   
+    @State private var editingTask: StudyTask?
 
+  
     private var doneCount: Int { tasks.filter(\.isCompleted).count }
 
     var body: some View {
@@ -39,17 +43,22 @@ struct TasksView: View {
     }
 
     private var content: some View {
+        
         VStack(spacing: 0) {
-            HStack {
-                Spacer()
-                PlanAddButton(label: "Add task") { showingAddSheet = true }
-            }
-            .padding(.horizontal, 24)
-            .padding(.top, 14)
-            .padding(.bottom, 12)
-
+           
             PlanCard {
+                
+                HStack {
+                    Spacer()
+                    PlanAddButton(label: "Add task") { showingAddSheet = true }
+                }
+                
+                .padding(.horizontal, 24)
+                .padding(.top, 20)
+                .padding(.bottom, 17)
+
                 VStack(alignment: .leading, spacing: 8) {
+                    
                     HStack(spacing: 8) {
                         Image(systemName: "list.clipboard")
                             .font(.system(size: 22))
@@ -72,8 +81,9 @@ struct TasksView: View {
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 16)
+            .padding(.top, 16)
         }
-        // NEW: the add sheet now uses the shared editor sheet (same look as before)
+    // NEW: the add sheet uses the shared editor sheet
         .sheet(isPresented: $showingAddSheet) {
             PlanTaskEditorSheet(heading: "New Task", buttonTitle: "Add") { title in
                 withAnimation { onAdd(title) }
@@ -93,6 +103,7 @@ struct TasksView: View {
         }
     }
 
+    
     private var emptyState: some View {
         VStack(spacing: 6) {
             Spacer()
@@ -104,11 +115,14 @@ struct TasksView: View {
             Spacer()
         }
         .foregroundStyle(PlanTheme.text)
+       
         .frame(maxWidth: .infinity)
     }
 
+    
     private var taskList: some View {
         List {
+            
             ForEach(tasks) { task in
                 PlanTaskRow(task: task) {
                     withAnimation(.easeInOut(duration: 0.2)) { onToggle(task) }
@@ -117,6 +131,7 @@ struct TasksView: View {
                 .listRowSeparatorTint(PlanTheme.text.opacity(0.12))
                 // NEW: swipe left on a task to delete or edit it
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    
                     Button(role: .destructive) {
                         withAnimation { onDelete(task) }
                     } label: {
@@ -152,7 +167,9 @@ struct TasksView: View {
 // MARK: - Row
 
 private struct PlanTaskRow: View {
+   
     let task: StudyTask
+   
     let onToggle: () -> Void
 
     var body: some View {
@@ -163,6 +180,7 @@ private struct PlanTaskRow: View {
                     .foregroundStyle(PlanTheme.deepClay)
             }
             .buttonStyle(.plain)
+            
             .accessibilityLabel(task.isCompleted ? "Mark as not completed" : "Mark as completed")
 
             NavigationLink {
@@ -174,6 +192,7 @@ private struct PlanTaskRow: View {
                         .strikethrough(task.isCompleted)
 
                     HStack(spacing: 8) {
+                        
                         if let dueDate = task.dueDate {
                             Text(dueDate.formatted(date: .abbreviated, time: .shortened))
                         }
@@ -197,12 +216,17 @@ private struct PlanTaskRow: View {
 // MARK: - Add / edit sheet (NEW: one sheet used for both adding and editing)
 
 private struct PlanTaskEditorSheet: View {
+   
     let heading: String
+    
     let buttonTitle: String
+   
     let onSave: (String) -> Void
 
     @Environment(\.dismiss) private var dismiss
+   
     @State private var title: String
+    
     @FocusState private var isFocused: Bool
 
     init(heading: String,
@@ -215,6 +239,7 @@ private struct PlanTaskEditorSheet: View {
         _title = State(initialValue: initialText)
     }
 
+    
     private var trimmed: String {
         title.trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -225,6 +250,7 @@ private struct PlanTaskEditorSheet: View {
                 .font(.system(size: 20, weight: .medium))
                 .foregroundStyle(PlanTheme.text)
 
+            
             TextField("What do you need to do?", text: $title)
                 .focused($isFocused)
                 .submitLabel(.done)
@@ -256,20 +282,23 @@ private struct PlanTaskEditorSheet: View {
         .padding(.horizontal, 24)
         .padding(.top, 28)
         .background(PlanTheme.background.ignoresSafeArea())
+        
         .onAppear { isFocused = true }
     }
 
     private func save() {
+        
         guard !trimmed.isEmpty else { return }
         onSave(trimmed)
         dismiss()
     }
 }
 
+
 #Preview {
     // Opens the whole flow on this page, so the switcher can reach every other page.
     // Use Live mode in the canvas (the play button) to tap around.
     NavigationStack {
-        CourseFlowView(course: Course(title: "Swift Basics"), showsBackButton: true, startingAt: .tasks)
+        CourseFlowView(course: Course(title: "Plan"), showsBackButton: true, startingAt: .tasks)
     }
 }

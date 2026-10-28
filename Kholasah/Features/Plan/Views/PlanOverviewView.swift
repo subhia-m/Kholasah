@@ -1,3 +1,4 @@
+// MARK:
 import SwiftUI
 
 // MARK: - Overview page
@@ -8,10 +9,15 @@ struct PlanOverviewView: View {
     var onBack: (() -> Void)? = nil
     var tasks: [StudyTask] = []
     var reminders: [PlanReminderItem] = []
+    var daysDone: Int = 0                    // NEW
+    var daysTotal: Int = 0                   // NEW
 
     var body: some View {
         PlanPageScaffold(title: courseTitle, selection: $selection, onBack: onBack) {
-            PlanOverviewContent(tasks: tasks, reminders: reminders)
+            PlanOverviewContent(tasks: tasks,
+                                reminders: reminders,
+                                daysDone: daysDone,          // NEW
+                                daysTotal: daysTotal)        // NEW
         }
     }
 }
@@ -21,7 +27,7 @@ struct PlanOverviewView: View {
 private struct PlanOverviewContent: View {
     var tasks: [StudyTask] = []
     var reminders: [PlanReminderItem] = []
-    // Course duration isn't stored yet, so these stay at 0 until Course has dates.
+    // Passed in by CourseFlowView, worked out from the due dates of the course's tasks.
     var daysDone: Int = 0
     var daysTotal: Int = 0
 
@@ -58,7 +64,7 @@ private struct PlanOverviewContent: View {
                 ZStack(alignment: .bottomLeading) {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(Color.white)
-                    PlanPalmLeaf().padding(6)
+                    //PlanPalmLeaf().padding(6)
 
                     if let reminder = nextReminder {
                         VStack(spacing: 4) {
@@ -74,7 +80,7 @@ private struct PlanOverviewContent: View {
                         emptyLabel("No upcoming reminders", color: PlanTheme.text)
                     }
                 }
-                .frame(height: 90)
+                .frame(height: 120)
                 .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
 
                 // New task
@@ -91,7 +97,7 @@ private struct PlanOverviewContent: View {
                         emptyLabel("No tasks yet", color: .white)
                     }
                 }
-                .frame(height: 90)
+                .frame(height: 120)
                 .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
 
                 // Course progress
@@ -102,15 +108,9 @@ private struct PlanOverviewContent: View {
                     VStack(spacing: 10) {
                         ZStack {
                             ring(progress: taskProgress)
-                            VStack(spacing: 0) {
-                                Text("\(tasksDone)")
-                                Rectangle()
-                                    .fill(Color.white)
-                                    .frame(width: 14, height: 1)
-                                Text("\(tasks.count)")
-                            }
-                            .font(.system(size: 12))
-                            .foregroundStyle(.white)
+                            Image(systemName: "list.clipboard")       // NEW: clipboard instead of the 0 / 0 fraction
+                                .font(.system(size: 18))
+                                .foregroundStyle(.white)
                         }
                         Text("\(tasksDone) / \(tasks.count) Tasks")
                             .font(.system(size: 12))
@@ -133,7 +133,7 @@ private struct PlanOverviewContent: View {
 
                     Spacer()
                 }
-                .padding(.vertical, 26)
+                .padding(.vertical, 90)
                 .frame(maxWidth: .infinity)
                 .background(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -171,13 +171,13 @@ private struct PlanOverviewContent: View {
     private func ring(progress: Double) -> some View {
         ZStack {
             Circle()
-                .stroke(Color.white.opacity(0.25), lineWidth: 4)
+                .stroke(Color.white.opacity(0.25), lineWidth: 6)
             Circle()
                 .trim(from: 0, to: progress)
-                .stroke(Color.white, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                .stroke(Color.white, style: StrokeStyle(lineWidth: 6, lineCap: .round))
                 .rotationEffect(.degrees(-90))
         }
-        .frame(width: 52, height: 52)
+        .frame(width: 60, height: 60)
     }
 }
 

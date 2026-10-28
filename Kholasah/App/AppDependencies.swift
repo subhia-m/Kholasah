@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import SwiftData
 
 @MainActor
 @Observable
@@ -24,15 +25,31 @@ final class AppDependencies {
         )
     }
 
+    convenience init(modelContainer: ModelContainer) {
+        let context = modelContainer.mainContext
+        self.init(
+            storageService: UserDefaultsStorageService(),
+            courseRepository: SwiftDataCourseRepository(modelContext: context),
+            taskRepository: SwiftDataTaskRepository(modelContext: context),
+            studyPlanRepository: SwiftDataStudyPlanRepository(modelContext: context),
+            timerService: SystemTimerService(),
+            fileImportService: PDFFileImportService(),
+            aiService: LocalFoundationModelsAIService(),
+            notificationService: LocalNotificationService(),
+            reminderModelContext: context
+        )
+    }
+
     init(
         storageService: any StorageService,
-        courseRepository: InMemoryCourseRepository,
-        taskRepository: InMemoryTaskRepository,
-        studyPlanRepository: InMemoryStudyPlanRepository,
+        courseRepository: any CourseRepository,
+        taskRepository: any TaskRepository,
+        studyPlanRepository: any StudyPlanRepository,
         timerService: any TimerService,
         fileImportService: any FileImportService = PDFFileImportService(),
         aiService: any AIService = LocalFoundationModelsAIService(),
-        notificationService: any NotificationService = LocalNotificationService()
+        notificationService: any NotificationService = LocalNotificationService(),
+        reminderModelContext: ModelContext? = nil
     ) {
         let appState = AppState(storage: storageService)
         let courseService = CourseService(repository: courseRepository)
@@ -53,5 +70,8 @@ final class AppDependencies {
             aiService: aiService,
             notificationService: notificationService
         )
+        if let reminderModelContext {
+            PlanRemindersStore.shared.configure(modelContext: reminderModelContext)
+        }
     }
 }

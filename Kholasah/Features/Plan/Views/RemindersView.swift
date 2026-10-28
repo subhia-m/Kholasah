@@ -1,14 +1,22 @@
+// MARK:
+
 import SwiftUI
 
 // MARK: - Reminders page
 
 struct RemindersView: View {
+   
     var courseTitle: String = "Plan"
+    
     @Binding var selection: PlanScreenTab
     var onBack: (() -> Void)? = nil
+   
     var reminders: [PlanReminderItem]
+    
     var onAdd: (String, Date) -> Void
+   
     var onSetEnabled: (PlanReminderItem, Bool) -> Void
+   
     var onDelete: (PlanReminderItem) -> Void
 
     @State private var showingAddSheet = false
@@ -19,17 +27,21 @@ struct RemindersView: View {
         }
     }
 
+  
     private var content: some View {
+        
         VStack(spacing: 0) {
-            HStack {
-                Spacer()
-                PlanAddButton(label: "Add reminder") { showingAddSheet = true }
-            }
-            .padding(.horizontal, 24)
-            .padding(.top, 14)
-            .padding(.bottom, 12)
-
+            
             PlanCard {
+                HStack {
+                    Spacer()
+                    PlanAddButton(label: "Add reminder") { showingAddSheet = true }
+                }
+               
+                .padding(.horizontal, 24)
+                .padding(.top, 20)
+                .padding(.bottom, 17)
+                
                 VStack(alignment: .leading, spacing: 8) {
                     Image(systemName: "bell")
                         .font(.system(size: 22))
@@ -46,6 +58,8 @@ struct RemindersView: View {
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 16)
+            .padding(.top, 16)
+
         }
         .sheet(isPresented: $showingAddSheet) {
             PlanAddReminderSheet { title, date in
@@ -56,6 +70,7 @@ struct RemindersView: View {
         }
     }
 
+    
     private var emptyState: some View {
         VStack(spacing: 6) {
             Spacer()
@@ -67,11 +82,12 @@ struct RemindersView: View {
             Spacer()
         }
         .foregroundStyle(PlanTheme.text)
+       
         .frame(maxWidth: .infinity)
     }
-
     private var reminderList: some View {
         List {
+            
             ForEach(reminders) { reminder in
                 HStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 2) {
@@ -97,6 +113,7 @@ struct RemindersView: View {
                 .listRowBackground(Color.clear)
                 .listRowSeparatorTint(PlanTheme.text.opacity(0.12))
                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    
                     Button(role: .destructive) {
                         withAnimation { onDelete(reminder) }
                     } label: {
@@ -116,20 +133,22 @@ private struct PlanAddReminderSheet: View {
     let onAdd: (String, Date) -> Void
 
     @Environment(\.dismiss) private var dismiss
+   
     @State private var title = ""
+    
     @State private var date = Date().addingTimeInterval(3600)
     @FocusState private var isFocused: Bool
 
     private var trimmed: String {
         title.trimmingCharacters(in: .whitespacesAndNewlines)
     }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("New Reminder")
                 .font(.system(size: 20, weight: .medium))
                 .foregroundStyle(PlanTheme.text)
 
+           
             TextField("Remind me to...", text: $title)
                 .focused($isFocused)
                 .submitLabel(.done)
@@ -153,6 +172,7 @@ private struct PlanAddReminderSheet: View {
                     .background(Capsule().fill(PlanTheme.chip))
 
                 Button("Add") {
+                    
                     guard !trimmed.isEmpty else { return }
                     onAdd(trimmed, date)
                     dismiss()
@@ -173,10 +193,9 @@ private struct PlanAddReminderSheet: View {
     }
 }
 
+
 #Preview {
-    // Opens the whole flow on this page, so the switcher can reach every other page.
-    // Use Live mode in the canvas (the play button) to tap around.
     NavigationStack {
-        CourseFlowView(course: Course(title: "Swift Basics"), showsBackButton: true, startingAt: .reminders)
+        CourseFlowView(course: Course(title: "Plan"), showsBackButton: true, startingAt: .reminders)
     }
 }

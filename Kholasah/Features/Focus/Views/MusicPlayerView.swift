@@ -1,23 +1,37 @@
+// MARK: - شرح الملف
+// واجهة التحكم بالصوت: تشغيل وإيقاف مؤقت وتنقل وإعادة تشغيل وتحريك موضع الاستماع.
+// للقراءة: let يثبت القيمة، وvar يسمح بتغييرها، وprivate يحصر الوصول في نطاق التعريف.
+
 import SwiftUI
 
 struct MusicPlayerView: View {
+    // العنوان المستخدم لهذا العنصر.
     let title: LocalizedStringKey
+    // اسم صورة المقطع الحالي في موارد التطبيق.
     let artworkName: String
 
+    // إجراء من بيئة SwiftUI لإغلاق العرض الحالي بحسب طريقة تقديمه.
+    // @Environment يقرأ قيمة أو كائنًا توفره بيئة SwiftUI لهذا العرض.
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.scenePhase) private var scenePhase
-    @State private var audioPlayer = FocusAudioPlayer()
+    // مشغل الصوت المشترك الذي تنعكس حالته على الواجهة.
+    let audioPlayer: FocusAudioPlayer
+    // يمنع إعادة اختيار المقطع في كل ظهور للواجهة.
+    // @State حالة تملكها الواجهة وتحافظ SwiftUI عليها بين تحديثاتها؛ الرمز $ يتيح ربطها بعنصر إدخال.
+    @State private var hasSelectedTrack = false
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
+        // يضع العناصر في طبقات متراكبة؛ العناصر اللاحقة تظهر فوق السابقة.
         ZStack {
             AppColors.lightPage
                 .ignoresSafeArea()
 
+            // يرتب العناصر عموديًا؛ spacing يحدد المسافة بينها.
             VStack(spacing: 0) {
                 MusicPlayerHeader {
-                    audioPlayer.pause()
                     dismiss()
                 }
+                    // يضيف مسافة حول العنصر؛ ترتيب معدلات العرض يؤثر في النتيجة.
                     .padding(.bottom, 40)
 
                 MusicArtworkPlaceholder(
@@ -43,30 +57,38 @@ struct MusicPlayerView: View {
             .padding(.top, 8)
         }
         .toolbar(.hidden, for: .navigationBar)
-        .onAppear { audioPlayer.select(artworkName: artworkName) }
-        .onDisappear { audioPlayer.pause() }
-        .onChange(of: scenePhase) { _, phase in
-            if phase != .active { audioPlayer.pause() }
+        // ينفذ الإجراء عند ظهور الواجهة.
+        .onAppear {
+            // يتحقق من شرط لازم للاستمرار؛ ينفذ مسار الخروج عند عدم تحققه.
+            guard !hasSelectedTrack else { return }
+            hasSelectedTrack = true
+            audioPlayer.select(artworkName: artworkName)
         }
     }
 }
 
 private struct MusicPlayerHeader: View {
+    // إجراء الرجوع الذي يمرره العرض الأب.
     let onBack: () -> Void
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         ZStack {
             Text("Focus")
                 .font(.system(.largeTitle, design: .rounded, weight: .regular))
                 .foregroundStyle(AppColors.burgundy)
 
+            // يرتب العناصر أفقيًا.
             HStack {
+                // الجزء التنفيذي يحدد ما يحدث عند الضغط، وlabel يحدد شكل الزر إن وُجد.
                 Button(action: onBack) {
                     Image(systemName: "chevron.backward")
+                        // يضبط مساحة تخطيط العنصر ومحاذاته.
                         .frame(width: 44, height: 44)
                         .contentShape(Circle())
                 }
                     .buttonStyle(.plain)
+                    // يوفر اسمًا تقرؤه التقنيات المساعدة مثل VoiceOver.
                     .accessibilityLabel("Back")
                     .font(.title2)
                     .foregroundStyle(.primary)
@@ -84,9 +106,12 @@ private struct MusicPlayerHeader: View {
 }
 
 private struct MusicArtworkPlaceholder: View {
+    // العنوان المستخدم لهذا العنصر.
     let title: LocalizedStringKey
+    // اسم الصورة المستخدمة في الموارد.
     let imageName: String
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         Color.clear
             .aspectRatio(3 / 4, contentMode: .fit)
@@ -109,20 +134,58 @@ private struct MusicArtworkPlaceholder: View {
 }
 
 private struct MusicPlaybackControls: View {
+    // هل الصوت قيد التشغيل؟
     let isPlaying: Bool
+    // إجراء تبديل تشغيل الصوت وإيقافه مؤقتًا.
     let onPlayPause: () -> Void
+    // إجراء الانتقال إلى الصوت السابق.
     let onPrevious: () -> Void
+    // إجراء الانتقال إلى الصوت التالي.
     let onNext: () -> Void
+    // إجراء إعادة الصوت إلى بدايته.
     let onReplay: () -> Void
+    // مشغل الصوت المشترك الذي تنعكس حالته على الواجهة.
+    // @Bindable يتيح إنشاء روابط $ لخصائص كائن يدعم Observation.
     @Bindable var audioPlayer: FocusAudioPlayer
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         VStack(spacing: 34) {
             VStack(spacing: 4) {
-                Slider(value: $audioPlayer.playbackPosition, in: 0...max(audioPlayer.duration, 1)) {
-                    Text("Playback position")
+                // خط رفيع بدون دائرة؛ الجزء الممتلئ يوضح موضع الاستماع الحالي.
+                GeometryReader { geometry in
+                    let progress = min(max(audioPlayer.playbackPosition / max(audioPlayer.duration, 1), 0), 1)
+
+                    Rectangle()
+                        .fill(.primary.opacity(0.15))
+                        .overlay(alignment: .leading) {
+                            Rectangle()
+                                .fill(.primary.opacity(0.55))
+                                .frame(width: geometry.size.width * progress)
+                        }
+                        .frame(height: 4)
+                        .clipShape(Capsule())
+                        // نوسّع مساحة اللمس مع بقاء الخط رفيعًا لتسهيل السحب والضغط.
+                        .frame(height: 44)
+                        .contentShape(Rectangle())
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { value in
+                                    guard audioPlayer.duration > 0, geometry.size.width > 0 else { return }
+                                    // نحول مكان اللمس إلى وقت، ونمنعه من تجاوز بداية المقطع أو نهايته.
+                                    let fraction = min(max(value.location.x / geometry.size.width, 0), 1)
+                                    audioPlayer.playbackPosition = fraction * audioPlayer.duration
+                                }
+                        )
                 }
-                .tint(.primary)
+                .frame(height: 44)
+                // يحافظ على إمكانية تقديم الصوت وتأخيره باستخدام VoiceOver.
+                .accessibilityRepresentation {
+                    Slider(value: $audioPlayer.playbackPosition, in: 0...max(audioPlayer.duration, 1)) {
+                        Text("Playback position")
+                    }
+                    .disabled(audioPlayer.duration <= 0)
+                }
                 .disabled(audioPlayer.duration <= 0)
 
                 HStack {
@@ -136,7 +199,7 @@ private struct MusicPlaybackControls: View {
             }
             .environment(\.layoutDirection, .leftToRight)
 
-            HStack(spacing: 0) {
+            ZStack {
                 HStack(spacing: 20) {
                     Button("Previous", systemImage: "backward.end.fill") {
                         onPrevious()
@@ -155,10 +218,12 @@ private struct MusicPlaybackControls: View {
                     .accessibilityLabel("Next sound")
                 }
 
-                Spacer(minLength: 40)
+                HStack {
+                    Spacer()
 
-                Button("Replay", systemImage: "arrow.counterclockwise", action: onReplay)
-                    .accessibilityLabel("Replay sound")
+                    Button("Replay", systemImage: "arrow.counterclockwise", action: onReplay)
+                        .accessibilityLabel("Replay sound")
+                }
             }
             .environment(\.layoutDirection, .leftToRight)
             .labelStyle(.iconOnly)
@@ -167,17 +232,21 @@ private struct MusicPlaybackControls: View {
         }
     }
 
+    // يحوّل الثواني إلى نص بصيغة دقائق وثوانٍ مع خانتين لكل جزء.
     private static func timeString(_ time: TimeInterval) -> String {
         let seconds = Int(max(0, time))
         return String(format: "%02d:%02d", seconds / 60, seconds % 60)
     }
 }
 
+// معاينة داخل Xcode لتجربة الواجهة دون المرور بمسار التطبيق كاملًا.
 #Preview {
+    // حاوية تدير الانتقال إلى شاشات التفاصيل والرجوع منها.
     NavigationStack {
         MusicPlayerView(
             title: "Sound",
-            artworkName: "khobar"
+            artworkName: "khobar",
+            audioPlayer: FocusAudioPlayer()
         )
     }
 }

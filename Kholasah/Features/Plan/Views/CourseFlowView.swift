@@ -15,12 +15,15 @@ import SwiftUI
 /// - With a `course`, only that course's tasks are shown and new tasks belong to it.
 ///   Without one (the Plan tab), all tasks are shown.
 struct CourseFlowView: View {
+    
     var course: Course?
     var viewModel: PlanViewModel?
     var showsBackButton: Bool
 
     @Environment(\.dismiss) private var dismiss
+    
     @State private var selection: PlanScreenTab
+   
     @State private var localTasks: [StudyTask] = []
 
     init(course: Course? = nil,
@@ -39,19 +42,43 @@ struct CourseFlowView: View {
 
     // Reminders have no model or service in the shared code yet, so they live in
     // PlanRemindersStore (one shared instance, kept per course).
+  
     private var store: PlanRemindersStore { .shared }
+    
     private var reminders: [PlanReminderItem] { store.reminders(for: course?.id) }
+
 
     private var allTasks: [StudyTask] {
         viewModel?.tasks ?? localTasks
     }
 
+ 
     private var tasks: [StudyTask] {
+       
         guard let course else { return allTasks }
         return allTasks.filter { $0.courseID == course.id }
     }
 
+    // NEW: the plan's length in days, worked out from the due dates of this course's tasks.
+    //   total = days from the first due date to the last one (both counted)
+    //   done  = whole days that have passed since the first due date, kept between 0 and total
+    // Tasks added by hand have no due date, so they don't change it. It's only worked out
+    // for a course, so the Plan tab (which mixes every course) shows 0 / 0.
+    private var studyDays: (done: Int, total: Int) {
+        guard course != nil else { return (0, 0) }
+
+        let calendar = Calendar.current
+        let dueDays = tasks.compactMap(\.dueDate).map { calendar.startOfDay(for: $0) }
+        guard let first = dueDays.min(), let last = dueDays.max() else { return (0, 0) }
+
+        let total = (calendar.dateComponents([.day], from: first, to: last).day ?? 0) + 1
+        let today = calendar.startOfDay(for: Date())
+        let passed = calendar.dateComponents([.day], from: first, to: today).day ?? 0
+        return (min(max(passed, 0), total), total)
+    }
+
     private func addTask(_ title: String) {
+        
         if let viewModel {
             viewModel.addTask(title: title, courseID: course?.id)
         } else {
@@ -65,11 +92,13 @@ struct CourseFlowView: View {
     // It uses PlanViewModel.replaceTaskItems, which your team already built for editing from
     // the Plan screens. That method removes every task missing from the list it receives,
     // so we pass ALL tasks and change only the title of the one being edited.
+  
     private func renameTask(_ task: StudyTask, to newTitle: String) {
         let trimmed = newTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 
         if let viewModel {
+            
             let items = viewModel.tasks.map {
                 PlanTaskItem(id: $0.id,
                              title: $0.id == task.id ? trimmed : $0.title,
@@ -84,6 +113,7 @@ struct CourseFlowView: View {
     // NEW: removes a task. Like renaming, it goes through replaceTaskItems, which removes any
     // task missing from the list, so we pass every task EXCEPT the one being deleted.
     // Reminders that were made from this task are removed too, so none are left pointing at it.
+    
     private func deleteTask(_ task: StudyTask) {
         for reminder in store.reminders where reminder.generatedTaskID == task.id {
             store.delete(reminder.id)
@@ -119,7 +149,9 @@ struct CourseFlowView: View {
                                  selection: $selection,
                                  onBack: back,
                                  tasks: tasks,
-                                 reminders: reminders)
+                                 reminders: reminders,
+                                 daysDone: studyDays.done,        // NEW
+                                 daysTotal: studyDays.total)      // NEW
             case .plan:
                 PlanView(courseTitle: title,
                          courseID: course?.id,
