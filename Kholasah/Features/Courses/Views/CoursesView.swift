@@ -22,6 +22,12 @@ struct CoursesView: View {
     @State private var selectedCourse: Course?
     @State private var showingCourseDetails = false
 
+    // NEW: how many of this course's tasks are done, and how many there are in total.
+    private func taskCounts(for course: Course) -> (done: Int, total: Int) {
+        let courseTasks = planViewModel?.tasks.filter { $0.courseID == course.id } ?? []
+        return (courseTasks.filter(\.isCompleted).count, courseTasks.count)
+    }
+
     var body: some View {
         // No NavigationStack here: MainTabView already provides one.
         ZStack(alignment: .bottomTrailing) {
@@ -37,10 +43,13 @@ struct CoursesView: View {
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: -28) {
                             ForEach(Array(viewModel.courses.enumerated()), id: \.element.id) { index, course in
+                                let counts = taskCounts(for: course)          // NEW
                                 StackedCourseCard(
                                     course: course,
                                     styleIndex: index,
-                                    isExpanded: expandedID == course.id
+                                    isExpanded: expandedID == course.id,
+                                    completedCount: counts.done,              // NEW
+                                    totalCount: counts.total                  // NEW
                                 )
                                 .zIndex(Double(index))
                                 .onTapGesture {
@@ -109,6 +118,8 @@ private struct StackedCourseCard: View {
     let course: Course
     let styleIndex: Int
     let isExpanded: Bool
+    let completedCount: Int          // NEW
+    let totalCount: Int              // NEW
 
     private var style: (background: Color, foreground: Color) {
         courseCardStyles[styleIndex % courseCardStyles.count]
@@ -125,6 +136,15 @@ private struct StackedCourseCard: View {
                         .font(.system(size: 13))
                         .padding(.top, 8)
                 }
+
+                ProgressCard(
+                    completedCount: completedCount,
+                    totalCount: totalCount,
+                    progress: totalCount == 0 ? 0 : Double(completedCount) / Double(totalCount)
+                )
+                .foregroundStyle(PlanTheme.text)
+                .padding(.top, 8)
+
                 Spacer(minLength: 0)
             }
         }
@@ -140,6 +160,6 @@ private struct StackedCourseCard: View {
 }
 
 #Preview {
-    
+
     MainTabView(dependencies: AppDependencies())
 }

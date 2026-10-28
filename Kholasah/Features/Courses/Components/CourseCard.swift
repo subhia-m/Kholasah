@@ -1,6 +1,4 @@
 // MARK: - شرح الملف
-// بطاقة تعرض عنوان المقرر واسم المدرّس.
-// للقراءة: let يثبت القيمة، وvar يسمح بتغييرها، وprivate يحصر الوصول في نطاق التعريف.
 
 import SwiftUI
 
@@ -33,6 +31,6 @@ struct CourseCard: View {
 }
 
 #Preview {
-    CourseCard(title: "Swift Basics", instructor: "Instructor")
+    CourseCard(title: "Course", instructor: "Instructor")
         .padding()
 }
