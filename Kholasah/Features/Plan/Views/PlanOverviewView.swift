@@ -108,15 +108,9 @@ private struct PlanOverviewContent: View {
                     VStack(spacing: 10) {
                         ZStack {
                             ring(progress: taskProgress)
-                            VStack(spacing: 0) {
-                                Text("\(tasksDone)")
-                                Rectangle()
-                                    .fill(Color.white)
-                                    .frame(width: 14, height: 1)
-                                Text("\(tasks.count)")
-                            }
-                            .font(AppTypography.caption)
-                            .foregroundStyle(.white)
+                            Image(systemName: "list.clipboard")       
+                                .font(.system(size: 18))
+                                .foregroundStyle(.white)
                         }
                         Text("\(tasksDone) / \(tasks.count) Tasks")
                             .font(AppTypography.caption)
