@@ -1,10 +1,19 @@
+// MARK: - شرح الملف
+// يعرض وقت جلسة التركيز والتقدم وأزرار المؤقت وملاحظة محلية للواجهة.
+// للقراءة: let يثبت القيمة، وvar يسمح بتغييرها، وprivate يحصر الوصول في نطاق التعريف.
+
 import SwiftUI
 
 struct PomodoroView: View {
+    // نموذج العرض الذي يزوّد هذه الواجهة بالبيانات والإجراءات.
     let viewModel: FocusViewModel
+    // الملاحظة النصية الخاصة بجلسة العرض.
+    // @State حالة تملكها الواجهة وتحافظ SwiftUI عليها بين تحديثاتها؛ الرمز $ يتيح ربطها بعنصر إدخال.
     @State private var note = ""
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
+        // يرتب العناصر عموديًا؛ spacing يحدد المسافة بينها.
         VStack(spacing: 34) {
             PomodoroDial(
                 remainingSeconds: viewModel.remainingSeconds,
@@ -19,26 +28,34 @@ struct PomodoroView: View {
 
             PomodoroNoteEditor(note: $note)
         }
+        // يضبط مساحة تخطيط العنصر ومحاذاته.
         .frame(maxWidth: .infinity)
+        // يضيف مسافة حول العنصر؛ ترتيب معدلات العرض يؤثر في النتيجة.
         .padding(.vertical, 8)
     }
 }
 
 private struct PomodoroDial: View {
+    // الثواني المتبقية في المؤقت.
     let remainingSeconds: Int
+    // نسبة التقدم التي تستخدمها الواجهة.
     let progress: Double
 
+    // الوقت بعد تحويله إلى صيغة دقائق وثوانٍ.
     private var formattedTime: String {
         let minutes = remainingSeconds / 60
         let seconds = remainingSeconds % 60
         return String(format: "%02d:%02d", minutes, seconds)
     }
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
+        // يضع العناصر في طبقات متراكبة؛ العناصر اللاحقة تظهر فوق السابقة.
         ZStack {
             Circle()
                 .stroke(.black.opacity(0.12), lineWidth: 5)
 
+            // ينشئ عنصر واجهة لكل قيمة؛ المعرّف يربط العنصر ببياناته أثناء التحديث.
             ForEach(0..<60, id: \.self) { index in
                 Capsule()
                     .fill(
@@ -83,18 +100,25 @@ private struct PomodoroDial: View {
         .frame(width: 310, height: 310)
             .animation(.linear(duration: 0.2), value: progress)
             .accessibilityElement(children: .ignore)
+            // يوفر اسمًا تقرؤه التقنيات المساعدة مثل VoiceOver.
             .accessibilityLabel("Time remaining")
             .accessibilityValue(formattedTime)
     }
 }
 
 private struct PomodoroTimerControls: View {
+    // الحالة الحالية للمؤقت.
     let timerState: PomodoroTimerState
+    // إجراء طلب تبديل حالة الإنجاز أو المؤقت وفق المكوّن.
     let onToggle: () -> Void
+    // إجراء إعادة ضبط المؤقت.
     let onReset: () -> Void
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
+        // يرتب العناصر أفقيًا.
         HStack(spacing: 12) {
+            // الجزء التنفيذي يحدد ما يحدث عند الضغط، وlabel يحدد شكل الزر إن وُجد.
             Button(primaryButtonTitle, action: onToggle)
                 .font(.headline)
                 .foregroundStyle(.primary)
@@ -124,6 +148,7 @@ private struct PomodoroTimerControls: View {
         }
     }
 
+    // عنوان زر المؤقت وفق حالته الحالية.
     private var primaryButtonTitle: LocalizedStringKey {
         switch timerState {
         case .idle:
@@ -139,8 +164,11 @@ private struct PomodoroTimerControls: View {
 }
 
 private struct PomodoroNoteEditor: View {
+    // الملاحظة النصية الخاصة بجلسة العرض.
+    // @Binding رابط قراءة وكتابة إلى قيمة يملكها العرض الأب، حتى ينعكس التعديل في الطرفين.
     @Binding var note: String
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Write a Note")
@@ -148,6 +176,7 @@ private struct PomodoroNoteEditor: View {
                 .foregroundStyle(AppColors.burgundy)
 
             HStack(spacing: 10) {
+                // حقل إدخال نص؛ الربط $ يكتب إدخال المستخدم في الخاصية المرتبطة.
                 TextField("Write a note…", text: $note)
                     .textFieldStyle(.plain)
 
@@ -166,6 +195,7 @@ private struct PomodoroNoteEditor: View {
     }
 }
 
+// معاينة داخل Xcode لتجربة الواجهة دون المرور بمسار التطبيق كاملًا.
 #Preview {
     PomodoroView(viewModel: AppDependencies().focusViewModel)
         .padding(.horizontal, 12)

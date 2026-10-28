@@ -1,15 +1,24 @@
+// MARK: - شرح الملف
+// يربط اللوحة بمستودع المهام ويحسب أيام التقويم. تظهر البيانات التجريبية في معاينات Xcode فقط.
+// للقراءة: let يثبت القيمة، وvar يسمح بتغييرها، وprivate يحصر الوصول في نطاق التعريف.
+
 import Foundation
 import Observation
 
 /// Replace this fixture with the agreed streak calculation when it is available.
 /// Calendar selection and task completion deliberately never update this value.
 struct BoardStreak: Equatable {
+    // عدد الأيام المسجل في الاستمرارية.
     var count: Int
+    // آخر يوم مسجل للاستمرارية.
+    // علامة ? تعني قيمة اختيارية قد تكون nil؛ يجب التحقق منها قبل استخدامها.
     var lastRecordedDay: Date?
-    static var demo: BoardStreak { BoardStreak(count: 7, lastRecordedDay: .now) }
+    nonisolated static var demo: BoardStreak { BoardStreak(count: 7, lastRecordedDay: .now) }
 
+    // يحسب أيام الأسبوع المرتبطة بتاريخ الاستمرارية باستخدام التقويم.
     func week(calendar: Calendar, fallback: Date = .now) -> [Date] {
         let anchor = lastRecordedDay ?? fallback
+        // يتحقق من شرط لازم للاستمرار؛ ينفذ مسار الخروج عند عدم تحققه.
         guard let start = calendar.dateInterval(of: .weekOfYear, for: anchor)?.start else { return [] }
         return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: start) }
     }
@@ -17,23 +26,28 @@ struct BoardStreak: Equatable {
 
 struct BoardMessageTiming {
     // Wait after opening Board or dismissing the previous encouragement.
+    // المدة المنتظرة قبل إظهار بطاقة التحفيز.
     var interval: Duration = .seconds(30)
 }
 
+// يحصر الوصول إلى هذا النوع في الممثل الرئيسي لتنسيق التغييرات المرتبطة بالواجهة.
 @MainActor
 @Observable
 final class BoardViewModel {
-    let repository: InMemoryTaskRepository
+    let repository: any TaskRepository
     var selectedDate: Date
+    // الشهر الذي يعرضه التقويم.
     var displayedMonth: Date {
         didSet {
             if demoDataEnabled { seedDisplayedMonth() }
         }
     }
+    // بيانات الاستمرارية المعروضة.
     var streak: BoardStreak
+    // التقويم المستخدم لحساب الأيام والشهور.
     let calendar: Calendar
 
-    init(repository: InMemoryTaskRepository, today: Date = .now, streak: BoardStreak = .demo) {
+    init(repository: any TaskRepository, today: Date = .now, streak: BoardStreak = .demo) {
         self.repository = repository
         var calendar = Calendar(identifier: .gregorian)
         calendar.locale = Locale(identifier: "en_US")
@@ -44,6 +58,7 @@ final class BoardViewModel {
         self.streak = streak
     }
 
+    // المهام التي يستخدمها هذا الجزء من التطبيق.
     var tasks: [StudyTask] {
         repository.tasks.filter { task in
             guard let date = task.dueDate else { return false }
@@ -51,21 +66,26 @@ final class BoardViewModel {
         }
     }
 
+    // تواريخ أيام الشهر المعروض.
     var monthDays: [Date] {
         guard let range = calendar.range(of: .day, in: .month, for: displayedMonth) else { return [] }
         return range.compactMap { calendar.date(byAdding: .day, value: $0 - 1, to: displayedMonth) }
     }
 
+    // عدد الخانات الفارغة قبل أول يوم في شبكة الشهر.
     var leadingEmptyDays: Int {
         (calendar.component(.weekday, from: displayedMonth) - calendar.firstWeekday + 7) % 7
     }
 
+    // ينقل الشهر المعروض بمقدار الإزاحة المطلوبة.
     func moveMonth(_ offset: Int) {
+        // يفك قيمة اختيارية بأمان؛ ينفذ الفرع فقط إذا لم تكن nil.
         if let next = calendar.date(byAdding: .month, value: offset, to: displayedMonth) {
             displayedMonth = next
         }
     }
 
+    // يضيف مهمة بعنوان وموعد ومدة إلى المستودع المشترك.
     func add(title: String, date: Date, minutes: Int) {
         let title = title.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !title.isEmpty, minutes > 0 else { return }
@@ -74,29 +94,43 @@ final class BoardViewModel {
         displayedMonth = calendar.dateInterval(of: .month, for: date)?.start ?? date
     }
 
+    // يبدل حالة إنجاز المهمة داخل المستودع المشترك.
     func toggle(_ task: StudyTask) {
         guard var current = repository.tasks.first(where: { $0.id == task.id }) else { return }
         current.isCompleted.toggle()
         repository.update(current)
     }
 
+    // يمنع تكرار تهيئة اللوحة خلال عمر نموذج العرض.
+    // يستبعد هذا المرجع الداخلي من تتبع Observation؛ لا يلغي دوره في تنفيذ العمليات.
     @ObservationIgnored private var hasOpened = false
 
+    // يهيئ اللوحة عند أول ظهور ويحذف أي بيانات تجريبية محفوظة من الإصدارات السابقة.
     func prepareForDisplay(today: Date = .now) {
         guard !hasOpened else { return }
         hasOpened = true
         selectedDate = calendar.startOfDay(for: today)
         displayedMonth = calendar.dateInterval(of: .month, for: today)?.start ?? today
-        // Previews use the same data generation without touching the app's saved markers.
-        let isPreview = ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
-        seedDemoTasksIfNeeded(today: today, defaults: isPreview ? nil : .standard)
+        removePersistedDemoTasks()
     }
 
+    /// Removes only fixtures created by the old Board seeder. AI-generated and user-created tasks use unrelated IDs.
+    private func removePersistedDemoTasks() {
+        repository.tasks
+            .filter { $0.id.uuidString.hasPrefix("B04D0002-") }
+            .forEach { repository.remove(id: $0.id) }
+    }
+
+    // هل أُتيح توليد بيانات اللوحة التجريبية؟
     @ObservationIgnored private var demoDataEnabled = false
+    // تخزين علامات إنشاء البيانات التجريبية، ويمكن تعطيله للمعاينات.
     @ObservationIgnored private var demoDefaults: UserDefaults?
+    // التاريخ المرجعي لتوزيع المهام التجريبية.
     @ObservationIgnored private var demoAnchor = Date.now
+    // الشهور التي أُنشئت بياناتها التجريبية في هذه النسخة.
     @ObservationIgnored private var preparedMonths: Set<String> = []
 
+    // يضبط التاريخ المرجعي للبيانات التجريبية ثم يجهز الشهر المعروض.
     func seedDemoTasksIfNeeded(today: Date = .now, defaults: UserDefaults? = .standard) {
         demoDefaults = defaults
         let anchorKey = "board.monthlyDemo.anchor.v2"
@@ -110,10 +144,12 @@ final class BoardViewModel {
         seedDisplayedMonth()
     }
 
+    // ينشئ مهام الشهر التجريبية مرة واحدة مع التحقق من المعرّفات لمنع التكرار.
     private func seedDisplayedMonth() {
         let components = calendar.dateComponents([.year, .month], from: displayedMonth)
         guard let year = components.year, let month = components.month else { return }
         let monthKey = String(format: "board.monthlyDemo.v2.%04d-%02d", year, month)
+        // نفحص ذاكرة الجلسة وعلامة التخزين لتجنب إعادة توليد مهام الشهر.
         guard !preparedMonths.contains(monthKey), demoDefaults?.bool(forKey: monthKey) != true else { return }
 
         for date in monthDays {
@@ -135,10 +171,12 @@ final class BoardViewModel {
             }
         }
         // Mark only after all tasks are saved; never rewrite completion or user-created tasks.
+        // تُسجل علامة اكتمال التهيئة بعد إضافة المهام كلها حتى يمكن التعافي من توقف سابق.
         preparedMonths.insert(monthKey)
         demoDefaults?.set(true, forKey: monthKey)
     }
 
+    // يحدد عناوين ومدد مهام تجريبية بحسب التاريخ؛ هذه البيانات ليست ناتجة عن الذكاء الاصطناعي.
     private func demoTasks(for date: Date) -> [(title: String, minutes: Int)] {
         let offset = calendar.dateComponents([.day], from: demoAnchor, to: date).day ?? 0
         switch offset {
@@ -166,6 +204,7 @@ final class BoardViewModel {
         }
     }
 
+    // ينشئ نموذج عرض ببيانات تجريبية معزولة عن علامات التخزين المستخدمة في التطبيق.
     static func preview() -> BoardViewModel {
         let model = BoardViewModel(repository: InMemoryTaskRepository())
         model.seedDemoTasksIfNeeded(defaults: nil)

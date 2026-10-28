@@ -1,3 +1,7 @@
+// MARK: - شرح الملف
+// ينسق التنقل بين نظرة عامة والخطة والمهام والتذكيرات. يستخدم البيانات المشتركة عند توفر نموذج العرض، وإلا يحتفظ بمهام محلية مؤقتة.
+// للقراءة: let يثبت القيمة، وvar يسمح بتغييرها، وprivate يحصر الوصول في نطاق التعريف.
+
 //
 //  CourseFlowView.swift
 //  Kholasah
@@ -15,14 +19,24 @@ import SwiftUI
 /// - With a `course`, only that course's tasks are shown and new tasks belong to it.
 ///   Without one (the Plan tab), all tasks are shown.
 struct CourseFlowView: View {
+    // المقرر الذي تتعامل معه الواجهة.
+    // علامة ? تعني قيمة اختيارية قد تكون nil؛ يجب التحقق منها قبل استخدامها.
     var course: Course?
+    // نموذج العرض الذي يزوّد هذه الواجهة بالبيانات والإجراءات.
     var viewModel: PlanViewModel?
+    // هل يظهر زر الرجوع؟
     var showsBackButton: Bool
 
+    // إجراء من بيئة SwiftUI لإغلاق العرض الحالي بحسب طريقة تقديمه.
+    // @Environment يقرأ قيمة أو كائنًا توفره بيئة SwiftUI لهذا العرض.
     @Environment(\.dismiss) private var dismiss
+    // التبويب المحدد الذي يقرر المحتوى المعروض.
+    // @State حالة تملكها الواجهة وتحافظ SwiftUI عليها بين تحديثاتها؛ الرمز $ يتيح ربطها بعنصر إدخال.
     @State private var selection: PlanScreenTab
+    // مهام مؤقتة تستخدم عند غياب نموذج العرض المشترك.
     @State private var localTasks: [StudyTask] = []
 
+    // المهيئ init يجهز النسخة ويستقبل القيم أو الخدمات اللازمة؛ self تشير إلى النسخة الحالية.
     init(course: Course? = nil,
          viewModel: PlanViewModel? = nil,
          showsBackButton: Bool = false,
@@ -35,18 +49,24 @@ struct CourseFlowView: View {
 
     // MARK: Data
 
+    // العنوان المستخدم لهذا العنصر.
     private var title: String { course?.title ?? "Plan" }
 
     // Reminders have no model or service in the shared code yet, so they live in
     // PlanRemindersStore (one shared instance, kept per course).
+    // مخزن تذكيرات الواجهة المشترك.
     private var store: PlanRemindersStore { .shared }
+    // تذكيرات الواجهة المعروضة.
     private var reminders: [PlanReminderItem] { store.reminders(for: course?.id) }
 
+    // جميع المهام قبل تصفيتها بحسب المقرر.
     private var allTasks: [StudyTask] {
         viewModel?.tasks ?? localTasks
     }
 
+    // المهام التي يستخدمها هذا الجزء من التطبيق.
     private var tasks: [StudyTask] {
+        // يتحقق من شرط لازم للاستمرار؛ ينفذ مسار الخروج عند عدم تحققه.
         guard let course else { return allTasks }
         return allTasks.filter { $0.courseID == course.id }
     }
@@ -70,6 +90,7 @@ struct CourseFlowView: View {
     }
 
     private func addTask(_ title: String) {
+        // يفك قيمة اختيارية بأمان؛ ينفذ الفرع فقط إذا لم تكن nil.
         if let viewModel {
             viewModel.addTask(title: title, courseID: course?.id)
         } else {
@@ -83,11 +104,13 @@ struct CourseFlowView: View {
     // It uses PlanViewModel.replaceTaskItems, which your team already built for editing from
     // the Plan screens. That method removes every task missing from the list it receives,
     // so we pass ALL tasks and change only the title of the one being edited.
+    // يعدل عنوان المهمة؛ عند استخدام النموذج المشترك يمرر جميع المهام حتى لا تُحذف مهام المقررات الأخرى.
     private func renameTask(_ task: StudyTask, to newTitle: String) {
         let trimmed = newTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 
         if let viewModel {
+            // نعدل عنوان مهمة واحدة مع تمرير بقية المهام كما هي لأن replaceTaskItems قد يحذف العناصر الغائبة.
             let items = viewModel.tasks.map {
                 PlanTaskItem(id: $0.id,
                              title: $0.id == task.id ? trimmed : $0.title,
@@ -102,6 +125,7 @@ struct CourseFlowView: View {
     // NEW: removes a task. Like renaming, it goes through replaceTaskItems, which removes any
     // task missing from the list, so we pass every task EXCEPT the one being deleted.
     // Reminders that were made from this task are removed too, so none are left pointing at it.
+    // يحذف المهمة والتذكيرات المرئية المرتبطة بها، مع الإبقاء على بقية المهام.
     private func deleteTask(_ task: StudyTask) {
         for reminder in store.reminders where reminder.generatedTaskID == task.id {
             store.delete(reminder.id)
@@ -117,6 +141,7 @@ struct CourseFlowView: View {
         }
     }
 
+    // يعكس حالة إنجاز المهمة ثم يحدث مصدر البيانات.
     private func toggleTask(_ task: StudyTask) {
         if let viewModel {
             viewModel.toggleTask(task)
@@ -127,6 +152,7 @@ struct CourseFlowView: View {
 
     // MARK: Body
 
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         let back: (() -> Void)? = showsBackButton ? { dismiss() } : nil
 
@@ -175,7 +201,9 @@ struct CourseFlowView: View {
     }
 }
 
+// معاينة داخل Xcode لتجربة الواجهة دون المرور بمسار التطبيق كاملًا.
 #Preview {
+    // حاوية تدير الانتقال إلى شاشات التفاصيل والرجوع منها.
     NavigationStack {
         CourseFlowView()
     }

@@ -44,4 +44,5 @@ struct SharedCourseDataTests {
 @MainActor
 private final class TestStorageService: StorageService {
     var hasCompletedOnboarding = false
+    var hasCompletedFirstCourseSetup = false
 }

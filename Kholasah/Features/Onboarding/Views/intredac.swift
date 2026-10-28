@@ -1,3 +1,7 @@
+// MARK: - شرح الملف
+// شاشات المقدمة المتتابعة ومكوناتها التعريفية؛ الصفحة الأخيرة تستدعي إجراء إكمال المقدمة.
+// للقراءة: let يثبت القيمة، وvar يسمح بتغييرها، وprivate يحصر الوصول في نطاق التعريف.
+
 //
 //  intredac.swift
 //  Kholasah
@@ -7,19 +11,28 @@
 import SwiftUI
 
 struct intredac: View {
+    // نموذج العرض الذي يزوّد هذه الواجهة بالبيانات والإجراءات.
+    let viewModel: OnboardingViewModel
+    // رقم الصفحة الحالية في المقدمة.
+    // @State حالة تملكها الواجهة وتحافظ SwiftUI عليها بين تحديثاتها؛ الرمز $ يتيح ربطها بعنصر إدخال.
     @State private var currentPage = 0
     
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
+        // يضع العناصر في طبقات متراكبة؛ العناصر اللاحقة تظهر فوق السابقة.
         ZStack {
             // Background color matching the design theme (warm cream)
             Color(#colorLiteral(red: 0.98, green: 0.97, blue: 0.95, alpha: 1.0))
                 .ignoresSafeArea()
             
+            // يرتب العناصر عموديًا؛ spacing يحدد المسافة بينها.
             VStack {
                 // Top Skip Button (Hidden on the last page)
+                // يرتب العناصر أفقيًا.
                 HStack {
                     Spacer()
                     if currentPage < 4 {
+                        // الجزء التنفيذي يحدد ما يحدث عند الضغط، وlabel يحدد شكل الزر إن وُجد.
                         Button("Skip") {
                             withAnimation {
                                 currentPage = 4
@@ -27,6 +40,7 @@ struct intredac: View {
                         }
                         .font(.subheadline)
                         .foregroundColor(.gray)
+                        // يضيف مسافة حول العنصر؛ ترتيب معدلات العرض يؤثر في النتيجة.
                         .padding(.horizontal, 24)
                         .padding(.top, 10)
                     } else {
@@ -41,7 +55,7 @@ struct intredac: View {
                     PageView2().tag(1)
                     PageView3().tag(2)
                     PageView4().tag(3)
-                    PageView5().tag(4)
+                    PageView5(onGetStarted: viewModel.finish).tag(4)
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 
@@ -51,9 +65,11 @@ struct intredac: View {
                     // Custom Page Dots
                     HStack(spacing: 8) {
                         
+                        // ينشئ عنصر واجهة لكل قيمة؛ المعرّف يربط العنصر ببياناته أثناء التحديث.
                         ForEach(0..<5, id: \.self) { index in
                             Circle()
                                 .fill(currentPage == index ? Color(#colorLiteral(red: 0.35, green: 0.18, blue: 0.08, alpha: 1.0)) : Color.gray.opacity(0.3))
+                                // يضبط مساحة تخطيط العنصر ومحاذاته.
                                 .frame(width: currentPage == index ? 16 : 8, height: 8)
                                 .animation(.spring(), value: currentPage)
                         }
@@ -81,6 +97,7 @@ struct intredac: View {
 
 // Page 1
 struct PageView1: View {
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         VStack(spacing: 20) {
             Spacer()
@@ -115,6 +132,7 @@ struct PageView1: View {
 
 // Page 2
 struct PageView2: View {
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -158,6 +176,7 @@ struct PageView2: View {
 
 //  Page 3
 struct PageView3: View {
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -212,9 +231,12 @@ struct PageView3: View {
 }
 
 struct FileBadge: View {
+    // العنوان المستخدم لهذا العنصر.
     let title: String
+    // لون المكوّن.
     let color: Color
     
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         Text(title)
             .font(.system(size: 12, weight: .bold))
@@ -228,6 +250,7 @@ struct FileBadge: View {
 
 // Page 4
 struct PageView4: View {
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -278,10 +301,14 @@ struct PageView4: View {
 }
 
 struct PlanRow: View {
+    // اسم الرمز المستخدم في الصف.
     let icon: String
+    // العنوان المستخدم لهذا العنصر.
     let title: String
+    // الوقت النصي المعروض.
     let time: String
     
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         HStack {
             Image(systemName: icon)
@@ -300,6 +327,10 @@ struct PlanRow: View {
 
 // Page 5
 struct PageView5: View {
+    // إجراء الانتقال من المقدمة إلى استخدام التطبيق.
+    let onGetStarted: () -> Void
+
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -336,9 +367,7 @@ struct PageView5: View {
                     .padding(.horizontal, 24)
                 
                 // Get Started Action Button
-                Button(action: {
-                    // Add your action to navigate to main app here
-                }) {
+                Button(action: onGetStarted) {
                     Text("Get Started")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
@@ -357,9 +386,12 @@ struct PageView5: View {
 }
 
 struct FeatureRow: View {
+    // اسم الرمز المستخدم في الصف.
     let icon: String
+    // العنوان المستخدم لهذا العنصر.
     let title: String
     
+    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
@@ -372,6 +404,7 @@ struct FeatureRow: View {
     }
 }
 
+// معاينة داخل Xcode لتجربة الواجهة دون المرور بمسار التطبيق كاملًا.
 #Preview {
-    intredac()
+    intredac(viewModel: AppDependencies().onboardingViewModel)
 }

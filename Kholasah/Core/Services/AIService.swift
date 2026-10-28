@@ -1,6 +1,11 @@
+// MARK: - شرح الملف
+// يعرّف خدمة توليد الخطط وينفذها باستخدام نموذج Apple المحلي: استخراج مفاهيم المادة، ثم تحويلها إلى مهام منظمة.
+// للقراءة: let يثبت القيمة، وvar يسمح بتغييرها، وprivate يحصر الوصول في نطاق التعريف.
+
 import Foundation
 import FoundationModels
 
+// enum يجمع حالات محددة أو قيمًا مشتركة تحت اسم واحد بحسب محتواه أدناه.
 enum AIModelAvailability: Equatable, Sendable {
     case available
     case appleIntelligenceDisabled
@@ -10,51 +15,70 @@ enum AIModelAvailability: Equatable, Sendable {
     case unavailable
 }
 
+// يتيح توليد بيانات تطابق بنية هذا النوع باستخدام Foundation Models.
 @Generable(description: "A study plan created only from the supplied study material.")
 struct GeneratedStudyPlanDraft: Equatable, Sendable {
+    // تعليمات للنموذج تصف المحتوى المطلوب في الخاصية التالية.
     @Guide(description: "A concise title for the study plan.")
+    // العنوان المستخدم لهذا العنصر.
     let title: String
 
     @Guide(description: "A short overview of the material and the learning goal.")
+    // ملخص الخطة المولدة.
     let summary: String
 
     @Guide(description: "Ordered, specific study tasks grounded in the supplied material.")
+    // المهام التي يستخدمها هذا الجزء من التطبيق.
     let tasks: [GeneratedStudyTaskDraft]
 }
 
 @Generable(description: "One focused task in a study plan.")
+// Identifiable يوفر هوية للعنصر؛ Equatable للمقارنة، وHashable لاستخدامه في المجموعات إن كانا مذكورين.
 struct GeneratedStudyTaskDraft: Equatable, Sendable, Identifiable {
+    // معرّف يميز هذا العنصر عن بقية العناصر.
+    // هذا المعرّف مشتق من العنوان والمفهوم؛ تكرار النصين ينتج المعرّف نفسه.
     var id: String { title + concept }
 
     @Guide(description: "A short action-oriented task title.")
+    // العنوان المستخدم لهذا العنصر.
     let title: String
 
     @Guide(description: "The exact concept from the material that the learner should understand.")
+    // المفهوم الذي تتناوله المهمة.
     let concept: String
 
     @Guide(description: "A concise explanation of the concept using only facts contained in the supplied study material.")
+    // شرح المفهوم المستخرج من المادة.
     let explanation: String
 
     @Guide(description: "Two to four concise key points supported by the supplied study material.")
+    // النقاط الأساسية التي تساعد على مراجعة المفهوم.
     let keyPoints: [String]
 
     @Guide(description: "A short review question based on the concept.")
+    // سؤال مراجعة لاختبار فهم المفهوم.
     let reviewPrompt: String
 
     @Guide(description: "A friendly, encouraging reminder related to this concept.")
+    // النص التحفيزي المرتبط بتذكير المهمة.
     let reminderMessage: String
 
     @Guide(description: "Estimated study time in minutes.")
+    // مدة الدراسة التي اقترحها النموذج بالدقائق.
     let estimatedMinutes: Int
 }
 
+// protocol عقد يحدد المتطلبات؛ النوع المطابق له يقدم التنفيذ الفعلي.
 protocol AIService: Sendable {
+    // حالة توفر النموذج المحلي للاستخدام.
     var availability: AIModelAvailability { get }
 
+    // يولد خطة من المادة وفق عدد الأيام والوقت اليومي؛ التفاصيل أدناه توضح مسؤولية هذه الطبقة.
     func generateStudyPlan(
         material: ImportedCourseMaterial,
         durationDays: Int,
         dailyMinutes: Int
+    // async يسمح بتعليق التنفيذ أثناء الانتظار؛ await ينتظر النتيجة، وthrows يعني أن العملية قد ترمي خطأ إذا ظهر في التوقيع.
     ) async throws -> GeneratedStudyPlanDraft
 }
 
@@ -62,6 +86,8 @@ enum AIServiceError: LocalizedError {
     case unavailable(AIModelAvailability)
     case emptyMaterial
 
+    // وصف قابل للعرض للخطأ.
+    // علامة ? تعني قيمة اختيارية قد تكون nil؛ يجب التحقق منها قبل استخدامها.
     var errorDescription: String? {
         switch self {
         case .unavailable(.appleIntelligenceDisabled):
@@ -81,11 +107,15 @@ enum AIServiceError: LocalizedError {
 }
 
 struct LocalFoundationModelsAIService: AIService {
+    // نموذج اللغة المحلي الذي يوفره النظام.
     private let model = SystemLanguageModel.default
 
+    // المهيئ init يجهز النسخة ويستقبل القيم أو الخدمات اللازمة؛ self تشير إلى النسخة الحالية.
     nonisolated init() {}
 
+    // حالة توفر النموذج المحلي للاستخدام.
     var availability: AIModelAvailability {
+        // يتحقق من شرط لازم للاستمرار؛ ينفذ مسار الخروج عند عدم تحققه.
         guard model.supportsLocale(Locale.current) else {
             return .unsupportedLanguage
         }
@@ -104,6 +134,7 @@ struct LocalFoundationModelsAIService: AIService {
         }
     }
 
+    // يولد خطة من المادة وفق عدد الأيام والوقت اليومي؛ التفاصيل أدناه توضح مسؤولية هذه الطبقة.
     func generateStudyPlan(
         material: ImportedCourseMaterial,
         durationDays: Int,
@@ -120,6 +151,7 @@ struct LocalFoundationModelsAIService: AIService {
             throw AIServiceError.emptyMaterial
         }
 
+        // المرحلة الأولى: تقسيم النص إلى أجزاء صغيرة قبل إرسالها إلى النموذج المحلي.
         let chunks = normalizedText.chunked(maximumCharacterCount: 4_000)
         var conceptInventories: [String] = []
 
@@ -147,9 +179,11 @@ struct LocalFoundationModelsAIService: AIService {
             conceptInventories.append(response.content)
         }
 
+        // المرحلة الثانية: حصر عدد الأيام بين ١ و٣٠ وتوزيع حصيلة المفاهيم عليها.
         let requestedTaskCount = min(max(durationDays, 1), 30)
         let dailyInventories = conceptInventories.distributed(over: requestedTaskCount)
         let taskSchema = DynamicGenerationSchema(type: GeneratedStudyTaskDraft.self)
+        // المخطط يفرض بنية الاستجابة ووجود مهمة واحدة في كل استجابة يومية؛ لا يضمن صحة الحقائق المولدة.
         let oneTaskPlanSchema = try GenerationSchema(
             root: DynamicGenerationSchema(
                 name: "GeneratedStudyPlanDraft",
@@ -180,6 +214,7 @@ struct LocalFoundationModelsAIService: AIService {
         )
         var generatedTasks: [GeneratedStudyTaskDraft] = []
 
+        // المرحلة الثالثة: طلب مهمة لكل يوم ثم جمع النتائج في مسودة واحدة.
         for (index, inventory) in dailyInventories.enumerated() {
             let planningSession = LanguageModelSession(
                 model: model,
@@ -205,6 +240,7 @@ struct LocalFoundationModelsAIService: AIService {
                 schema: oneTaskPlanSchema
             )
             let dayPlan = try GeneratedStudyPlanDraft(response.content)
+            // يفك قيمة اختيارية بأمان؛ ينفذ الفرع فقط إذا لم تكن nil.
             if let task = dayPlan.tasks.first {
                 generatedTasks.append(task)
             }
@@ -218,7 +254,9 @@ struct LocalFoundationModelsAIService: AIService {
     }
 }
 
+// extension يضيف وظائف أو خصائص محسوبة إلى نوع موجود دون تعديل تعريفه الأصلي.
 private extension String {
+    // يقسم النص إلى أجزاء بحد أقصى للحروف، ويحاول الفصل عند مسافة حتى لا يقطع الكلمات.
     func chunked(maximumCharacterCount: Int) -> [String] {
         guard count > maximumCharacterCount else { return [self] }
 
@@ -252,7 +290,9 @@ private extension String {
     }
 }
 
+// extension يضيف وظائف أو خصائص محسوبة إلى نوع موجود دون تعديل تعريفه الأصلي.
 private extension Array where Element == String {
+    // يوزع النصوص بالتناوب على مجموعات؛ يملأ المجموعات الفارغة بمحتوى مراجعة من النصوص المتاحة.
     func distributed(over groupCount: Int) -> [String] {
         guard !isEmpty else { return [] }
 
