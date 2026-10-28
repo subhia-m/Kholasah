@@ -1,16 +1,13 @@
-// MARK: - شرح الملف
-
+// MARK:
 import SwiftUI
 
 // MARK: - Overview page
 
 struct PlanOverviewView: View {
-    var courseTitle: String = "Plan"
+    var courseTitle: String = "Swift Basics"
     @Binding var selection: PlanScreenTab
     var onBack: (() -> Void)? = nil
-
     var tasks: [StudyTask] = []
-    // تذكيرات الواجهة المعروضة.
     var reminders: [PlanReminderItem] = []
     var daysDone: Int = 0                    // NEW
     var daysTotal: Int = 0                   // NEW
@@ -28,26 +25,20 @@ struct PlanOverviewView: View {
 // MARK: - Overview tab content
 
 private struct PlanOverviewContent: View {
-    
     var tasks: [StudyTask] = []
-   
     var reminders: [PlanReminderItem] = []
     // Passed in by CourseFlowView, worked out from the due dates of the course's tasks.
     var daysDone: Int = 0
-   
     var daysTotal: Int = 0
 
     // MARK: Derived data
 
-   
     private var tasksDone: Int { tasks.filter(\.isCompleted).count }
 
-    
     private var taskProgress: Double {
         tasks.isEmpty ? 0 : Double(tasksDone) / Double(tasks.count)
     }
 
-    
     private var dayProgress: Double {
         daysTotal == 0 ? 0 : Double(daysDone) / Double(daysTotal)
     }
@@ -84,7 +75,6 @@ private struct PlanOverviewContent: View {
                                 .opacity(0.7)
                         }
                         .foregroundStyle(PlanTheme.text)
-                      
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
                         emptyLabel("No upcoming reminders", color: PlanTheme.text)
@@ -102,7 +92,6 @@ private struct PlanOverviewContent: View {
                         Text(task.title)
                             .font(.system(size: 17, weight: .medium))
                             .foregroundStyle(.white)
-                        
                             .padding(.horizontal, 16)
                     } else {
                         emptyLabel("No tasks yet", color: .white)
@@ -113,22 +102,15 @@ private struct PlanOverviewContent: View {
 
                 // Course progress
                 header(systemImage: "chart.bar", title: "Course Progress :")
-                
                 HStack {
                     Spacer()
 
                     VStack(spacing: 10) {
                         ZStack {
                             ring(progress: taskProgress)
-                            VStack(spacing: 0) {
-                                Text("\(tasksDone)")
-                                Rectangle()
-                                    .fill(Color.white)
-                                    .frame(width: 14, height: 1)
-                                Text("\(tasks.count)")
-                            }
-                            .font(.system(size: 12))
-                            .foregroundStyle(.white)
+                            Image(systemName: "list.clipboard")       // NEW: clipboard instead of the 0 / 0 fraction
+                                .font(.system(size: 18))
+                                .foregroundStyle(.white)
                         }
                         Text("\(tasksDone) / \(tasks.count) Tasks")
                             .font(.system(size: 12))
@@ -203,6 +185,6 @@ private struct PlanOverviewContent: View {
     // Opens the whole flow on this page, so the switcher can reach every other page.
     // Use Live mode in the canvas (the play button) to tap around.
     NavigationStack {
-        CourseFlowView(course: Course(title: "Plan"), showsBackButton: true, startingAt: .overview)
+        CourseFlowView(course: Course(title: "Swift Basics"), showsBackButton: true, startingAt: .overview)
     }
 }
