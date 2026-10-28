@@ -2,7 +2,7 @@ import SwiftUI
 
 struct AddCourseWelcomeView: View {
     let onAddCourse: () -> Void
-
+//بوابتك الخاصة عشان تقولي للشاشة اللي برا: "ترى المستخدم ضغط الزر الفلاني، وش تبغيني أسوي الحين؟".
     var body: some View {
         ZStack {
             Color.backgroundCream
