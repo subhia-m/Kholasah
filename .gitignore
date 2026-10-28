@@ -1,3 +1,4 @@
 /nxcuserdata/
 *.xcuserstate
 xcuserdata/
+.DS_Store
