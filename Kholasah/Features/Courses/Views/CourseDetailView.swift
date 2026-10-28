@@ -4,11 +4,13 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
+//مكتبة تسمح لنا نحدد انواع الملفات-برفع البي دي اف
 import UIKit
-
+//مكتبة ابل
 struct CourseView: View {
     @Environment(\.dismiss) private var dismiss
-
+    //يتيح لنا إغلاق الشاشة أو الرجوع للخلف (مثل زر الرجوع في الشريط العلوي).
+    //أداة جاهزة من النظام عشان تقفل الشاشة الحالية.
     // نموذج عرض إدارة المقررات.
     let coursesViewModel: CoursesViewModel
     // نموذج عرض الخطة والمهام وتوليد المحتوى.
@@ -105,7 +107,7 @@ struct CourseView: View {
             .allowsHitTesting(false)
 
             // يرتب العناصر عموديًا؛ spacing يحدد المسافة بينها.
-            VStack(spacing: 0) {
+            VStack(spacing: 16) {
                 
                 // MARK: Header
                 
@@ -119,7 +121,7 @@ struct CourseView: View {
                     VStack(alignment: .leading, spacing: 22) {
                         
                         // Course Name
-                        VStack(alignment: .leading, spacing: 0) {
+                        VStack(alignment: .leading, spacing: 8) {
                             fieldLabel("Course Name:")
                             
                             // حقل إدخال نص؛ الربط $ يكتب إدخال المستخدم في الخاصية المرتبطة.
@@ -127,8 +129,9 @@ struct CourseView: View {
                                 "Enter course name",
                                 text: $courseName
                             )
+                            
                             .padding(.horizontal, 18)
-                            .frame(height: 70)
+                            .frame(height: 56)
                             .background(fieldBackground)
                             .textInputAutocapitalization(.words)
                         }
@@ -169,10 +172,6 @@ struct CourseView: View {
                                 }
                             }
 
-                            Label("\(durationDays) day study plan", systemImage: "clock")
-                                .font(AppTypography.captionEmphasized)
-                                .foregroundStyle(titleBrown.opacity(0.75))
-                                .padding(.leading, 10)
                         }
                         .onChange(of: startDate) { _, newStartDate in
                             if endDate < newStartDate {
