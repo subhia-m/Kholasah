@@ -35,8 +35,6 @@ struct CourseView: View {
     // Upload states
     // يتحكم في ظهور منتقي الملفات.
     @State private var showFileImporter = false
-    // روابط الملفات التي اختارها المستخدم.
-    @State private var selectedFiles: [URL] = []
     // عدد دقائق الدراسة اليومية.
     @State private var dailyMinutes = 30
     // اختيار تفعيل التذكيرات عند توليد الخطة.
@@ -383,7 +381,6 @@ struct CourseView: View {
         ) { result in
             switch result {
             case .success(let urls):
-                selectedFiles = urls
                 // يتحقق من شرط لازم للاستمرار؛ ينفذ مسار الخروج عند عدم تحققه.
                 guard let url = urls.first, let planViewModel else { return }
                 Task {
@@ -575,6 +572,25 @@ private struct ModernPlanLoader: View {
         }
         .frame(width: 46, height: 46)
         .accessibilityHidden(true)
+    }
+}
+
+private extension AIModelAvailability {
+    var message: LocalizedStringKey {
+        switch self {
+        case .available:
+            "On-device AI is ready"
+        case .appleIntelligenceDisabled:
+            "Apple Intelligence is disabled"
+        case .deviceNotEligible:
+            "This device does not support on-device AI"
+        case .modelNotReady:
+            "The on-device model is still preparing"
+        case .unsupportedLanguage:
+            "The current language is not supported"
+        case .unavailable:
+            "On-device AI is unavailable"
+        }
     }
 }
 

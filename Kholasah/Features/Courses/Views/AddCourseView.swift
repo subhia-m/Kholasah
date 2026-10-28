@@ -1,68 +1,8 @@
 // MARK: - شرح الملف
-// يحتوي نموذج إضافة مقرر ومكونات الترحيب وإعداد أول مقرر.
+// يحتوي مكونات الترحيب وإعداد أول مقرر.
 // للقراءة: let يثبت القيمة، وvar يسمح بتغييرها، وprivate يحصر الوصول في نطاق التعريف.
 
 import SwiftUI
-
-struct AddCourseView: View {
-    // نموذج العرض الذي يزوّد هذه الواجهة بالبيانات والإجراءات.
-    let viewModel: CoursesViewModel
-
-    // إجراء من بيئة SwiftUI لإغلاق العرض الحالي بحسب طريقة تقديمه.
-    // @Environment يقرأ قيمة أو كائنًا توفره بيئة SwiftUI لهذا العرض.
-    @Environment(\.dismiss) private var dismiss
-    // العنوان المستخدم لهذا العنصر.
-    // @State حالة تملكها الواجهة وتحافظ SwiftUI عليها بين تحديثاتها؛ الرمز $ يتيح ربطها بعنصر إدخال.
-    @State private var title = ""
-    // اسم المدرّس.
-    @State private var instructor = ""
-
-    // يبني محتوى العرض من البيانات الحالية؛ some View يخفي النوع التفصيلي لتركيب الواجهة.
-    var body: some View {
-        // حاوية تدير الانتقال إلى شاشات التفاصيل والرجوع منها.
-        NavigationStack {
-            Form {
-                Section("Course Details") {
-                    // حقل إدخال نص؛ الربط $ يكتب إدخال المستخدم في الخاصية المرتبطة.
-                    TextField("Course title", text: $title)
-                    TextField("Instructor (optional)", text: $instructor)
-                }
-
-                // يفك قيمة اختيارية بأمان؛ ينفذ الفرع فقط إذا لم تكن nil.
-                if let errorMessage = viewModel.errorMessage {
-                    Section {
-                        Text(errorMessage)
-                            .foregroundStyle(.red)
-                    }
-                }
-            }
-            .navigationTitle("Add Course")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    // الجزء التنفيذي يحدد ما يحدث عند الضغط، وlabel يحدد شكل الزر إن وُجد.
-                    Button("Cancel") {
-                        viewModel.clearError()
-                        dismiss()
-                    }
-                }
-
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        addCourse()
-                    }
-                    .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-            }
-        }
-    }
-
-    // يطلب إضافة مقرر باستخدام البيانات المدخلة؛ تتولى الخدمة التحقق من العنوان.
-    private func addCourse() {
-        if viewModel.addCourse(title: title, instructor: instructor) {
-            dismiss()
-        }
-    }
-}
 
 struct AddCourseWelcomeView: View {
     // إجراء فتح مسار إضافة مقرر.
