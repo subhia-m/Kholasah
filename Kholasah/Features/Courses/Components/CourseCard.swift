@@ -31,3 +31,8 @@ struct CourseCard: View {
         .background(AppColors.card, in: RoundedRectangle(cornerRadius: 16))
     }
 }
+
+#Preview {
+    CourseCard(title: "Swift Basics", instructor: "Instructor")
+        .padding()
+}

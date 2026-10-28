@@ -53,3 +53,7 @@ struct OnboardingView: View {
         }
     }
 }
+
+#Preview {
+    OnboardingView(viewModel: AppDependencies().onboardingViewModel)
+}

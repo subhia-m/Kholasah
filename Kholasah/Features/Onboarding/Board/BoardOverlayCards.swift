@@ -196,3 +196,12 @@ struct BoardQuotesView: View {
         .accessibilityHint("Shows another quote")
     }
 }
+
+#Preview {
+    VStack(spacing: 24) {
+        BoardStreakCard(streak: .demo, calendar: .current, close: {})
+        BoardMotivationCard(close: {})
+        BoardQuotesView()
+    }
+    .padding()
+}

@@ -30,3 +30,8 @@ struct ProgressCard: View {
         .background(AppColors.card, in: RoundedRectangle(cornerRadius: 16))
     }
 }
+
+#Preview {
+    ProgressCard(completedCount: 3, totalCount: 5, progress: 0.6)
+        .padding()
+}

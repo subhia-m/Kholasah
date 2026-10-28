@@ -26,3 +26,8 @@ struct PrimaryButton: View {
         .controlSize(.large)
     }
 }
+
+#Preview {
+    PrimaryButton(title: "Get Started", action: {})
+        .padding()
+}

@@ -36,3 +36,9 @@ struct FocusSoundCard: View {
         .accessibilityLabel(title)
     }
 }
+
+#Preview {
+    FocusSoundCard(title: "Palms", imageName: "khobar")
+        .frame(width: 160)
+        .padding()
+}

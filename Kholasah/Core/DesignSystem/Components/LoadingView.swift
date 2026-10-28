@@ -13,3 +13,7 @@ struct LoadingView: View {
             .background(AppColors.background)
     }
 }
+
+#Preview {
+    LoadingView()
+}

@@ -62,3 +62,9 @@ private struct FocusSound: Identifiable {
     let assetName: String
 }
 
+#Preview {
+    NavigationStack {
+        MusicView(audioPlayer: FocusAudioPlayer())
+    }
+}
+

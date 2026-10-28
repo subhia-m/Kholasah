@@ -30,3 +30,8 @@ struct TaskCard: View {
         .accessibilityValue(isCompleted ? "Completed" : "Not completed")
     }
 }
+
+#Preview {
+    TaskCard(title: "Review Swift functions", isCompleted: false, onToggle: {})
+        .padding()
+}

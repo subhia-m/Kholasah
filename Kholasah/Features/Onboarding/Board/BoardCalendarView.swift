@@ -105,3 +105,8 @@ extension View {
             }
     }
 }
+
+#Preview {
+    BoardCalendarView(viewModel: BoardViewModel.preview())
+        .padding()
+}

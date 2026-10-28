@@ -12,3 +12,8 @@ struct BoardDateDecoration: View {
             .scaledToFit()
     }
 }
+
+#Preview {
+    BoardDateDecoration()
+        .padding()
+}
