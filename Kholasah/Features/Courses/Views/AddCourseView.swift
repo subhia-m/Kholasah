@@ -148,13 +148,13 @@ private struct QuoteView: View {
                     .rotationEffect(.degrees(5))
                     .offset(x: -22, y: 19)
 
-                Text("“ motivation quote here ”")
+                Text("Focus. Plan. Succeed.")
                     .font(AppTypography.subheadlineEmphasized)
                     .italic()
-                    .foregroundStyle(.black)
+                    .foregroundStyle(.white)
                     .lineLimit(2)
                     .minimumScaleFactor(0.65)
-                    .offset(x: -28)
+                    .offset(x: -24)
             }
         }
     }
