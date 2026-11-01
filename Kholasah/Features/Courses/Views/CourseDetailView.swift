@@ -335,7 +335,14 @@ struct CourseView: View {
                 course: course,
                 viewModel: planViewModel,
                 showsBackButton: true,
-                startingAt: .plan
+                startingAt: .plan,
+                onBack: {
+                    if let onPlanGenerated {
+                        onPlanGenerated(course)
+                    } else {
+                        dismiss()
+                    }
+                }
             )
         }
     }
@@ -427,11 +434,7 @@ struct CourseView: View {
             )
 
             if planViewModel.didSaveGeneratedPlan {
-                if let onPlanGenerated {
-                    onPlanGenerated(course)
-                } else {
-                    generatedCourse = course
-                }
+                generatedCourse = course
             } else {
                 coursesViewModel.removeCourse(id: course.id)
                 alertMessage = planViewModel.planGenerationError ?? "Unable to generate the study plan."
