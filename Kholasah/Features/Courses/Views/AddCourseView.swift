@@ -57,6 +57,7 @@ private struct WelcomeHeroView: View {
 struct FirstCourseSetupView: View {
     let dependencies: AppDependencies
     @State private var showingCourseDetails = false
+    @State private var generatedCourse: Course?
 
     var body: some View {
         NavigationStack {
@@ -82,9 +83,18 @@ struct FirstCourseSetupView: View {
                 CourseView(
                     coursesViewModel: dependencies.coursesViewModel,
                     planViewModel: dependencies.planViewModel
-                ) { _ in
-                    dependencies.appState.completeFirstCourseSetup()
+                ) { course in
+                    generatedCourse = course
                 }
+            }
+            .navigationDestination(item: $generatedCourse) { course in
+                CourseFlowView(
+                    course: course,
+                    viewModel: dependencies.planViewModel,
+                    showsBackButton: true,
+                    startingAt: .plan,
+                    onBack: dependencies.appState.completeFirstCourseSetup
+                )
             }
         }
     }

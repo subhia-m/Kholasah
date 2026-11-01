@@ -19,6 +19,7 @@ struct CourseFlowView: View {
     var course: Course?
     var viewModel: PlanViewModel?
     var showsBackButton: Bool
+    var onBack: (() -> Void)?
 
     @Environment(\.dismiss) private var dismiss
     
@@ -29,10 +30,12 @@ struct CourseFlowView: View {
     init(course: Course? = nil,
          viewModel: PlanViewModel? = nil,
          showsBackButton: Bool = false,
-         startingAt: PlanScreenTab = .overview) {
+         startingAt: PlanScreenTab = .overview,
+         onBack: (() -> Void)? = nil) {
         self.course = course
         self.viewModel = viewModel
         self.showsBackButton = showsBackButton
+        self.onBack = onBack
         _selection = State(initialValue: startingAt)
     }
 
@@ -140,7 +143,7 @@ struct CourseFlowView: View {
     // MARK: Body
 
     var body: some View {
-        let back: (() -> Void)? = showsBackButton ? { dismiss() } : nil
+        let back: (() -> Void)? = showsBackButton ? { onBack?() ?? dismiss() } : nil
 
         Group {
             switch selection {
