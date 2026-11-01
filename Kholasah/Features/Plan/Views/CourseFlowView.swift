@@ -142,15 +142,18 @@ struct CourseFlowView: View {
 
     // MARK: Body
 
-    var body: some View {
-        let back: (() -> Void)? = showsBackButton ? { onBack?() ?? dismiss() } : nil
+    private var backAction: (() -> Void)? {
+        guard showsBackButton else { return nil }
+        return onBack ?? { dismiss() }
+    }
 
+    var body: some View {
         Group {
             switch selection {
             case .overview:
                 PlanOverviewView(courseTitle: title,
                                  selection: $selection,
-                                 onBack: back,
+                                 onBack: backAction,
                                  tasks: tasks,
                                  reminders: reminders,
                                  daysDone: studyDays.done,        // NEW
@@ -161,11 +164,11 @@ struct CourseFlowView: View {
                          viewModel: viewModel,
                          showsBackButton: showsBackButton,
                          selection: $selection,
-                         onBack: back)
+                         onBack: backAction)
             case .tasks:
                 TasksView(courseTitle: title,
                           selection: $selection,
-                          onBack: back,
+                          onBack: backAction,
                           tasks: tasks,
                           onAdd: addTask,
                           onToggle: toggleTask,
@@ -174,7 +177,7 @@ struct CourseFlowView: View {
             case .reminders:
                 RemindersView(courseTitle: title,
                               selection: $selection,
-                              onBack: back,
+                              onBack: backAction,
                               reminders: reminders,
                               onAdd: { title, date in
                                   store.add(title: title, date: date, courseID: course?.id)

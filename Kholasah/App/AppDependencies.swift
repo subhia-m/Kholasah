@@ -63,6 +63,9 @@ final class AppDependencies {
         self.appState = appState
         onboardingViewModel = OnboardingViewModel(appState: appState)
         coursesViewModel = CoursesViewModel(service: courseService)
+        if !courseRepository.courses.isEmpty && !appState.hasCompletedFirstCourseSetup {
+            appState.completeFirstCourseSetup()
+        }
         focusViewModel = FocusViewModel(timerService: timerService)
         planViewModel = PlanViewModel(
             service: planService,
