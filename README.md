@@ -1,3 +1,5 @@
+# Khulasa App
+
 ## Phase: engage
 Big idea: Education. 
 essential question: How do we help people who struggle to complete courses and stick to them.
@@ -14,6 +16,7 @@ challenge statement: create a way to help people stick to their learning journey
 ## Guiding Activity
 ### Reserch
 [Survey](https://docs.google.com/forms/d/e/1FAIpQLSf4mlSV0BfSPqsz3XtUXY8jPTrYZtXRcsf3nOj8lUEe3GSd2g/viewform)
+
    ### RESOURSES
    1. [what makes someone excited to learn?](https://pmc.ncbi.nlm.nih.gov/articles/PMC5839644/)
    2.  [What happens after learners repeatedly struggle or fail?](https://pmc.ncbi.nlm.nih.gov/articles/PMC12352478/)
