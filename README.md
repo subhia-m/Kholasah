@@ -1,3 +1,8 @@
+<img width="1536" height="1024" alt="Kholasah Learning App Showcase" src="https://github.com/user-attachments/assets/9692bcde-9f7c-4545-b7d2-110d85d2333d" />
+
+
+
+
 # Khulasa App
 
 ## Phase: engage
